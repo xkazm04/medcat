@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 ## Current Position
 
 Phase: 4 of 4 (Comparison Engine)
-Plan: Not yet planned
-Status: Ready to plan
-Last activity: 2026-02-02 - Completed Phase 3 (AI Extraction)
+Plan: 1 of 3
+Status: In progress
+Last activity: 2026-02-02 - Completed 04-01-PLAN.md (Similarity Search Foundation)
 
-Progress: [########--] 75% (3/4 phases)
+Progress: [########=-] 80% (12/15 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 7 min
-- Total execution time: 1.3 hours
+- Total plans completed: 12
+- Average duration: 6 min
+- Total execution time: 1.35 hours
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: [########--] 75% (3/4 phases)
 | 01-foundation-catalog | 3 | 35 min | 12 min |
 | 02-product-management | 4 | 20 min | 5 min |
 | 03-ai-extraction | 4 | 12 min | 3 min |
+| 04-comparison-engine | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 12 min, 3 min, 2 min, 2 min, 5 min
+- Last 5 plans: 3 min, 2 min, 2 min, 5 min, 3 min
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -66,6 +67,10 @@ Recent decisions affecting current work:
 - Case-insensitive partial matching for vendor/material name-to-ID resolution
 - Show extracted raw text above dropdowns for user transparency
 - ExtractionSheet uses step state ('upload' | 'preview') with reset on open
+- Use pg_trgm extension for trigram similarity (handles word reordering)
+- LOWER() for case-insensitive matching in RPC functions
+- Default threshold 0.3 for duplicate warning, 0.5 for price comparison grouping
+- SKU similarity threshold 0.8 (higher confidence needed for SKU matches)
 
 ### Pending Todos
 
@@ -75,6 +80,7 @@ Recent decisions affecting current work:
 - User must run `npm run import:emdn` then `npm run seed`
 - User must run 002_regulatory_fields.sql migration in Supabase SQL Editor
 - User must add GEMINI_API_KEY to .env.local (from https://aistudio.google.com/apikey)
+- User must run 003_similarity_search.sql migration in Supabase SQL Editor
 
 ### Blockers/Concerns
 
@@ -82,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-02T16:00:00Z
-Stopped at: Completed 03-04-PLAN.md (Integration & Sheet) - Phase 3 complete
+Last session: 2026-02-02T15:58:00Z
+Stopped at: Completed 04-01-PLAN.md (Similarity Search Foundation)
 Resume file: None
