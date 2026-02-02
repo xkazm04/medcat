@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "import:emdn": "tsx scripts/import-emdn.ts"
+    "import:emdn": "tsx scripts/import-emdn.ts",
+    "seed": "tsx scripts/seed-data.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
