@@ -69,7 +69,7 @@ interface SheetHeaderProps {
 }
 
 const SheetHeader = ({ children, className }: SheetHeaderProps) => (
-  <div className={`px-6 py-4 border-b border-border ${className || ''}`}>
+  <div className={`px-6 py-4 border-b-2 border-green-border ${className || ''}`}>
     {children}
   </div>
 )

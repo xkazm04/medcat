@@ -42,11 +42,11 @@ export function FilterSidebar({ children }: FilterSidebarProps) {
     >
       <div className="p-4">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border">
-          <Filter className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 mb-6 pb-4 border-b border-green-border">
+          <Filter className="h-4 w-4 text-green-subtle" />
           <h2 className="text-sm font-semibold text-foreground">Filters</h2>
           {hasActiveFilters && (
-            <span className="ml-auto text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full">
+            <span className="ml-auto text-xs bg-green-light text-green-subtle px-2 py-0.5 rounded-full">
               Active
             </span>
           )}
@@ -80,7 +80,7 @@ interface FilterSectionProps {
 export function FilterSection({ title, children }: FilterSectionProps) {
   return (
     <div className="space-y-3">
-      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+      <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide pl-2 border-l-2 border-green-border">
         {title}
       </h3>
       {children}

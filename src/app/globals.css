@@ -5,15 +5,20 @@
   --color-background: #ffffff;
   --color-foreground: #0a0a0a;
   --color-muted: #f5f5f5;
-  --color-muted-foreground: #737373;
-  --color-border: #e5e5e5;
-  --color-accent: #2563eb;
+  --color-muted-foreground: #6b7280;
+  --color-border: #e5e7eb;
+  --color-accent: #374151;
   --color-accent-foreground: #ffffff;
+
+  /* Green tones for subtle decorations */
+  --color-green-subtle: #166534;
+  --color-green-light: #f0fdf4;
+  --color-green-border: #bbf7d0;
 
   /* Table specific - subtle differentiation */
   --color-table-header: #fafafa;
   --color-table-row-alt: #fafafa;
-  --color-table-row-hover: #f0f4ff;
+  --color-table-row-hover: #f9fafb;
 
   /* Typography */
   --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;

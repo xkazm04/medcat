@@ -53,6 +53,16 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <main className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="h-14 border-b border-border flex items-center px-6">
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-6 bg-green-subtle rounded-sm" />
+          <h1 className="text-lg font-semibold text-foreground">MedCatalog</h1>
+        </div>
+        <span className="ml-4 text-sm text-muted-foreground">
+          Orthopedic Product Catalog
+        </span>
+      </header>
       <div className="flex">
         <Suspense fallback={<div className="w-[280px] shrink-0 border-r border-border" />}>
           <FilterSidebar>

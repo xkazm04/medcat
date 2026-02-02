@@ -98,8 +98,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
       </div>
 
       {/* Section 6: Price Comparison */}
-      <div>
-        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-1">
+      <div className="pt-2 border-t-2 border-green-border">
+        <p className="text-sm font-medium text-green-subtle uppercase tracking-wide mb-1">
           Price Comparison
         </p>
         <p className="text-sm text-muted-foreground mb-3">
