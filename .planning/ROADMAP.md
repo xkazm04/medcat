@@ -12,7 +12,7 @@ MedCatalog v1.1 extends the catalog with bulk import capabilities and deep resea
 
 - [x] **Phase 5: Schema & Navigation** - Manufacturer fields, EMDN tree navigation, performance foundation
 - [x] **Phase 6: Bulk Import** - CSV upload, column mapping, deduplication, import flow
-- [ ] **Phase 7: Research Prompt** - Structured prompt generator for EU vendor pricing research
+- [x] **Phase 7: Research Prompt** - Structured prompt generator for EU vendor pricing research
 
 ## Phase Details
 
@@ -60,7 +60,7 @@ Plans:
   5. Prompt format documented for consistent data entry
 **Plans**: 1 plan
 Plans:
-- [ ] 07-01-PLAN.md - Prompt template utility, ResearchPrompt component, ProductDetail integration
+- [x] 07-01-PLAN.md - Prompt template utility, ResearchPrompt component, ProductDetail integration
 
 ## Progress
 
@@ -71,7 +71,7 @@ Phases execute in numeric order: 5 -> 6 -> 7
 |-------|----------------|--------|-----------|
 | 5. Schema & Navigation | 2/2 | Verified | 2026-02-02 |
 | 6. Bulk Import | 4/4 | Verified | 2026-02-02 |
-| 7. Research Prompt | 0/1 | Planned | — |
+| 7. Research Prompt | 1/1 | Verified | 2026-02-02 |
 
 ---
 *Roadmap created: 2026-02-02*

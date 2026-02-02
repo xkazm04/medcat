@@ -9,40 +9,40 @@ Requirements for v1.1 release. Each maps to roadmap phases.
 
 ### Research Prompt Generator
 
-- [ ] **RSRCH-01**: User can generate structured research prompt from product detail view
-- [ ] **RSRCH-02**: Prompt template includes product specs, manufacturer, SKU for EU vendor search
-- [ ] **RSRCH-03**: User can copy generated prompt to clipboard with one click
-- [ ] **RSRCH-04**: User can open Perplexity in new tab with prompt ready to paste
-- [ ] **RSRCH-05**: Prompt output format is documented for consistent comparison data entry
+- [x] **RSRCH-01**: User can generate structured research prompt from product detail view
+- [x] **RSRCH-02**: Prompt template includes product specs, manufacturer, SKU for EU vendor search
+- [x] **RSRCH-03**: User can copy generated prompt to clipboard with one click
+- [x] **RSRCH-04**: User can open Perplexity in new tab with prompt ready to paste
+- [x] **RSRCH-05**: Prompt output format is documented for consistent comparison data entry
 
 ### Bulk Import
 
-- [ ] **IMPORT-01**: User can upload CSV file for bulk product import
-- [ ] **IMPORT-02**: System parses CSV and shows column mapping preview
-- [ ] **IMPORT-03**: User can map CSV columns to product schema fields
-- [ ] **IMPORT-04**: System validates data before import (required fields, format)
-- [ ] **IMPORT-05**: System deduplicates by SKU (warns on existing, option to update)
-- [ ] **IMPORT-06**: User sees import progress and summary (created, updated, skipped)
+- [x] **IMPORT-01**: User can upload CSV file for bulk product import
+- [x] **IMPORT-02**: System parses CSV and shows column mapping preview
+- [x] **IMPORT-03**: User can map CSV columns to product schema fields
+- [x] **IMPORT-04**: System validates data before import (required fields, format)
+- [x] **IMPORT-05**: System deduplicates by SKU (warns on existing, option to update)
+- [x] **IMPORT-06**: User sees import progress and summary (created, updated, skipped)
 
 ### Schema Extension
 
-- [ ] **SCHEMA-01**: Products table has `manufacturer_name` field
-- [ ] **SCHEMA-02**: Products table has `manufacturer_sku` field
-- [ ] **SCHEMA-03**: Migration script adds fields without data loss
-- [ ] **SCHEMA-04**: Product detail and forms display manufacturer info
+- [x] **SCHEMA-01**: Products table has `manufacturer_name` field
+- [x] **SCHEMA-02**: Products table has `manufacturer_sku` field
+- [x] **SCHEMA-03**: Migration script adds fields without data loss
+- [x] **SCHEMA-04**: Product detail and forms display manufacturer info
 
 ### Navigation
 
-- [ ] **NAV-01**: EMDN categories display as collapsible tree in filter sidebar
-- [ ] **NAV-02**: User can expand/collapse category levels
-- [ ] **NAV-03**: Selecting a parent category filters to all descendants
-- [ ] **NAV-04**: Current category path shows breadcrumb in filter
+- [x] **NAV-01**: EMDN categories display as collapsible tree in filter sidebar
+- [x] **NAV-02**: User can expand/collapse category levels
+- [x] **NAV-03**: Selecting a parent category filters to all descendants
+- [x] **NAV-04**: Current category path shows breadcrumb in filter
 
 ### Performance
 
-- [ ] **PERF-01**: Catalog table handles 1000+ products without lag
-- [ ] **PERF-02**: EMDN tree lazy-loads children on expand
-- [ ] **PERF-03**: Database indexes optimized for new fields
+- [x] **PERF-01**: Catalog table handles 1000+ products without lag
+- [x] **PERF-02**: EMDN tree lazy-loads children on expand
+- [x] **PERF-03**: Database indexes optimized for new fields
 
 ## Out of Scope
 
@@ -79,11 +79,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | IMPORT-04 | Phase 6 | Complete |
 | IMPORT-05 | Phase 6 | Complete |
 | IMPORT-06 | Phase 6 | Complete |
-| RSRCH-01 | Phase 7 | Pending |
-| RSRCH-02 | Phase 7 | Pending |
-| RSRCH-03 | Phase 7 | Pending |
-| RSRCH-04 | Phase 7 | Pending |
-| RSRCH-05 | Phase 7 | Pending |
+| RSRCH-01 | Phase 7 | Complete |
+| RSRCH-02 | Phase 7 | Complete |
+| RSRCH-03 | Phase 7 | Complete |
+| RSRCH-04 | Phase 7 | Complete |
+| RSRCH-05 | Phase 7 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 18 total
@@ -92,4 +92,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-02*
-*Last updated: 2026-02-02 after Phase 6 completion*
+*Last updated: 2026-02-02 after Phase 7 completion*
