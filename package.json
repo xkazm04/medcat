@@ -9,7 +9,8 @@
     "lint": "eslint",
     "import:emdn": "tsx scripts/import-emdn.ts",
     "seed": "tsx scripts/seed-data.ts",
-    "enrich:emdn": "tsx scripts/enrich-csv-emdn.ts"
+    "enrich:emdn": "tsx scripts/enrich-csv-emdn.ts",
+    "enrich:emdn:local": "tsx scripts/enrich-csv-emdn-local.ts"
   },
   "dependencies": {
     "@google/genai": "^1.39.0",
