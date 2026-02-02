@@ -31,11 +31,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### AI Extraction
 
-- [ ] **EXTR-01**: User can upload txt/markdown vendor product sheet
-- [ ] **EXTR-02**: Gemini extracts structured data: name, description, SKU, vendor, pricing, specs, materials, regulatory info
-- [ ] **EXTR-03**: User can preview extracted data before saving
-- [ ] **EXTR-04**: User can edit/correct extracted fields before committing
-- [ ] **EXTR-05**: Gemini suggests EMDN classification based on product description
+- [x] **EXTR-01**: User can upload txt/markdown vendor product sheet
+- [x] **EXTR-02**: Gemini extracts structured data: name, description, SKU, vendor, pricing, specs, materials, regulatory info
+- [x] **EXTR-03**: User can preview extracted data before saving
+- [x] **EXTR-04**: User can edit/correct extracted fields before committing
+- [x] **EXTR-05**: Gemini suggests EMDN classification based on product description
 
 ### Duplicate Detection
 
@@ -96,11 +96,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROD-03 | Phase 2 | Complete |
 | PROD-04 | Phase 2 | Complete |
 | PROD-05 | Phase 2 | Complete |
-| EXTR-01 | Phase 3 | Pending |
-| EXTR-02 | Phase 3 | Pending |
-| EXTR-03 | Phase 3 | Pending |
-| EXTR-04 | Phase 3 | Pending |
-| EXTR-05 | Phase 3 | Pending |
+| EXTR-01 | Phase 3 | Complete |
+| EXTR-02 | Phase 3 | Complete |
+| EXTR-03 | Phase 3 | Complete |
+| EXTR-04 | Phase 3 | Complete |
+| EXTR-05 | Phase 3 | Complete |
 | DUPL-01 | Phase 4 | Pending |
 | DUPL-02 | Phase 4 | Pending |
 | COMP-01 | Phase 4 | Pending |
