@@ -11,7 +11,7 @@ MedCatalog v1.1 extends the catalog with bulk import capabilities and deep resea
 - v1.1 starts at phase 5
 
 - [x] **Phase 5: Schema & Navigation** - Manufacturer fields, EMDN tree navigation, performance foundation
-- [ ] **Phase 6: Bulk Import** - CSV upload, column mapping, deduplication, import flow
+- [x] **Phase 6: Bulk Import** - CSV upload, column mapping, deduplication, import flow
 - [ ] **Phase 7: Research Prompt** - Structured prompt generator for EU vendor pricing research
 
 ## Phase Details
@@ -43,10 +43,10 @@ Plans:
   5. User sees import summary (created, updated, skipped counts)
 **Plans**: 4 plans
 Plans:
-- [ ] 06-01-PLAN.md - Foundation: PapaParse install, CSV parser utility, import schemas
-- [ ] 06-02-PLAN.md - Server action with deduplication, file upload component
-- [ ] 06-03-PLAN.md - Column mapping step, validation step with preview
-- [ ] 06-04-PLAN.md - Import wizard integration, summary, page route
+- [x] 06-01-PLAN.md - Foundation: PapaParse install, CSV parser utility, import schemas
+- [x] 06-02-PLAN.md - Server action with deduplication, file upload component
+- [x] 06-03-PLAN.md - Column mapping step, validation step with preview
+- [x] 06-04-PLAN.md - Import wizard integration, summary, page route
 
 ### Phase 7: Research Prompt
 **Goal**: Users can generate structured research prompts for finding EU vendors and pricing via Perplexity
@@ -68,7 +68,7 @@ Phases execute in numeric order: 5 -> 6 -> 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 5. Schema & Navigation | 2/2 | Verified | 2026-02-02 |
-| 6. Bulk Import | 0/4 | Planned | — |
+| 6. Bulk Import | 4/4 | Verified | 2026-02-02 |
 | 7. Research Prompt | 0/? | Not Started | — |
 
 ---

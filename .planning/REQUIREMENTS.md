@@ -73,12 +73,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-01 | Phase 5 | Human Verification |
 | PERF-02 | Phase 5 | Complete |
 | PERF-03 | Phase 5 | Complete |
-| IMPORT-01 | Phase 6 | Pending |
-| IMPORT-02 | Phase 6 | Pending |
-| IMPORT-03 | Phase 6 | Pending |
-| IMPORT-04 | Phase 6 | Pending |
-| IMPORT-05 | Phase 6 | Pending |
-| IMPORT-06 | Phase 6 | Pending |
+| IMPORT-01 | Phase 6 | Complete |
+| IMPORT-02 | Phase 6 | Complete |
+| IMPORT-03 | Phase 6 | Complete |
+| IMPORT-04 | Phase 6 | Complete |
+| IMPORT-05 | Phase 6 | Complete |
+| IMPORT-06 | Phase 6 | Complete |
 | RSRCH-01 | Phase 7 | Pending |
 | RSRCH-02 | Phase 7 | Pending |
 | RSRCH-03 | Phase 7 | Pending |
@@ -92,4 +92,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-02*
-*Last updated: 2026-02-02 after Phase 5 completion*
+*Last updated: 2026-02-02 after Phase 6 completion*
