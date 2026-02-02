@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 ## Current Position
 
 Phase: 3 of 4 (AI Extraction)
-Plan: Not yet planned
-Status: Ready to plan
-Last activity: 2026-02-02 - Completed Phase 2 (Product Management)
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-02-02 - Completed 03-01-PLAN.md (SDK and Schema Setup)
 
-Progress: [#####-----] 50% (2/4 phases)
+Progress: [######----] 57% (8/14 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 9 min
-- Total execution time: 1.05 hours
+- Total plans completed: 8
+- Average duration: 8 min
+- Total execution time: 1.1 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [#####-----] 50% (2/4 phases)
 |-------|-------|-------|----------|
 | 01-foundation-catalog | 3 | 35 min | 12 min |
 | 02-product-management | 4 | 20 min | 5 min |
+| 03-ai-extraction | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 15 min, 3 min, 2 min, 3 min, 12 min
+- Last 5 plans: 3 min, 2 min, 3 min, 12 min, 3 min
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -58,6 +59,8 @@ Recent decisions affecting current work:
 - Use z.input/z.output types for React Hook Form with Zod transforms
 - Column factory function (createColumns) injects callbacks instead of static columns export
 - Server/Client boundary: page.tsx fetches all data, passes to CatalogClient wrapper
+- Extraction schema uses string vendor_name/material_name (not UUIDs), resolved later in preview form
+- EXTRACTION_MODEL = "gemini-3-flash-preview" as single source of truth
 
 ### Pending Todos
 
@@ -66,6 +69,7 @@ Recent decisions affecting current work:
 - User must add SUPABASE_SERVICE_ROLE_KEY to .env.local
 - User must run `npm run import:emdn` then `npm run seed`
 - User must run 002_regulatory_fields.sql migration in Supabase SQL Editor
+- User must add GEMINI_API_KEY to .env.local (from https://aistudio.google.com/apikey)
 
 ### Blockers/Concerns
 
@@ -73,6 +77,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-02
-Stopped at: Completed 02-04-PLAN.md (Phase 2 complete)
+Last session: 2026-02-02T15:17:30Z
+Stopped at: Completed 03-01-PLAN.md (SDK and Schema Setup)
 Resume file: None
