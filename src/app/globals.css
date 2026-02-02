@@ -15,6 +15,11 @@
   --color-green-light: #f0fdf4;
   --color-green-border: #bbf7d0;
 
+  /* Blue tones for research section */
+  --color-blue-subtle: #1e40af;
+  --color-blue-light: #eff6ff;
+  --color-blue-border: #bfdbfe;
+
   /* Table specific - subtle differentiation */
   --color-table-header: #fafafa;
   --color-table-row-alt: #fafafa;
