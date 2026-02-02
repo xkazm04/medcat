@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-02)
 
 **Core value:** Procurement can quickly compare prices for identical orthopedic products across multiple vendors
-**Current focus:** Phase 1 - Foundation + Catalog
+**Current focus:** Phase 2 - Product Management
 
 ## Current Position
 
-Phase: 1 of 4 (Foundation + Catalog)
-Plan: 2 of 3 in current phase
+Phase: 2 of 4 (Product Management)
+Plan: 1 of 3 complete
 Status: In progress
-Last activity: 2026-02-02 - Completed 01-02-PLAN.md
+Last activity: 2026-02-02 - Completed 02-01-PLAN.md (Dependencies, Types, Schema & Actions)
 
-Progress: [##--------] 17% (2/12 plans)
+Progress: [####------] 40% (4/10 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
+- Total plans completed: 4
 - Average duration: 10 min
-- Total execution time: 0.33 hours
+- Total execution time: 0.63 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-foundation-catalog | 2 | 20 min | 10 min |
+| 01-foundation-catalog | 3 | 35 min | 12 min |
+| 02-product-management | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 8 min, 12 min
-- Trend: Stable
+- Last 5 plans: 8 min, 12 min, 15 min, 3 min
+- Trend: Improving
 
 *Updated after each plan completion*
 
@@ -48,7 +49,10 @@ Recent decisions affecting current work:
 - Public read RLS policies for catalog (no auth required)
 - Filter EMDN to orthopedic categories only (P09, P10) - keeps database focused
 - Use Supabase service role key for imports (bypasses RLS)
-- Dry-run mode for script testing without database
+- URL searchParams as source of truth for filters
+- Mock data fallback when Supabase not configured
+- FormData sends strings; convert ce_marked 'true'/'false' to boolean in Server Action
+- Permissive RLS for update/delete; tighten when auth is added
 
 ### Pending Todos
 
@@ -56,13 +60,14 @@ Recent decisions affecting current work:
 - User must run database migration in Supabase SQL Editor
 - User must add SUPABASE_SERVICE_ROLE_KEY to .env.local
 - User must run `npm run import:emdn` then `npm run seed`
+- User must run 002_regulatory_fields.sql migration in Supabase SQL Editor
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
 Last session: 2026-02-02
-Stopped at: Completed 01-02-PLAN.md (Database Seeding)
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
