@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 
 ## Current Position
 
-Phase: 5 of 7 (Schema & Navigation) - In Progress
-Plan: 1 of 2 complete
-Status: Completed 05-01 (Manufacturer Fields)
-Last activity: 2026-02-02 — Completed 05-01-PLAN.md
+Phase: 5 of 7 (Schema & Navigation) - Complete
+Plan: 2 of 2 complete
+Status: Phase 5 Complete
+Last activity: 2026-02-02 — Completed 05-02-PLAN.md
 
-Progress: [###.......] 33% (1/3 phases)
+Progress: [######....] 66% (2/3 phases)
 
 ## Milestone History
 
@@ -41,6 +41,9 @@ v1.1 decisions (Phase 5):
 - Nullable manufacturer columns for backward compatibility
 - Partial index on manufacturer_sku (WHERE NOT NULL)
 - Conditional manufacturer section display (only when data exists)
+- Use path prefix LIKE pattern for descendant lookup (efficient with text_pattern_ops index)
+- RPC returns category IDs as array, query uses IN clause for filtering
+- Breadcrumb shows above tree when filter active, helps user understand context
 
 ### Technical Debt
 
@@ -59,7 +62,7 @@ CSV file `docs/BornDigital DATA(SVK).csv`:
 ### Pending Todos
 
 - User must create Supabase project and set env vars
-- User must run database migrations in Supabase SQL Editor (including 004_manufacturer_fields.sql)
+- User must run database migrations in Supabase SQL Editor (including 004_manufacturer_fields.sql, 005_category_descendants.sql)
 - User must add SUPABASE_SERVICE_ROLE_KEY and GEMINI_API_KEY to .env.local
 - User must run `npm run import:emdn` then `npm run seed`
 
@@ -70,5 +73,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-02
-Stopped at: Completed 05-01-PLAN.md (Manufacturer Fields)
+Stopped at: Completed 05-02-PLAN.md (Category Descendant Filtering)
 Resume file: None
