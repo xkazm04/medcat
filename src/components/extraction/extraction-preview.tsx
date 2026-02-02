@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { productSchema } from '@/lib/schemas/product'
 import { createProduct } from '@/lib/actions/products'
+import { findSimilarProducts, type SimilarProduct } from '@/lib/actions/similarity'
+import { SimilarProductsWarning } from './similar-products-warning'
 import type { ExtractedProduct } from '@/lib/schemas/extraction'
 
 // Define input type for the form (before Zod transforms)
@@ -32,6 +34,8 @@ export function ExtractionPreview({
 }: ExtractionPreviewProps) {
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
+  const [similarProducts, setSimilarProducts] = useState<SimilarProduct[]>([])
+  const [similarityLoading, setSimilarityLoading] = useState(true)
 
   // Match extracted names to database IDs (case-insensitive partial match)
   const matchedVendor = vendors.find(
@@ -48,6 +52,22 @@ export function ExtractionPreview({
     (c) =>
       extractedData.suggested_emdn && c.code === extractedData.suggested_emdn
   )
+
+  // Check for similar products when component mounts or extracted data changes
+  useEffect(() => {
+    async function checkSimilarity() {
+      setSimilarityLoading(true)
+      const result = await findSimilarProducts(
+        extractedData.name,
+        extractedData.sku
+      )
+      if (result.success && result.data) {
+        setSimilarProducts(result.data)
+      }
+      setSimilarityLoading(false)
+    }
+    checkSimilarity()
+  }, [extractedData.name, extractedData.sku])
 
   const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
     resolver: zodResolver(productSchema),
@@ -112,6 +132,11 @@ export function ExtractionPreview({
           {serverError}
         </div>
       )}
+
+      <SimilarProductsWarning
+        products={similarProducts}
+        isLoading={similarityLoading}
+      />
 
       {/* Name */}
       <div>
