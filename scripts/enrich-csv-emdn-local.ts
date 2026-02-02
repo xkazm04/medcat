@@ -419,7 +419,7 @@ async function enrichCSV(inputPath: string, outputPath: string) {
     const name = row[nameColumn]?.trim();
     if (!name) {
       unclassified++;
-      return { ...row, emdn_code: "", emdn_name: "", emdn_confidence: "" };
+      return { ...row, emdn_code: "UNCLASSIFIED", emdn_name: "Unclassified - requires manual review", emdn_confidence: "" };
     }
 
     const classification = classifyProduct(name);
@@ -437,7 +437,7 @@ async function enrichCSV(inputPath: string, outputPath: string) {
       };
     } else {
       unclassified++;
-      return { ...row, emdn_code: "", emdn_name: "", emdn_confidence: "" };
+      return { ...row, emdn_code: "UNCLASSIFIED", emdn_name: "Unclassified - requires manual review", emdn_confidence: "" };
     }
   });
 
@@ -473,9 +473,9 @@ async function enrichCSV(inputPath: string, outputPath: string) {
 
   // Show some unclassified examples
   const unclassifiedExamples = enrichedRows
-    .filter((r) => !r.emdn_code && r[nameColumn])
+    .filter((r) => r.emdn_code === "UNCLASSIFIED" && (r as Record<string, string>)[nameColumn])
     .slice(0, 5)
-    .map((r) => r[nameColumn]);
+    .map((r) => (r as Record<string, string>)[nameColumn]);
 
   if (unclassifiedExamples.length > 0) {
     console.log("\n=== Unclassified Examples (may need manual review) ===\n");

@@ -14,12 +14,51 @@ export interface ImportResult {
   updated: number;
   /** Number of rows skipped due to validation errors */
   skipped: number;
+  /** Number of products with unclassified EMDN */
+  unclassified: number;
   /** Validation errors with row details */
   errors: Array<{ row: number; field: string; message: string }>;
 }
 
 /** Batch size for processing imports */
 const BATCH_SIZE = 100;
+
+/**
+ * Look up EMDN category IDs from codes.
+ * Caches results for efficiency when processing many rows.
+ *
+ * @param codes - Array of EMDN codes to look up
+ * @returns Map of code to category ID (null if not found)
+ */
+async function lookupEMDNCodes(
+  codes: string[]
+): Promise<Map<string, string | null>> {
+  const supabase = await createClient();
+
+  // Filter out empty codes
+  const validCodes = codes.filter((c) => c && c.trim().length > 0);
+
+  if (validCodes.length === 0) {
+    return new Map();
+  }
+
+  const { data, error } = await supabase
+    .from("emdn_categories")
+    .select("id, code")
+    .in("code", validCodes);
+
+  if (error) {
+    console.error("Error looking up EMDN codes:", error);
+    return new Map();
+  }
+
+  const codeMap = new Map<string, string | null>();
+  for (const category of data || []) {
+    codeMap.set(category.code, category.id);
+  }
+
+  return codeMap;
+}
 
 /**
  * Check which products already exist by SKU + vendor_id pair.
@@ -74,6 +113,7 @@ export async function importProducts(
     created: 0,
     updated: 0,
     skipped: 0,
+    unclassified: 0,
     errors: [],
   };
 
@@ -84,6 +124,7 @@ export async function importProducts(
     // Collect valid rows and their SKUs for this batch
     const validRows: Array<{
       rowIndex: number;
+      emdn_code?: string | null;
       data: {
         name: string;
         sku: string;
@@ -92,10 +133,12 @@ export async function importProducts(
         vendor_id: string;
         manufacturer_name?: string | null;
         manufacturer_sku?: string | null;
+        emdn_category_id?: string | null;
         ce_marked: boolean;
       };
     }> = [];
     const skusToCheck: string[] = [];
+    const emdnCodesToLookup: string[] = [];
 
     // Validate each row
     for (let j = 0; j < batch.length; j++) {
@@ -127,8 +170,11 @@ export async function importProducts(
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _rowIndex, ...productData } = validated.data;
 
+      const emdnCode = productData.emdn_code?.trim() || null;
+
       validRows.push({
         rowIndex,
+        emdn_code: emdnCode,
         data: {
           name: productData.name,
           sku: productData.sku,
@@ -137,16 +183,39 @@ export async function importProducts(
           vendor_id: vendorId,
           manufacturer_name: productData.manufacturer_name ?? null,
           manufacturer_sku: productData.manufacturer_sku ?? null,
+          emdn_category_id: null, // Will be resolved after lookup
           ce_marked: productData.ce_marked ?? false,
         },
       });
       skusToCheck.push(productData.sku);
+      if (emdnCode) {
+        emdnCodesToLookup.push(emdnCode);
+      }
     }
 
     if (validRows.length === 0) continue;
 
     // Check which products already exist for this batch
     const existingProducts = await checkExistingProducts(skusToCheck, vendorId);
+
+    // Look up EMDN category IDs from codes
+    const emdnLookup = await lookupEMDNCodes(emdnCodesToLookup);
+
+    // Resolve EMDN category IDs for each valid row
+    for (const validRow of validRows) {
+      if (validRow.emdn_code) {
+        const categoryId = emdnLookup.get(validRow.emdn_code);
+        if (categoryId) {
+          validRow.data.emdn_category_id = categoryId;
+        } else {
+          // EMDN code not found in database - mark as unclassified
+          result.unclassified++;
+        }
+      } else {
+        // No EMDN code provided - mark as unclassified
+        result.unclassified++;
+      }
+    }
 
     // Process each valid row
     for (const validRow of validRows) {

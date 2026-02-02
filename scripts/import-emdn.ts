@@ -14,9 +14,14 @@
 import * as XLSX from "xlsx";
 import { createClient } from "@supabase/supabase-js";
 import * as path from "path";
+import * as dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
 // Configuration
-const EXCEL_FILE = "EMDN V2_EN.xlsx";
+const EXCEL_FILE = "docs/EMDN V2_EN.xlsx";
 
 // Orthopedic-relevant category prefixes
 // P09: Orthopedic prostheses, osteosynthesis devices

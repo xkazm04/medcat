@@ -12,6 +12,7 @@ export const MAPPABLE_FIELDS = [
   { key: "vendor_id", label: "Vendor", required: false },
   { key: "manufacturer_name", label: "Manufacturer", required: false },
   { key: "manufacturer_sku", label: "Manufacturer SKU", required: false },
+  { key: "emdn_code", label: "EMDN Code", required: false },
 ] as const;
 
 /**
@@ -31,6 +32,7 @@ export const columnMappingSchema = z.object({
   vendor_id: z.string().optional(),
   manufacturer_name: z.string().optional(),
   manufacturer_sku: z.string().optional(),
+  emdn_code: z.string().optional(),
 });
 
 /**
@@ -53,6 +55,7 @@ export const importRowSchema = z.object({
   price: z.coerce.number().positive("Price must be positive").nullable().optional(),
   vendor_id: z.string().uuid("Invalid vendor ID").nullable().optional(),
   emdn_category_id: z.string().uuid("Invalid category ID").nullable().optional(),
+  emdn_code: z.string().max(20, "EMDN code too long").nullable().optional(),
   material_id: z.string().uuid("Invalid material ID").nullable().optional(),
   udi_di: z.string().max(14, "UDI-DI max 14 characters").nullable().optional(),
   ce_marked: z.boolean().default(false),

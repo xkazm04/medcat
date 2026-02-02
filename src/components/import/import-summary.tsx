@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, AlertTriangle, Plus, RefreshCw, XCircle, ChevronDown, ChevronUp, List } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Plus, RefreshCw, XCircle, ChevronDown, ChevronUp, List, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { type ImportResult } from '@/lib/actions/import';
@@ -36,7 +36,7 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         <div className="border border-border rounded-lg p-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Plus className="h-5 w-5 text-green-500" />
@@ -51,6 +51,14 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
             <span className="text-2xl font-bold">{result.updated}</span>
           </div>
           <p className="text-sm text-muted-foreground">Updated</p>
+        </div>
+
+        <div className="border border-border rounded-lg p-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <HelpCircle className="h-5 w-5 text-yellow-500" />
+            <span className="text-2xl font-bold">{result.unclassified}</span>
+          </div>
+          <p className="text-sm text-muted-foreground">Unclassified</p>
         </div>
 
         <div className="border border-border rounded-lg p-4 text-center">

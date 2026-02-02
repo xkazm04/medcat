@@ -166,6 +166,7 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
       created: 0,
       updated: 0,
       skipped: 0,
+      unclassified: 0,
       errors: [],
     };
 
@@ -178,6 +179,7 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
       combinedResult.created += chunkResult.created;
       combinedResult.updated += chunkResult.updated;
       combinedResult.skipped += chunkResult.skipped;
+      combinedResult.unclassified += chunkResult.unclassified;
       combinedResult.errors.push(...chunkResult.errors);
 
       setImportProgress({
