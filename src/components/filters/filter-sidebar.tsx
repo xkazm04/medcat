@@ -2,7 +2,8 @@
 
 import { ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { X } from "lucide-react";
+import { motion } from "motion/react";
+import { X, Filter } from "lucide-react";
 
 interface FilterSidebarProps {
   children: ReactNode;
@@ -33,21 +34,41 @@ export function FilterSidebar({ children }: FilterSidebarProps) {
   };
 
   return (
-    <aside className="w-[280px] shrink-0 border-r border-border bg-background overflow-y-auto h-[calc(100vh-1px)]">
-      <div className="p-4 space-y-6">
-        {children}
+    <motion.aside
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2 }}
+      className="w-[280px] shrink-0 border-r border-border bg-background overflow-y-auto h-[calc(100vh-1px)]"
+    >
+      <div className="p-4">
+        {/* Header */}
+        <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold text-foreground">Filters</h2>
+          {hasActiveFilters && (
+            <span className="ml-auto text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full">
+              Active
+            </span>
+          )}
+        </div>
 
-        {hasActiveFilters && (
-          <button
-            onClick={clearAllFilters}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted transition-colors"
-          >
-            <X className="h-4 w-4" />
-            Clear all filters
-          </button>
-        )}
+        <div className="space-y-6">
+          {children}
+
+          {hasActiveFilters && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onClick={clearAllFilters}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted transition-colors duration-150"
+            >
+              <X className="h-4 w-4" />
+              Clear all filters
+            </motion.button>
+          )}
+        </div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }
 

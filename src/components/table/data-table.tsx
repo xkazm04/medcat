@@ -88,13 +88,20 @@ export function DataTable<TData>({
 
   if (data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <PackageX className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium text-foreground mb-1">No products found</h3>
-        <p className="text-sm text-muted-foreground">
-          Try adjusting your filters or search query.
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.2 }}
+        className="flex flex-col items-center justify-center py-20 text-center bg-background border border-border rounded-lg"
+      >
+        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+          <PackageX className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-medium text-foreground mb-2">No products found</h3>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          Try adjusting your filters or search query to find what you are looking for.
         </p>
-      </div>
+      </motion.div>
     );
   }
 

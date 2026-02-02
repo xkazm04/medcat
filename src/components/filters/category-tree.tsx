@@ -43,19 +43,22 @@ function CategoryNodeComponent({
     <div>
       <button
         onClick={handleClick}
-        className={`flex items-center gap-1 w-full px-2 py-1.5 text-sm rounded-md hover:bg-muted transition-colors text-left ${
-          isSelected ? "bg-accent/10 text-accent font-medium" : "text-foreground"
+        className={`flex items-center gap-1.5 w-full px-2 py-1.5 text-sm rounded-md transition-colors duration-150 text-left ${
+          isSelected
+            ? "bg-accent/10 text-accent font-medium"
+            : "text-foreground hover:bg-muted"
         }`}
-        style={{ paddingLeft: `${depth * 16 + 8}px` }}
+        style={{ paddingLeft: `${depth * 14 + 8}px` }}
       >
         {hasChildren && (
-          <ChevronRight
-            className={`h-4 w-4 shrink-0 transition-transform duration-150 ${
-              isExpanded ? "rotate-90" : ""
-            }`}
-          />
+          <motion.span
+            animate={{ rotate: isExpanded ? 90 : 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          </motion.span>
         )}
-        {!hasChildren && <span className="w-4" />}
+        {!hasChildren && <span className="w-3.5" />}
         <span className="truncate">{category.name}</span>
       </button>
 
@@ -65,7 +68,7 @@ function CategoryNodeComponent({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            transition={{ duration: 0.15, ease: "easeInOut" }}
             className="overflow-hidden"
           >
             {category.children.map((child) => (
@@ -102,12 +105,12 @@ export function CategoryTree({ categories }: CategoryTreeProps) {
 
   if (categories.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground italic">No categories available</p>
+      <p className="text-sm text-muted-foreground italic py-2">No categories available</p>
     );
   }
 
   return (
-    <div className="space-y-0.5 max-h-[300px] overflow-y-auto">
+    <div className="space-y-0.5 max-h-[280px] overflow-y-auto pr-1 -mr-1">
       {categories.map((category) => (
         <CategoryNodeComponent
           key={category.id}
