@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 
 ## Current Position
 
-Phase: 5 of 7 (Schema & Navigation) - Verified
-Plan: 2 of 2 complete
-Status: Phase 5 Verified — Human verification pending for PERF-01
-Last activity: 2026-02-02 — Phase 5 verification complete, gap fixed
+Phase: 6 of 7 (Bulk Import)
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-02-02 — Completed 06-01-PLAN.md
 
 Progress: [####......] 33% (1/3 phases verified)
 
@@ -45,6 +45,12 @@ v1.1 decisions (Phase 5):
 - RPC returns category IDs as array, query uses IN clause for filtering
 - Breadcrumb shows above tree when filter active, helps user understand context
 
+v1.1 decisions (Phase 6):
+
+- PapaParse 5.5.3 for CSV parsing (handles BOM, UTF-8 by default)
+- Preview mode with default 10 rows for user confirmation before full parse
+- Column mapping validates required fields (name, sku) separately from row data
+
 ### Technical Debt
 
 - Permissive RLS policies need tightening when auth is added
@@ -73,6 +79,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-02
-Stopped at: Phase 5 verification complete, human verification pending
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
-Next action: Human verification for PERF-01, then /gsd:plan-phase 6
+Next action: Execute 06-02-PLAN.md (Import Wizard UI)
