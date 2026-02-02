@@ -12,7 +12,7 @@ MedCatalog transforms vendor product sheets into a searchable catalog with AI-po
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation + Catalog** - Database schema, EMDN setup, and browsable product table
+- [x] **Phase 1: Foundation + Catalog** - Database schema, EMDN setup, and browsable product table
 - [ ] **Phase 2: Product Management** - Detail views, editing, and deletion capabilities
 - [ ] **Phase 3: AI Extraction** - Gemini-powered product data extraction from vendor sheets
 - [ ] **Phase 4: Comparison Engine** - Duplicate detection and multi-vendor price comparison
@@ -32,9 +32,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project setup (Next.js 15, Tailwind v4, Supabase) and database schema
-- [ ] 01-02-PLAN.md — EMDN data import and seed data (vendors, materials, products)
-- [ ] 01-03-PLAN.md — Catalog table UI with filtering, search, pagination, and animations
+- [x] 01-01-PLAN.md — Project setup (Next.js 15, Tailwind v4, Supabase) and database schema
+- [x] 01-02-PLAN.md — EMDN data import and seed data (vendors, materials, products)
+- [x] 01-03-PLAN.md — Catalog table UI with filtering, search, pagination, and animations
 
 ### Phase 2: Product Management
 **Goal**: Users can view full product details and manage product data
@@ -46,11 +46,13 @@ Plans:
   3. User can edit product metadata and save changes
   4. User can delete products from the catalog
   5. User can see regulatory info (UDI, CE marking, MDR class)
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md — Install dependencies, extend types, create Zod schema and Server Actions
+- [ ] 02-02-PLAN.md — Create Sheet component, EMDN breadcrumb, and Regulatory info display
+- [ ] 02-03-PLAN.md — Create ProductDetail, ProductForm, and DeleteDialog components
+- [ ] 02-04-PLAN.md — Integrate ProductSheet and wire to table row actions
 
 ### Phase 3: AI Extraction
 **Goal**: Users can upload vendor product sheets and have Gemini extract structured data
@@ -91,12 +93,13 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation + Catalog | 0/3 | Planned | - |
-| 2. Product Management | 0/2 | Not started | - |
+| 1. Foundation + Catalog | 3/3 | Complete | 2026-02-02 |
+| 2. Product Management | 0/4 | Planned | - |
 | 3. AI Extraction | 0/3 | Not started | - |
 | 4. Comparison Engine | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-02*
 *Phase 1 planned: 2026-02-02*
+*Phase 2 planned: 2026-02-02*
 *Depth: quick (3-5 phases)*
