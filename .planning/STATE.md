@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 ## Current Position
 
 Phase: 6 of 7 (Bulk Import)
-Plan: 2 of 4 complete
+Plan: 3 of 4 complete
 Status: In progress
-Last activity: 2026-02-02 — Completed 06-02-PLAN.md
+Last activity: 2026-02-02 — Completed 06-03-PLAN.md
 
-Progress: [#####.....] 50% (2/4 plans in phase 6)
+Progress: [#######...] 75% (3/4 plans in phase 6)
 
 ## Milestone History
 
@@ -52,6 +52,8 @@ v1.1 decisions (Phase 6):
 - Column mapping validates required fields (name, sku) separately from row data
 - Deduplication by (sku + vendor_id) pair, not SKU alone
 - Batch processing at 100 rows for import to avoid timeout/memory issues
+- Auto-detect CSV columns by case-insensitive header matching with common aliases
+- Validation status enum: valid | update | error with color-coded display
 
 ### Technical Debt
 
@@ -81,6 +83,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-02
-Stopped at: Completed 06-02-PLAN.md
+Stopped at: Completed 06-03-PLAN.md
 Resume file: None
-Next action: Execute 06-03-PLAN.md (Mapping & Preview Steps)
+Next action: Execute 06-04-PLAN.md (Import Wizard Page)
