@@ -28,8 +28,8 @@ MedCatalog v1.1 extends the catalog with bulk import capabilities and deep resea
   5. Catalog table responsive with 1000 products loaded
 **Plans**: 2 plans
 Plans:
-- [ ] 05-01-PLAN.md - Schema extension: manufacturer fields, types, UI
-- [ ] 05-02-PLAN.md - Descendant navigation: RPC function, query update, breadcrumb
+- [x] 05-01-PLAN.md - Schema extension: manufacturer fields, types, UI
+- [x] 05-02-PLAN.md - Descendant navigation: RPC function, query update, breadcrumb
 
 ### Phase 6: Bulk Import
 **Goal**: Users can import products from CSV files with column mapping and deduplication
@@ -41,7 +41,12 @@ Plans:
   3. System validates required fields before import
   4. System warns on duplicate SKUs with update option
   5. User sees import summary (created, updated, skipped counts)
-**Plans**: TBD during planning
+**Plans**: 4 plans
+Plans:
+- [ ] 06-01-PLAN.md - Foundation: PapaParse install, CSV parser utility, import schemas
+- [ ] 06-02-PLAN.md - Server action with deduplication, file upload component
+- [ ] 06-03-PLAN.md - Column mapping step, validation step with preview
+- [ ] 06-04-PLAN.md - Import wizard integration, summary, page route
 
 ### Phase 7: Research Prompt
 **Goal**: Users can generate structured research prompts for finding EU vendors and pricing via Perplexity
@@ -62,8 +67,8 @@ Phases execute in numeric order: 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 5. Schema & Navigation | 0/2 | Planned | — |
-| 6. Bulk Import | 0/? | Not Started | — |
+| 5. Schema & Navigation | 2/2 | Verified | 2026-02-02 |
+| 6. Bulk Import | 0/4 | Planned | — |
 | 7. Research Prompt | 0/? | Not Started | — |
 
 ---
