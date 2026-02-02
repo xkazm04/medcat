@@ -10,7 +10,7 @@ MedCatalog v1.1 extends the catalog with bulk import capabilities and deep resea
 - Continues from v1.0 (phases 1-4)
 - v1.1 starts at phase 5
 
-- [ ] **Phase 5: Schema & Navigation** - Manufacturer fields, EMDN tree navigation, performance foundation
+- [x] **Phase 5: Schema & Navigation** - Manufacturer fields, EMDN tree navigation, performance foundation
 - [ ] **Phase 6: Bulk Import** - CSV upload, column mapping, deduplication, import flow
 - [ ] **Phase 7: Research Prompt** - Structured prompt generator for EU vendor pricing research
 
@@ -26,7 +26,10 @@ MedCatalog v1.1 extends the catalog with bulk import capabilities and deep resea
   3. EMDN filter shows collapsible tree with expand/collapse
   4. Selecting parent category filters to all descendants
   5. Catalog table responsive with 1000 products loaded
-**Plans**: TBD during planning
+**Plans**: 2 plans
+Plans:
+- [ ] 05-01-PLAN.md - Schema extension: manufacturer fields, types, UI
+- [ ] 05-02-PLAN.md - Descendant navigation: RPC function, query update, breadcrumb
 
 ### Phase 6: Bulk Import
 **Goal**: Users can import products from CSV files with column mapping and deduplication
@@ -59,7 +62,7 @@ Phases execute in numeric order: 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 5. Schema & Navigation | 0/? | Not Started | — |
+| 5. Schema & Navigation | 0/2 | Planned | — |
 | 6. Bulk Import | 0/? | Not Started | — |
 | 7. Research Prompt | 0/? | Not Started | — |
 
