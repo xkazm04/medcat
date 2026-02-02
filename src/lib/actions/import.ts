@@ -124,6 +124,7 @@ export async function importProducts(
       }
 
       // Extract product data (without _rowIndex)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _rowIndex, ...productData } = validated.data;
 
       validRows.push({
