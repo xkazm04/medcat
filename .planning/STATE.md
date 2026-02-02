@@ -9,18 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-02)
 
 ## Current Position
 
-Phase: 6 of 7 (Bulk Import)
-Plan: 4 of 4 complete
-Status: Phase complete
-Last activity: 2026-02-02 — Completed 06-04-PLAN.md
+Phase: 7 of 7 (Research Prompt)
+Plan: 1 of 1 complete
+Status: Milestone v1.1 complete
+Last activity: 2026-02-02 — Completed 07-01-PLAN.md
 
-Progress: [######....] 66% (2/3 phases verified)
+Progress: [##########] 100% (3/3 phases complete)
 
 ## Milestone History
 
 | Version | Phases | Plans | Shipped |
 |---------|--------|-------|---------|
 | v1.0    | 4      | 14    | 2026-02-02 |
+| v1.1    | 3      | 6     | 2026-02-02 |
 
 ## Accumulated Context
 
@@ -57,6 +58,12 @@ v1.1 decisions (Phase 6):
 - Wizard step flow: vendor -> upload -> mapping -> validation -> importing -> summary
 - Vendor selection required first since deduplication is per-vendor
 
+v1.1 decisions (Phase 7):
+
+- Blue color theme for research section to distinguish from green price comparison
+- Open base Perplexity URL rather than pre-filling query (prompt may exceed URL length limits)
+- Truncate description to 200 chars in prompt to keep it concise
+
 ### Technical Debt
 
 - Permissive RLS policies need tightening when auth is added
@@ -85,6 +92,6 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-02
-Stopped at: Completed 06-04-PLAN.md (Phase 6 complete)
+Stopped at: Completed 07-01-PLAN.md (Phase 7 complete, Milestone v1.1 complete)
 Resume file: None
-Next action: /gsd:plan-phase 7 for Research Prompt feature
+Next action: User verification of v1.1 features or plan next milestone
