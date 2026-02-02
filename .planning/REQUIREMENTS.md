@@ -39,13 +39,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Duplicate Detection
 
-- [ ] **DUPL-01**: System warns user when adding product similar to existing one
-- [ ] **DUPL-02**: User sees similarity percentage and links to similar products
+- [x] **DUPL-01**: System warns user when adding product similar to existing one
+- [x] **DUPL-02**: User sees similarity percentage and links to similar products
 
 ### Price Comparison
 
-- [ ] **COMP-01**: Same/similar products from different vendors grouped for price comparison
-- [ ] **COMP-02**: User can see all vendor prices for a product at a glance
+- [x] **COMP-01**: Same/similar products from different vendors grouped for price comparison
+- [x] **COMP-02**: User can see all vendor prices for a product at a glance
 
 ## v2 Requirements
 
@@ -101,10 +101,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXTR-03 | Phase 3 | Complete |
 | EXTR-04 | Phase 3 | Complete |
 | EXTR-05 | Phase 3 | Complete |
-| DUPL-01 | Phase 4 | Pending |
-| DUPL-02 | Phase 4 | Pending |
-| COMP-01 | Phase 4 | Pending |
-| COMP-02 | Phase 4 | Pending |
+| DUPL-01 | Phase 4 | Complete |
+| DUPL-02 | Phase 4 | Complete |
+| COMP-01 | Phase 4 | Complete |
+| COMP-02 | Phase 4 | Complete |
 
 **Coverage:**
 - v1 requirements: 22 total

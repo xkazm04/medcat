@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation + Catalog** - Database schema, EMDN setup, and browsable product table
 - [x] **Phase 2: Product Management** - Detail views, editing, and deletion capabilities
 - [x] **Phase 3: AI Extraction** - Gemini-powered product data extraction from vendor sheets
-- [ ] **Phase 4: Comparison Engine** - Duplicate detection and multi-vendor price comparison
+- [x] **Phase 4: Comparison Engine** - Duplicate detection and multi-vendor price comparison
 
 ## Phase Details
 
@@ -84,9 +84,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Database migration (pg_trgm, RPC functions) and similarity Server Actions
-- [ ] 04-02-PLAN.md — Similar products warning in extraction preview
-- [ ] 04-03-PLAN.md — Price comparison table in product detail
+- [x] 04-01-PLAN.md — Database migration (pg_trgm, RPC functions) and similarity Server Actions
+- [x] 04-02-PLAN.md — Similar products warning in extraction preview
+- [x] 04-03-PLAN.md — Price comparison table in product detail
 
 ## Progress
 
@@ -98,7 +98,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation + Catalog | 3/3 | Complete | 2026-02-02 |
 | 2. Product Management | 4/4 | Complete | 2026-02-02 |
 | 3. AI Extraction | 4/4 | Complete | 2026-02-02 |
-| 4. Comparison Engine | 0/3 | Not started | - |
+| 4. Comparison Engine | 3/3 | Complete | 2026-02-02 |
 
 ---
 *Roadmap created: 2026-02-02*
