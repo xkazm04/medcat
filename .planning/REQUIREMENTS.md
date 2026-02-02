@@ -9,25 +9,25 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Foundation
 
-- [ ] **FOUN-01**: Supabase schema supports products, vendors, pricing, materials, EMDN classification
-- [ ] **FOUN-02**: EMDN codes filtered to orthopedic-relevant categories and imported to database
-- [ ] **FOUN-03**: NextJS project with Tailwind v4, TypeScript, and Framer Motion configured
+- [x] **FOUN-01**: Supabase schema supports products, vendors, pricing, materials, EMDN classification
+- [x] **FOUN-02**: EMDN codes filtered to orthopedic-relevant categories and imported to database
+- [x] **FOUN-03**: NextJS project with Tailwind v4, TypeScript, and Framer Motion configured
 
 ### Catalog Display
 
-- [ ] **DISP-01**: User can view products in sortable table with frozen header and zebra striping
-- [ ] **DISP-02**: User can filter products by vendor, EMDN category, price range, and material
-- [ ] **DISP-03**: User can paginate through products (20 items per page)
-- [ ] **DISP-04**: User can search products by name, description, or SKU
-- [ ] **DISP-05**: Catalog table displays elegantly with light theme, advanced typography, Framer Motion animations
+- [x] **DISP-01**: User can view products in sortable table with frozen header and zebra striping
+- [x] **DISP-02**: User can filter products by vendor, EMDN category, price range, and material
+- [x] **DISP-03**: User can paginate through products (20 items per page)
+- [x] **DISP-04**: User can search products by name, description, or SKU
+- [x] **DISP-05**: Catalog table displays elegantly with light theme, advanced typography, Framer Motion animations
 
 ### Product Data
 
-- [ ] **PROD-01**: User can view full product detail in modal or side panel
-- [ ] **PROD-02**: User can see EMDN classification code with hierarchy explanation
-- [ ] **PROD-03**: User can edit product metadata
-- [ ] **PROD-04**: User can delete products
-- [ ] **PROD-05**: User can see regulatory info (UDI, CE marking, MDR class)
+- [x] **PROD-01**: User can view full product detail in modal or side panel
+- [x] **PROD-02**: User can see EMDN classification code with hierarchy explanation
+- [x] **PROD-03**: User can edit product metadata
+- [x] **PROD-04**: User can delete products
+- [x] **PROD-05**: User can see regulatory info (UDI, CE marking, MDR class)
 
 ### AI Extraction
 
@@ -83,19 +83,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUN-01 | Phase 1 | Pending |
-| FOUN-02 | Phase 1 | Pending |
-| FOUN-03 | Phase 1 | Pending |
-| DISP-01 | Phase 1 | Pending |
-| DISP-02 | Phase 1 | Pending |
-| DISP-03 | Phase 1 | Pending |
-| DISP-04 | Phase 1 | Pending |
-| DISP-05 | Phase 1 | Pending |
-| PROD-01 | Phase 2 | Pending |
-| PROD-02 | Phase 2 | Pending |
-| PROD-03 | Phase 2 | Pending |
-| PROD-04 | Phase 2 | Pending |
-| PROD-05 | Phase 2 | Pending |
+| FOUN-01 | Phase 1 | Complete |
+| FOUN-02 | Phase 1 | Complete |
+| FOUN-03 | Phase 1 | Complete |
+| DISP-01 | Phase 1 | Complete |
+| DISP-02 | Phase 1 | Complete |
+| DISP-03 | Phase 1 | Complete |
+| DISP-04 | Phase 1 | Complete |
+| DISP-05 | Phase 1 | Complete |
+| PROD-01 | Phase 2 | Complete |
+| PROD-02 | Phase 2 | Complete |
+| PROD-03 | Phase 2 | Complete |
+| PROD-04 | Phase 2 | Complete |
+| PROD-05 | Phase 2 | Complete |
 | EXTR-01 | Phase 3 | Pending |
 | EXTR-02 | Phase 3 | Pending |
 | EXTR-03 | Phase 3 | Pending |
