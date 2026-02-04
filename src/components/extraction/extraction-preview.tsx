@@ -390,6 +390,23 @@ export function ExtractionPreview({
           {isPending ? 'Saving...' : 'Save to Catalog'}
         </button>
       </div>
+
+      {/* Classification Rationale */}
+      {extractedData.emdn_rationale && (
+        <div className="mt-6 p-4 bg-muted/30 border border-border rounded-lg">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+            Classification Rationale
+          </h4>
+          <p className="text-sm text-foreground leading-relaxed">
+            {extractedData.emdn_rationale}
+          </p>
+          {extractedData.suggested_emdn && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Suggested code: <span className="font-mono font-medium">{extractedData.suggested_emdn}</span>
+            </p>
+          )}
+        </div>
+      )}
     </form>
   )
 }

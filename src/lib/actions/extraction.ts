@@ -14,47 +14,113 @@ interface ExtractionResult {
 }
 
 /**
- * Extract structured product data from an uploaded vendor product sheet.
- *
- * Accepts FormData with a "file" field containing a .txt or .md file.
- * Uses Gemini AI with structured output to extract product information.
- *
- * @param formData - FormData containing "file" field
- * @returns ExtractionResult with success/data or error
+ * Extract structured product data from an uploaded file.
+ * Supports .txt, .md, and .pdf files.
  */
 export async function extractFromProductSheet(
   formData: FormData
 ): Promise<ExtractionResult> {
   const file = formData.get("file") as File | null;
 
-  // Validate file exists
   if (!file) {
     return { success: false, error: "No file provided" };
   }
 
-  // Validate file extension
   const fileName = file.name.toLowerCase();
-  if (!fileName.endsWith(".txt") && !fileName.endsWith(".md")) {
-    return { success: false, error: "Only .txt and .md files are supported" };
+
+  // Handle PDF files
+  if (fileName.endsWith(".pdf")) {
+    return extractFromPdf(file);
   }
 
-  // Read file content
-  const content = await file.text();
-
-  // Validate content length (50KB limit)
-  if (content.length > 50000) {
-    return { success: false, error: "File too large (max 50KB)" };
+  // Handle text files
+  if (fileName.endsWith(".txt") || fileName.endsWith(".md")) {
+    const content = await file.text();
+    if (content.length > 50000) {
+      return { success: false, error: "File too large (max 50KB)" };
+    }
+    return extractFromContent(content);
   }
 
-  return extractFromContent(content);
+  return { success: false, error: "Unsupported file type. Use .txt, .md, or .pdf" };
+}
+
+/**
+ * Extract structured product data from a PDF file.
+ */
+async function extractFromPdf(file: File): Promise<ExtractionResult> {
+  try {
+    // Dynamic import to avoid issues with pdf-parse in edge runtime
+    const { PDFParse } = await import("pdf-parse");
+
+    const arrayBuffer = await file.arrayBuffer();
+    const data = new Uint8Array(arrayBuffer);
+
+    const parser = new PDFParse({ data });
+    const textResult = await parser.getText();
+    const content = textResult.text;
+    await parser.destroy();
+
+    if (!content || content.trim().length === 0) {
+      return { success: false, error: "Could not extract text from PDF. The file may be image-based or empty." };
+    }
+
+    if (content.length > 100000) {
+      return { success: false, error: "PDF content too large (max 100KB of text)" };
+    }
+
+    return extractFromContent(content);
+  } catch (error) {
+    console.error("PDF extraction error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to parse PDF file",
+    };
+  }
+}
+
+/**
+ * Extract structured product data from a URL.
+ * Uses Gemini's ability to fetch and analyze web content.
+ */
+export async function extractFromUrl(url: string): Promise<ExtractionResult> {
+  // Validate URL
+  try {
+    new URL(url);
+  } catch {
+    return { success: false, error: "Invalid URL format" };
+  }
+
+  try {
+    const ai = getAIClient();
+    const response = await ai.models.generateContent({
+      model: EXTRACTION_MODEL,
+      contents: buildUrlExtractionPrompt(url),
+      config: {
+        responseMimeType: "application/json",
+        responseJsonSchema: extractedProductJsonSchema,
+      },
+    });
+
+    if (!response.text) {
+      return { success: false, error: "No response from AI model" };
+    }
+
+    const parsed = JSON.parse(response.text);
+    const validated = extractedProductSchema.parse(parsed);
+
+    return { success: true, data: validated };
+  } catch (error) {
+    console.error("URL extraction error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to extract from URL",
+    };
+  }
 }
 
 /**
  * Extract structured product data from raw text content.
- * Used by both file upload and test item features.
- *
- * @param content - Raw text content to extract from
- * @returns ExtractionResult with success/data or error
  */
 export async function extractFromContent(
   content: string
@@ -70,7 +136,6 @@ export async function extractFromContent(
       },
     });
 
-    // Parse and validate the response
     if (!response.text) {
       return { success: false, error: "No response from AI model" };
     }
@@ -89,15 +154,45 @@ export async function extractFromContent(
 }
 
 /**
- * Build the extraction prompt for Gemini.
- *
- * Comprehensive prompt for extracting structured medical device product data
- * from vendor product sheets, datasheets, or technical specifications.
+ * Build the extraction prompt for URL-based extraction.
+ */
+function buildUrlExtractionPrompt(url: string): string {
+  return `You are a medical device data extraction specialist. Your task is to visit the provided URL and extract structured product information from the webpage.
+
+## TARGET URL
+${url}
+
+## INSTRUCTIONS
+1. Access and analyze the content at the provided URL
+2. Look for product specifications, datasheets, or technical information
+3. Extract the structured data according to the guidelines below
+
+${getExtractionGuidelines()}
+
+## IMPORTANT FOR WEB PAGES
+- The page may contain multiple products - focus on the main/primary product being showcased
+- Look for specification tables, technical data sections, and product descriptions
+- Check for downloadable datasheets or spec sheets linked on the page
+- If the URL is a product listing page, extract info for the featured product`;
+}
+
+/**
+ * Build the extraction prompt for document content.
  */
 function buildExtractionPrompt(content: string): string {
   return `You are a medical device data extraction specialist. Your task is to extract structured product information from the provided vendor product sheet, datasheet, or technical specification document.
 
-## EXTRACTION GUIDELINES
+${getExtractionGuidelines()}
+
+## DOCUMENT TO EXTRACT FROM:
+${content}`;
+}
+
+/**
+ * Common extraction guidelines shared between URL and document extraction.
+ */
+function getExtractionGuidelines(): string {
+  return `## EXTRACTION GUIDELINES
 
 ### Product Identification
 - **name**: Extract the full official product name as stated by the manufacturer/vendor
@@ -199,13 +294,14 @@ function buildExtractionPrompt(content: string): string {
   6. Knee prosthesis → Use P0909 category (not shown - use general if unsure)
   7. If unsure between levels, prefer the more specific child category
 
+- **emdn_rationale**: Provide a brief explanation (1-2 sentences) for why you selected this EMDN category.
+  - Reference specific product characteristics that led to the classification
+  - Example: "Classified as P0908030102 (uncemented acetabular cup) because product is a porous-coated titanium shell designed for press-fit fixation without cement."
+
 ## CRITICAL RULES
 1. Extract ONLY what is explicitly stated in the document
 2. Set fields to null if information is not found - do NOT guess or infer
 3. For regulatory fields (MDR class, CE marking), only mark true/extract if explicitly confirmed
 4. Material names should be technical/clinical, not marketing terms
-5. Prices should be numeric only, converted to base unit if needed
-
-## DOCUMENT TO EXTRACT FROM:
-${content}`;
+5. Prices should be numeric only, converted to base unit if needed`;
 }

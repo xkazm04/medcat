@@ -19,6 +19,7 @@ export const extractedProductSchema = z.object({
   mdr_class: z.enum(["I", "IIa", "IIb", "III"]).nullable().describe("MDR risk classification if explicitly stated"),
   udi_di: z.string().nullable().describe("UDI-DI identifier if provided (max 14 characters)"),
   suggested_emdn: z.string().nullable().describe("Suggested EMDN code based on product type (e.g., P090201 for hip implants)"),
+  emdn_rationale: z.string().nullable().describe("Brief explanation (1-2 sentences) of why this EMDN category was chosen based on product characteristics"),
 });
 
 export type ExtractedProduct = z.infer<typeof extractedProductSchema>;
