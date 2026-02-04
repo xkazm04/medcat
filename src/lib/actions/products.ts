@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { checkCircuit } from "@/lib/supabase/circuit-breaker";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { productSchema } from "@/lib/schemas/product";
 
 interface ActionResult {
@@ -45,6 +46,7 @@ export async function updateProduct(
     };
   }
 
+  checkCircuit();
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -61,6 +63,7 @@ export async function updateProduct(
   }
 
   revalidatePath("/");
+  revalidateTag("categories", "default"); // Invalidate category counts cache
   return { success: true };
 }
 
@@ -101,6 +104,7 @@ export async function createProduct(
     };
   }
 
+  checkCircuit();
   const supabase = await createClient();
 
   const { data: created, error } = await supabase
@@ -118,10 +122,12 @@ export async function createProduct(
   }
 
   revalidatePath("/");
+  revalidateTag("categories", "default"); // Invalidate category counts cache
   return { success: true, productId: created?.id };
 }
 
 export async function deleteProduct(id: string): Promise<ActionResult> {
+  checkCircuit();
   const supabase = await createClient();
 
   const { error } = await supabase.from("products").delete().eq("id", id);
@@ -135,5 +141,6 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   }
 
   revalidatePath("/");
+  revalidateTag("categories", "default"); // Invalidate category counts cache
   return { success: true };
 }

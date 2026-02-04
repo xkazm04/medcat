@@ -26,20 +26,29 @@ export function DropdownMenu({ trigger, children, align = "right" }: DropdownMen
 
   return (
     <div ref={containerRef} className="relative inline-block">
-      <button
+      {/* Render trigger directly - it should handle its own click */}
+      <div
         onClick={() => setIsOpen(!isOpen)}
-        className="p-1.5 rounded-md hover:bg-muted transition-colors"
+        className="cursor-pointer"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            setIsOpen(!isOpen);
+          }
+        }}
       >
         {trigger}
-      </button>
+      </div>
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            key="dropdown-content"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.1 }}
-            className={`absolute z-50 mt-1 min-w-[160px] bg-background border border-border rounded-md shadow-lg py-1 ${
+            className={`absolute z-50 mt-1 min-w-[180px] bg-background border border-border rounded-md shadow-lg py-1 ${
               align === "right" ? "right-0" : "left-0"
             }`}
           >
@@ -76,4 +85,21 @@ export function DropdownMenuItem({ children, onClick, disabled, className }: Dro
       {children}
     </button>
   );
+}
+
+interface DropdownMenuSectionProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function DropdownMenuSection({ children, className }: DropdownMenuSectionProps) {
+  return (
+    <div className={`py-1 ${className || ""}`}>
+      {children}
+    </div>
+  );
+}
+
+export function DropdownMenuDivider() {
+  return <div className="my-1 border-t border-border" />;
 }

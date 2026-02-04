@@ -7,11 +7,18 @@ import {
   flexRender,
   ColumnDef,
   SortingState,
+  Row,
 } from "@tanstack/react-table";
-import { useState, useCallback } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { motion } from "motion/react";
 import { PackageX } from "lucide-react";
 import { TablePagination } from "./table-pagination";
+import {
+  ColumnVisibilityToggle,
+  useColumnVisibility,
+  type ColumnVisibility,
+} from "./column-visibility-toggle";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
@@ -20,7 +27,13 @@ interface DataTableProps<TData> {
   totalCount: number;
   currentPage: number;
   pageSize: number;
+  columnVisibility: ColumnVisibility;
+  onColumnVisibilityChange: (visibility: ColumnVisibility) => void;
 }
+
+// Row height for virtual scrolling calculations
+const ROW_HEIGHT = 52;
+const EXPANDED_ROW_EXTRA_HEIGHT = 100; // Approximate extra height when category is expanded
 
 export function DataTable<TData>({
   columns,
@@ -29,9 +42,12 @@ export function DataTable<TData>({
   totalCount,
   currentPage,
   pageSize,
+  columnVisibility,
+  onColumnVisibilityChange,
 }: DataTableProps<TData>) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   // Derive sorting state from URL
   const sortBy = searchParams.get("sortBy") || "name";
@@ -76,88 +92,177 @@ export function DataTable<TData>({
         updateURL({
           sortBy: newSorting[0].id,
           sortOrder: newSorting[0].desc ? "desc" : "asc",
-          page: "1", // Reset to first page on sort change
+          page: "1",
         });
       }
     },
   });
 
-  const handlePageChange = (newPage: number) => {
-    updateURL({ page: String(newPage) });
-  };
+  const { rows } = table.getRowModel();
+
+  // Virtual scrolling for performance with large datasets
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => tableContainerRef.current,
+    estimateSize: () => ROW_HEIGHT,
+    overscan: 5, // Render 5 extra rows above/below viewport
+  });
+
+  const virtualRows = virtualizer.getVirtualItems();
+  const totalSize = virtualizer.getTotalSize();
+
+  // Calculate padding for virtual scroll
+  const paddingTop = virtualRows.length > 0 ? virtualRows[0]?.start || 0 : 0;
+  const paddingBottom =
+    virtualRows.length > 0
+      ? totalSize - (virtualRows[virtualRows.length - 1]?.end || 0)
+      : 0;
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      updateURL({ page: String(newPage) });
+      // Scroll to top when page changes
+      tableContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [updateURL]
+  );
 
   if (data.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.2 }}
-        className="flex flex-col items-center justify-center py-20 text-center bg-background border border-border rounded-lg"
-      >
-        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-          <PackageX className="h-8 w-8 text-muted-foreground" />
+      <div className="space-y-3">
+        {/* Header with column toggle */}
+        <div className="flex justify-end">
+          <ColumnVisibilityToggle
+            visibility={columnVisibility}
+            onChange={onColumnVisibilityChange}
+          />
         </div>
-        <h3 className="text-lg font-medium text-foreground mb-2">No products found</h3>
-        <p className="text-sm text-muted-foreground max-w-sm">
-          Try adjusting your filters or search query to find what you are looking for.
-        </p>
-      </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2 }}
+          className="flex flex-col items-center justify-center py-20 text-center bg-background border border-border rounded-lg"
+        >
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+            <PackageX className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-medium text-foreground mb-2">
+            No products found
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-sm">
+            Try adjusting your filters or search query to find what you are
+            looking for.
+          </p>
+        </motion.div>
+      </div>
     );
   }
 
   return (
-    <div className="flex flex-col bg-background border border-border rounded-lg shadow-sm overflow-hidden">
-      <div className="overflow-auto">
-        <table className="w-full">
-          <thead className="sticky top-0 z-10 bg-table-header border-b border-border">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="px-3 py-3 text-left"
-                    style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row, index) => (
-              <motion.tr
-                key={row.id}
-                initial={index < 15 ? { opacity: 0, y: -10 } : false}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.2,
-                  delay: index < 15 ? index * 0.02 : 0,
-                  ease: "easeOut",
-                }}
-                className={`group border-b border-border last:border-b-0 transition-colors hover:bg-table-row-hover ${
-                  index % 2 === 1 ? "bg-table-row-alt" : ""
-                }`}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-3 py-2">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="space-y-3">
+      {/* Header with total count and column toggle */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Showing <span className="font-medium text-foreground">{data.length}</span> of{" "}
+          <span className="font-medium text-foreground">{totalCount.toLocaleString()}</span> products
+        </div>
+        <ColumnVisibilityToggle
+          visibility={columnVisibility}
+          onChange={onColumnVisibilityChange}
+        />
       </div>
-      <TablePagination
-        currentPage={currentPage}
-        totalPages={pageCount}
-        totalCount={totalCount}
-        pageSize={pageSize}
-        onPageChange={handlePageChange}
-      />
+
+      {/* Table container */}
+      <div className="flex flex-col bg-background border border-border rounded-lg shadow-sm overflow-hidden">
+        {/* Scrollable table area with virtual scrolling */}
+        <div
+          ref={tableContainerRef}
+          className="overflow-auto"
+          style={{ maxHeight: "calc(100vh - 320px)", minHeight: "400px" }}
+        >
+          <table className="w-full table-fixed">
+            <thead className="sticky top-0 z-10 bg-muted/50 border-b border-border">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left first:pl-4 last:pr-4"
+                      style={{
+                        width: header.getSize() !== 150 ? header.getSize() : undefined,
+                      }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody className="divide-y divide-border">
+              {/* Top padding for virtual scroll */}
+              {paddingTop > 0 && (
+                <tr>
+                  <td style={{ height: `${paddingTop}px` }} colSpan={columns.length} />
+                </tr>
+              )}
+
+              {/* Virtualized rows */}
+              {virtualRows.map((virtualRow) => {
+                const row = rows[virtualRow.index] as Row<TData>;
+                const isFirstVisible = virtualRow.index < 10;
+
+                return (
+                  <motion.tr
+                    key={row.id}
+                    data-index={virtualRow.index}
+                    initial={isFirstVisible ? { opacity: 0 } : false}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                      duration: 0.15,
+                      delay: isFirstVisible ? virtualRow.index * 0.02 : 0,
+                    }}
+                    className="group transition-colors hover:bg-muted/30"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className="px-4 py-3 first:pl-4 last:pr-4 align-top"
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </motion.tr>
+                );
+              })}
+
+              {/* Bottom padding for virtual scroll */}
+              {paddingBottom > 0 && (
+                <tr>
+                  <td style={{ height: `${paddingBottom}px` }} colSpan={columns.length} />
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={pageCount}
+          totalCount={totalCount}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 }
+
+// Export hook for external use
+export { useColumnVisibility };

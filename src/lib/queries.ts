@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { checkCircuit, CircuitBreakerError } from "@/lib/supabase/circuit-breaker";
 import type { EMDNCategory, Material, ProductWithRelations, Vendor } from "@/lib/types";
 
 // Mock data for when Supabase is not configured
@@ -67,6 +68,8 @@ export interface GetProductsParams {
   vendor?: string;
   category?: string;
   material?: string;
+  ceMarked?: string;
+  mdrClass?: string;
   minPrice?: number;
   maxPrice?: number;
   sortBy?: string;
@@ -80,6 +83,9 @@ export interface GetProductsResult {
 }
 
 export async function getProducts(params: GetProductsParams = {}): Promise<GetProductsResult> {
+  // Circuit breaker check to prevent infinite loops
+  checkCircuit();
+
   const {
     page = 1,
     pageSize = 20,
@@ -87,6 +93,8 @@ export async function getProducts(params: GetProductsParams = {}): Promise<GetPr
     vendor,
     category,
     material,
+    ceMarked,
+    mdrClass,
     minPrice,
     maxPrice,
     sortBy = "name",
@@ -159,6 +167,16 @@ export async function getProducts(params: GetProductsParams = {}): Promise<GetPr
     }
   }
 
+  // Apply CE marked filter
+  if (ceMarked !== undefined && ceMarked !== null && ceMarked !== "") {
+    query = query.eq("ce_marked", ceMarked === "true");
+  }
+
+  // Apply MDR class filter
+  if (mdrClass !== undefined && mdrClass !== null && mdrClass !== "") {
+    query = query.eq("mdr_class", mdrClass);
+  }
+
   // Apply price range filter
   if (minPrice !== undefined && !isNaN(minPrice)) {
     query = query.gte("price", minPrice);
@@ -191,6 +209,7 @@ export async function getProducts(params: GetProductsParams = {}): Promise<GetPr
 }
 
 export async function getVendors(): Promise<Vendor[]> {
+  checkCircuit();
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -207,6 +226,7 @@ export async function getVendors(): Promise<Vendor[]> {
 }
 
 export async function getMaterials(): Promise<Material[]> {
+  checkCircuit();
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -223,6 +243,7 @@ export async function getMaterials(): Promise<Material[]> {
 }
 
 export async function getEMDNCategoriesFlat(): Promise<EMDNCategory[]> {
+  checkCircuit();
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -240,9 +261,162 @@ export async function getEMDNCategoriesFlat(): Promise<EMDNCategory[]> {
 
 export interface CategoryNode extends EMDNCategory {
   children: CategoryNode[];
+  productCount: number;
 }
 
+/**
+ * Get EMDN categories as a tree structure.
+ * Only includes categories that have products assigned (directly or via descendants).
+ * Uses materialized view for fast counts when available.
+ */
 export async function getEMDNCategories(): Promise<CategoryNode[]> {
+  checkCircuit();
+  const supabase = await createClient();
+
+  // Try to use materialized view first (fast path)
+  const { data: matViewData, error: matViewError } = await supabase
+    .from("category_product_counts")
+    .select("id, code, name, parent_id, path, depth, total_count")
+    .gt("total_count", 0)
+    .order("code");
+
+  if (!matViewError && matViewData && matViewData.length > 0) {
+    // Build tree from materialized view
+    return buildTreeFromMatView(matViewData);
+  }
+
+  // Fallback: compute counts directly (slower path)
+  console.log("[getEMDNCategories] Materialized view not available, computing counts directly");
+  return computeCategoryTreeFallback(supabase);
+}
+
+// Build tree from materialized view data
+function buildTreeFromMatView(data: Array<{
+  id: string;
+  code: string;
+  name: string;
+  parent_id: string | null;
+  path: string;
+  depth: number;
+  total_count: number;
+}>): CategoryNode[] {
+  const categoryMap = new Map<string, CategoryNode>();
+  const rootCategories: CategoryNode[] = [];
+
+  // First pass: create nodes
+  data.forEach((row) => {
+    categoryMap.set(row.id, {
+      id: row.id,
+      code: row.code,
+      name: row.name,
+      parent_id: row.parent_id,
+      path: row.path,
+      depth: row.depth,
+      created_at: "",
+      children: [],
+      productCount: row.total_count,
+    });
+  });
+
+  // Second pass: build tree
+  data.forEach((row) => {
+    const node = categoryMap.get(row.id)!;
+    if (row.parent_id && categoryMap.has(row.parent_id)) {
+      categoryMap.get(row.parent_id)!.children.push(node);
+    } else if (!row.parent_id || !categoryMap.has(row.parent_id)) {
+      rootCategories.push(node);
+    }
+  });
+
+  return rootCategories;
+}
+
+// Fallback: compute tree directly from tables
+async function computeCategoryTreeFallback(
+  supabase: Awaited<ReturnType<typeof createClient>>
+): Promise<CategoryNode[]> {
+  // Get all categories
+  const { data: categoriesData, error: catError } = await supabase
+    .from("emdn_categories")
+    .select("*")
+    .order("code");
+
+  if (catError) {
+    console.error("Error fetching EMDN categories (using mock data):", catError.message);
+    const mockRoot: CategoryNode = { ...MOCK_CATEGORIES[0], children: [], productCount: 0 };
+    const mockChild: CategoryNode = { ...MOCK_CATEGORIES[1], children: [], productCount: 0 };
+    mockRoot.children.push(mockChild);
+    return [mockRoot];
+  }
+
+  // Get product counts per category
+  const { data: productCounts, error: countError } = await supabase
+    .from("products")
+    .select("emdn_category_id")
+    .not("emdn_category_id", "is", null);
+
+  const countMap = new Map<string, number>();
+  if (!countError && productCounts) {
+    productCounts.forEach((p) => {
+      const catId = p.emdn_category_id;
+      countMap.set(catId, (countMap.get(catId) || 0) + 1);
+    });
+  }
+
+  // Build tree structure
+  const categories = categoriesData || [];
+  const categoryMap = new Map<string, CategoryNode>();
+  const rootCategories: CategoryNode[] = [];
+
+  // First pass: create nodes with direct counts
+  categories.forEach((cat) => {
+    categoryMap.set(cat.id, {
+      ...cat,
+      children: [],
+      productCount: countMap.get(cat.id) || 0,
+    });
+  });
+
+  // Second pass: build tree
+  categories.forEach((cat) => {
+    const node = categoryMap.get(cat.id)!;
+    if (cat.parent_id && categoryMap.has(cat.parent_id)) {
+      categoryMap.get(cat.parent_id)!.children.push(node);
+    } else {
+      rootCategories.push(node);
+    }
+  });
+
+  // Third pass: propagate counts up (parent includes children's counts)
+  function propagateCounts(node: CategoryNode): number {
+    let total = node.productCount;
+    for (const child of node.children) {
+      total += propagateCounts(child);
+    }
+    node.productCount = total;
+    return total;
+  }
+  rootCategories.forEach(propagateCounts);
+
+  // Filter out categories with no products
+  function filterEmptyCategories(nodes: CategoryNode[]): CategoryNode[] {
+    return nodes
+      .filter((node) => node.productCount > 0)
+      .map((node) => ({
+        ...node,
+        children: filterEmptyCategories(node.children),
+      }));
+  }
+
+  return filterEmptyCategories(rootCategories);
+}
+
+/**
+ * Get all EMDN categories (even those without products).
+ * Used for forms where user needs to select from all categories.
+ */
+export async function getEMDNCategoriesAll(): Promise<CategoryNode[]> {
+  checkCircuit();
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -251,25 +425,18 @@ export async function getEMDNCategories(): Promise<CategoryNode[]> {
     .order("code");
 
   if (error) {
-    console.error("Error fetching EMDN categories (using mock data):", error.message);
-    // Build mock tree
-    const mockRoot: CategoryNode = { ...MOCK_CATEGORIES[0], children: [] };
-    const mockChild: CategoryNode = { ...MOCK_CATEGORIES[1], children: [] };
-    mockRoot.children.push(mockChild);
-    return [mockRoot];
+    console.error("Error fetching EMDN categories:", error.message);
+    return [];
   }
 
-  // Build tree structure
   const categories = data || [];
   const categoryMap = new Map<string, CategoryNode>();
   const rootCategories: CategoryNode[] = [];
 
-  // First pass: create nodes
   categories.forEach((cat) => {
-    categoryMap.set(cat.id, { ...cat, children: [] });
+    categoryMap.set(cat.id, { ...cat, children: [], productCount: 0 });
   });
 
-  // Second pass: build tree
   categories.forEach((cat) => {
     const node = categoryMap.get(cat.id)!;
     if (cat.parent_id && categoryMap.has(cat.parent_id)) {

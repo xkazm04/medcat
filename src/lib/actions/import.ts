@@ -1,7 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { checkCircuit } from "@/lib/supabase/circuit-breaker";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { importRowSchema } from "@/lib/schemas/import";
 
 /**
@@ -33,6 +34,7 @@ const BATCH_SIZE = 100;
 async function lookupEMDNCodes(
   codes: string[]
 ): Promise<Map<string, string | null>> {
+  checkCircuit();
   const supabase = await createClient();
 
   // Filter out empty codes
@@ -72,6 +74,7 @@ export async function checkExistingProducts(
   skus: string[],
   vendorId: string
 ): Promise<Map<string, string>> {
+  checkCircuit();
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -107,6 +110,7 @@ export async function importProducts(
   rows: unknown[],
   vendorId: string
 ): Promise<ImportResult> {
+  checkCircuit();
   const supabase = await createClient();
 
   const result: ImportResult = {
@@ -258,6 +262,7 @@ export async function importProducts(
 
   // Revalidate cache after all operations
   revalidatePath("/");
+  revalidateTag("categories", "default"); // Invalidate category counts cache
 
   return result;
 }

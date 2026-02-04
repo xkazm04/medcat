@@ -3,20 +3,22 @@ import { z } from "zod";
 /**
  * Schema for AI-extracted product data from vendor product sheets.
  *
- * Key difference from productSchema: This schema has vendor_name and material_name
- * as strings (extracted text), not UUIDs. The preview form will resolve these to IDs later.
+ * Key difference from productSchema: This schema has vendor_name, manufacturer_name,
+ * and material_name as strings (extracted text), not UUIDs.
+ * The preview form will resolve these to IDs later.
  */
 export const extractedProductSchema = z.object({
-  name: z.string().describe("Product name as stated by vendor"),
-  sku: z.string().describe("Vendor SKU, catalog number, or part number"),
-  description: z.string().nullable().describe("Full product description"),
-  price: z.number().nullable().describe("Unit price (numeric only, no currency)"),
-  vendor_name: z.string().nullable().describe("Vendor or manufacturer name"),
-  material_name: z.string().nullable().describe("Primary material (titanium, PEEK, etc.)"),
-  ce_marked: z.boolean().describe("True if CE marking mentioned"),
-  mdr_class: z.enum(["I", "IIa", "IIb", "III"]).nullable().describe("MDR classification if stated"),
-  udi_di: z.string().nullable().describe("UDI-DI if provided (max 14 chars)"),
-  suggested_emdn: z.string().nullable().describe("Suggested EMDN code (P09xx or P10xx)"),
+  name: z.string().describe("Product name as stated by manufacturer/vendor"),
+  sku: z.string().describe("Catalog number, REF, part number, or SKU"),
+  description: z.string().nullable().describe("Full product description including features and intended use"),
+  price: z.number().nullable().describe("Unit price (numeric only, no currency symbols)"),
+  vendor_name: z.string().nullable().describe("Distributor or vendor company name (may be different from manufacturer)"),
+  manufacturer_name: z.string().nullable().describe("Original manufacturer/OEM company name"),
+  material_name: z.string().nullable().describe("Primary material composition (e.g., Titanium Ti-6Al-4V, PEEK, Cobalt-Chrome)"),
+  ce_marked: z.boolean().describe("True if CE marking or EU MDR compliance is mentioned"),
+  mdr_class: z.enum(["I", "IIa", "IIb", "III"]).nullable().describe("MDR risk classification if explicitly stated"),
+  udi_di: z.string().nullable().describe("UDI-DI identifier if provided (max 14 characters)"),
+  suggested_emdn: z.string().nullable().describe("Suggested EMDN code based on product type (e.g., P090201 for hip implants)"),
 });
 
 export type ExtractedProduct = z.infer<typeof extractedProductSchema>;

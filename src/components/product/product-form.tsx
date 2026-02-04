@@ -17,7 +17,6 @@ interface ProductFormProps {
   product: ProductWithRelations
   onSuccess?: () => void
   vendors: { id: string; name: string }[]
-  materials: { id: string; name: string }[]
   emdnCategories: { id: string; code: string; name: string }[]
 }
 
@@ -25,7 +24,6 @@ export function ProductForm({
   product,
   onSuccess,
   vendors,
-  materials,
   emdnCategories,
 }: ProductFormProps) {
   const [isPending, startTransition] = useTransition()
@@ -218,30 +216,6 @@ export function ProductForm({
         {form.formState.errors.vendor_id && (
           <p className={errorClass}>
             {form.formState.errors.vendor_id.message}
-          </p>
-        )}
-      </div>
-
-      {/* Material */}
-      <div>
-        <label htmlFor="material_id" className={labelClass}>
-          Material
-        </label>
-        <select
-          id="material_id"
-          {...form.register('material_id')}
-          className={inputClass}
-        >
-          <option value="">Select material</option>
-          {materials.map((material) => (
-            <option key={material.id} value={material.id}>
-              {material.name}
-            </option>
-          ))}
-        </select>
-        {form.formState.errors.material_id && (
-          <p className={errorClass}>
-            {form.formState.errors.material_id.message}
           </p>
         )}
       </div>

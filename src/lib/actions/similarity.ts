@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { checkCircuit } from "@/lib/supabase/circuit-breaker";
 
 /**
  * Represents a product found via similarity search.
@@ -57,6 +58,7 @@ export async function findSimilarProducts(
   sku?: string,
   threshold: number = 0.3
 ): Promise<SimilarityResult> {
+  checkCircuit();
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("find_similar_products", {
@@ -86,6 +88,7 @@ export async function getProductPriceComparison(
   productId: string,
   threshold: number = 0.5
 ): Promise<PriceComparisonResult> {
+  checkCircuit();
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("get_product_price_comparison", {

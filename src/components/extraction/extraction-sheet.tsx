@@ -10,13 +10,12 @@ import {
 import { UploadForm } from './upload-form'
 import { ExtractionPreview } from './extraction-preview'
 import type { ExtractedProduct } from '@/lib/schemas/extraction'
-import type { Vendor, Material, EMDNCategory } from '@/lib/types'
+import type { Vendor, EMDNCategory } from '@/lib/types'
 
 interface ExtractionSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   vendors: Vendor[]
-  materials: Material[]
   emdnCategories: EMDNCategory[]
 }
 
@@ -24,7 +23,6 @@ export function ExtractionSheet({
   open,
   onOpenChange,
   vendors,
-  materials,
   emdnCategories,
 }: ExtractionSheetProps) {
   const [step, setStep] = useState<'upload' | 'preview'>('upload')
@@ -70,7 +68,6 @@ export function ExtractionSheet({
             <ExtractionPreview
               extractedData={extractedData}
               vendors={vendors.map((v) => ({ id: v.id, name: v.name }))}
-              materials={materials.map((m) => ({ id: m.id, name: m.name }))}
               emdnCategories={emdnCategories.map((c) => ({
                 id: c.id,
                 code: c.code,
