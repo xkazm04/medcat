@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Search, Layers } from "lucide-react";
 import type { Material } from "@/lib/types";
 
@@ -10,6 +11,8 @@ interface MaterialFilterProps {
 }
 
 export function MaterialFilter({ materials }: MaterialFilterProps) {
+  const t = useTranslations('filters');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedMaterials = searchParams.get("material")?.split(",").filter(Boolean) || [];
@@ -55,7 +58,7 @@ export function MaterialFilter({ materials }: MaterialFilterProps) {
     return (
       <div className="flex flex-col items-center justify-center py-4 text-center">
         <Layers className="h-6 w-6 text-muted-foreground/40 mb-2" />
-        <p className="text-sm text-muted-foreground">No materials available</p>
+        <p className="text-sm text-muted-foreground">{t('noMaterials')}</p>
       </div>
     );
   }
@@ -70,7 +73,7 @@ export function MaterialFilter({ materials }: MaterialFilterProps) {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search materials..."
+            placeholder={t('searchMaterials')}
             className="w-full pl-8 pr-3 py-1.5 text-sm border border-border rounded-md bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50 transition-colors"
           />
         </div>
@@ -80,13 +83,13 @@ export function MaterialFilter({ materials }: MaterialFilterProps) {
       {selectedMaterials.length > 0 && (
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">
-            {selectedMaterials.length} selected
+            {tCommon('selected', { count: selectedMaterials.length })}
           </span>
           <button
             onClick={clearSelection}
             className="text-accent hover:underline"
           >
-            Clear
+            {tCommon('clear')}
           </button>
         </div>
       )}
@@ -124,7 +127,7 @@ export function MaterialFilter({ materials }: MaterialFilterProps) {
 
         {filteredMaterials.length === 0 && searchQuery && (
           <p className="text-sm text-muted-foreground text-center py-2">
-            No materials match "{searchQuery}"
+            {tCommon('noMatch', { query: searchQuery })}
           </p>
         )}
       </div>

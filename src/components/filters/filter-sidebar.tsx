@@ -2,6 +2,7 @@
 
 import { ReactNode, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "motion/react";
 import { X, SlidersHorizontal, ChevronDown } from "lucide-react";
 
@@ -10,6 +11,7 @@ interface FilterSidebarProps {
 }
 
 export function FilterSidebar({ children }: FilterSidebarProps) {
+  const t = useTranslations('filters');
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -50,9 +52,11 @@ export function FilterSidebar({ children }: FilterSidebarProps) {
     >
       <div className="p-4">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-5 pb-4 border-b border-border">
-          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-          <h2 className="text-sm font-semibold text-foreground">Filters</h2>
+        <div className="flex items-center gap-2 mb-5 pb-4 border-b-2 border-green-border">
+          <div className="w-6 h-6 rounded-md bg-green-light flex items-center justify-center">
+            <SlidersHorizontal className="h-3.5 w-3.5 text-accent" />
+          </div>
+          <h2 className="text-sm font-semibold text-foreground">{t('title')}</h2>
           {hasActiveFilters && (
             <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 text-xs font-medium bg-accent text-accent-foreground px-1.5 rounded-full">
               {filterCount}
@@ -78,7 +82,7 @@ export function FilterSidebar({ children }: FilterSidebarProps) {
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted transition-colors duration-150"
               >
                 <X className="h-3.5 w-3.5" />
-                Clear all filters
+                {t('clearAllFilters')}
               </button>
             </motion.div>
           )}

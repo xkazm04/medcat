@@ -1,10 +1,12 @@
 import { Suspense } from "react";
-import { getProducts, getVendors, getEMDNCategories, getEMDNCategoriesFlat } from "@/lib/queries";
+import { getTranslations } from "next-intl/server";
+import { getProducts, getVendors, getEMDNCategories, getEMDNCategoriesFlat, getManufacturers } from "@/lib/queries";
 import { FilterSidebar, FilterSection } from "@/components/filters/filter-sidebar";
 import { SearchInput } from "@/components/filters/search-input";
 import { CategoryTree } from "@/components/filters/category-tree";
 import { VendorFilter } from "@/components/filters/vendor-filter";
 import { CatalogClient } from "@/components/catalog-client";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Package } from "lucide-react";
 
 interface HomeProps {
@@ -15,6 +17,7 @@ interface HomeProps {
     category?: string;
     ceMarked?: string;
     mdrClass?: string;
+    manufacturer?: string;
     sortBy?: string;
     sortOrder?: string;
   }>;
@@ -51,12 +54,13 @@ function CatalogSkeleton() {
 
 export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
+  const t = await getTranslations();
 
   const page = parseInt(params.page || "1");
   const pageSize = 20;
 
   // Fetch data in parallel
-  const [productsResult, allVendors, categories, emdnCategoriesFlat] = await Promise.all([
+  const [productsResult, allVendors, categories, emdnCategoriesFlat, manufacturers] = await Promise.all([
     getProducts({
       page,
       pageSize,
@@ -65,12 +69,14 @@ export default async function Home({ searchParams }: HomeProps) {
       category: params.category,
       ceMarked: params.ceMarked,
       mdrClass: params.mdrClass,
+      manufacturer: params.manufacturer,
       sortBy: params.sortBy,
       sortOrder: params.sortOrder as "asc" | "desc" | undefined,
     }),
     getVendors(),
     getEMDNCategories(),
     getEMDNCategoriesFlat(),
+    getManufacturers(),
   ]);
 
   // Filter out test vendors
@@ -88,16 +94,17 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <main className="min-h-screen bg-background">
       {/* Header */}
-      <header className="h-14 border-b border-border flex items-center px-6 sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="h-14 border-b border-border flex items-center justify-between px-6 sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-green-light border border-green-border flex items-center justify-center">
             <Package className="h-4 w-4 text-accent" />
           </div>
           <div>
-            <h1 className="text-base font-semibold text-foreground leading-tight">MedCatalog</h1>
-            <p className="text-xs text-muted-foreground">Orthopedic Product Catalog</p>
+            <h1 className="text-base font-semibold text-foreground leading-tight">{t("header.title")}</h1>
+            <p className="text-xs text-muted-foreground">{t("header.subtitle")}</p>
           </div>
         </div>
+        <LanguageSwitcher />
       </header>
 
       <div className="flex">
@@ -108,11 +115,11 @@ export default async function Home({ searchParams }: HomeProps) {
               <SearchInput />
             </div>
 
-            <FilterSection title="Category" badge={params.category ? 1 : 0}>
+            <FilterSection title={t("filters.category")} badge={params.category ? 1 : 0}>
               <CategoryTree initialCategories={categories} />
             </FilterSection>
 
-            <FilterSection title="Vendor" badge={selectedVendorCount}>
+            <FilterSection title={t("filters.vendor")} badge={selectedVendorCount}>
               <VendorFilter vendors={vendors} />
             </FilterSection>
           </FilterSidebar>
@@ -125,6 +132,7 @@ export default async function Home({ searchParams }: HomeProps) {
               vendors={vendors}
               emdnCategories={emdnCategoriesFlat}
               categories={categories}
+              manufacturers={manufacturers}
               pageCount={pageCount}
               totalCount={count}
               currentPage={page}

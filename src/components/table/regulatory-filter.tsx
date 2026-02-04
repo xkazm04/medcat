@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown, Check, X } from "lucide-react";
 
@@ -9,36 +10,53 @@ interface RegulatoryFilterProps {
   className?: string;
 }
 
-const CE_OPTIONS = [
-  { value: "true", label: "CE Marked" },
-  { value: "false", label: "Not CE Marked" },
-] as const;
-
-const MDR_OPTIONS = [
-  { value: "I", label: "Class I", color: "bg-green-100 text-green-700" },
-  { value: "IIa", label: "Class IIa", color: "bg-yellow-100 text-yellow-700" },
-  { value: "IIb", label: "Class IIb", color: "bg-orange-100 text-orange-700" },
-  { value: "III", label: "Class III", color: "bg-red-100 text-red-700" },
-] as const;
-
 export const RegulatoryFilter = memo(function RegulatoryFilter({
   className = "",
 }: RegulatoryFilterProps) {
+  const t = useTranslations('regulatory');
+  const tc = useTranslations('common');
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const currentCeMarked = searchParams.get("ceMarked");
-  const currentMdrClass = searchParams.get("mdrClass");
-  const hasFilters = currentCeMarked !== null || currentMdrClass !== null;
+  // CE options sorted by label name
+  const CE_OPTIONS = useMemo(() => [
+    { value: "true", label: t("ceMarked") },
+    { value: "false", label: t("ceNotMarked") },
+  ], [t]);
+
+  // MDR options sorted by class name (I, IIa, IIb, III)
+  const MDR_OPTIONS = useMemo(() => [
+    { value: "I", label: t("mdrClassI"), color: "bg-green-100 text-green-700" },
+    { value: "IIa", label: t("mdrClassIIa"), color: "bg-yellow-100 text-yellow-700" },
+    { value: "IIb", label: t("mdrClassIIb"), color: "bg-orange-100 text-orange-700" },
+    { value: "III", label: t("mdrClassIII"), color: "bg-red-100 text-red-700" },
+  ], [t]);
+
+  // Parse selected CE values (multiselect)
+  const selectedCeMarked = useMemo(() => {
+    const param = searchParams.get("ceMarked");
+    if (!param) return [];
+    return param.split(",").filter(Boolean);
+  }, [searchParams]);
+
+  // Parse selected MDR classes (multiselect)
+  const selectedMdrClasses = useMemo(() => {
+    const param = searchParams.get("mdrClass");
+    if (!param) return [];
+    return param.split(",").filter(Boolean);
+  }, [searchParams]);
+
+  const hasFilters = selectedCeMarked.length > 0 || selectedMdrClasses.length > 0;
+  const totalSelected = selectedCeMarked.length + selectedMdrClasses.length;
 
   const updateFilter = useCallback(
-    (key: string, value: string | null) => {
+    (key: string, values: string[]) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (value === null) {
-        params.delete(key);
+      if (values.length > 0) {
+        params.set(key, values.join(","));
       } else {
-        params.set(key, value);
+        params.delete(key);
       }
       params.set("page", "1");
       router.push(`?${params.toString()}`);
@@ -60,16 +78,26 @@ export const RegulatoryFilter = memo(function RegulatoryFilter({
 
   const toggleCeMarked = useCallback(
     (value: string) => {
-      updateFilter("ceMarked", currentCeMarked === value ? null : value);
+      const isSelected = selectedCeMarked.includes(value);
+      if (isSelected) {
+        updateFilter("ceMarked", selectedCeMarked.filter((v) => v !== value));
+      } else {
+        updateFilter("ceMarked", [...selectedCeMarked, value]);
+      }
     },
-    [currentCeMarked, updateFilter]
+    [selectedCeMarked, updateFilter]
   );
 
   const toggleMdrClass = useCallback(
     (value: string) => {
-      updateFilter("mdrClass", currentMdrClass === value ? null : value);
+      const isSelected = selectedMdrClasses.includes(value);
+      if (isSelected) {
+        updateFilter("mdrClass", selectedMdrClasses.filter((v) => v !== value));
+      } else {
+        updateFilter("mdrClass", [...selectedMdrClasses, value]);
+      }
     },
-    [currentMdrClass, updateFilter]
+    [selectedMdrClasses, updateFilter]
   );
 
   return (
@@ -82,7 +110,7 @@ export const RegulatoryFilter = memo(function RegulatoryFilter({
             ${hasFilters ? "text-accent" : "text-muted-foreground hover:text-foreground"}
           `}
         >
-          <span>Regulatory</span>
+          <span>{t('filterTitle')}</span>
           <ChevronDown
             className={`h-3 w-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
           />
@@ -91,7 +119,7 @@ export const RegulatoryFilter = memo(function RegulatoryFilter({
           <button
             onClick={clearFilters}
             className="p-0.5 rounded hover:bg-muted transition-colors"
-            title="Clear regulatory filters"
+            title={t('clearFilters')}
           >
             <X className="h-3 w-3" />
           </button>
@@ -115,17 +143,30 @@ export const RegulatoryFilter = memo(function RegulatoryFilter({
               transition={{ duration: 0.15 }}
               className="absolute left-0 top-full mt-1 z-50 bg-background border border-border rounded-lg shadow-lg py-1 min-w-[180px]"
             >
-              {/* CE Marked section */}
+              {/* Selection summary */}
+              {totalSelected > 0 && (
+                <div className="px-3 py-1.5 text-xs text-muted-foreground border-b border-border flex items-center justify-between">
+                  <span>{t('selected', { count: totalSelected })}</span>
+                  <button
+                    onClick={clearFilters}
+                    className="text-accent hover:underline"
+                  >
+                    {tc('clear')}
+                  </button>
+                </div>
+              )}
+
+              {/* CE Status section */}
               <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground border-b border-border">
-                CE Status
+                {t('ceStatus')}
               </div>
               {CE_OPTIONS.map((option) => {
-                const isSelected = currentCeMarked === option.value;
+                const isSelected = selectedCeMarked.includes(option.value);
                 return (
                   <button
                     key={option.value}
                     onClick={() => toggleCeMarked(option.value)}
-                    className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left hover:bg-muted transition-colors"
+                    className="flex items-center gap-2 w-full px-3 py-1.5 text-sm font-normal text-left hover:bg-muted transition-colors"
                   >
                     <div
                       className={`
@@ -137,22 +178,22 @@ export const RegulatoryFilter = memo(function RegulatoryFilter({
                         <Check className="h-3 w-3 text-accent-foreground" />
                       )}
                     </div>
-                    <span>{option.label}</span>
+                    <span className="font-normal text-foreground">{option.label}</span>
                   </button>
                 );
               })}
 
               {/* MDR Class section */}
               <div className="px-3 py-1.5 text-xs font-medium text-muted-foreground border-b border-t border-border mt-1">
-                MDR Class
+                {t('mdrClass')}
               </div>
               {MDR_OPTIONS.map((option) => {
-                const isSelected = currentMdrClass === option.value;
+                const isSelected = selectedMdrClasses.includes(option.value);
                 return (
                   <button
                     key={option.value}
                     onClick={() => toggleMdrClass(option.value)}
-                    className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left hover:bg-muted transition-colors"
+                    className="flex items-center gap-2 w-full px-3 py-1.5 text-sm font-normal text-left hover:bg-muted transition-colors"
                   >
                     <div
                       className={`
@@ -165,11 +206,11 @@ export const RegulatoryFilter = memo(function RegulatoryFilter({
                       )}
                     </div>
                     <span
-                      className={`px-1.5 py-0.5 rounded text-xs font-medium ${option.color}`}
+                      className={`px-1.5 py-0.5 rounded text-xs font-normal ${option.color}`}
                     >
                       {option.value}
                     </span>
-                    <span className="text-muted-foreground">{option.label.replace("Class ", "")}</span>
+                    <span className="font-normal text-muted-foreground">{option.label.replace(/^Třída |^Class /, "")}</span>
                   </button>
                 );
               })}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { Upload, FileText, Loader2, FlaskConical, Link, FileType } from 'lucide-react'
 import { extractFromProductSheet, extractFromUrl } from '@/lib/actions/extraction'
 import { runTestExtraction } from '@/lib/actions/test-extraction'
@@ -14,6 +15,7 @@ interface UploadFormProps {
 type InputMode = 'file' | 'url'
 
 export function UploadForm({ onExtracted }: UploadFormProps) {
+  const t = useTranslations('extraction')
   const [isPending, startTransition] = useTransition()
   const [isTestPending, startTestTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -37,7 +39,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
       if (result.success && result.data) {
         onExtracted(result.data)
       } else {
-        setError(result.error ?? 'Extraction failed')
+        setError(result.error ?? t('failed'))
       }
     })
   }
@@ -45,7 +47,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
   function handleUrlSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!url.trim()) {
-      setError('Please enter a URL')
+      setError(t('pleaseEnterUrl'))
       return
     }
     setError(null)
@@ -55,7 +57,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
       if (result.success && result.data) {
         onExtracted(result.data)
       } else {
-        setError(result.error ?? 'URL extraction failed')
+        setError(result.error ?? t('urlExtractionFailed'))
       }
     })
   }
@@ -67,11 +69,11 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
       const result = await runTestExtraction()
       if (result.success && result.data) {
         if (result.deletedExisting) {
-          setTestInfo('Deleted existing test product')
+          setTestInfo(t('deletedTestProduct'))
         }
         onExtracted(result.data)
       } else {
-        setError(result.error ?? 'Test extraction failed')
+        setError(result.error ?? t('testFailed'))
       }
     })
   }
@@ -92,7 +94,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
           }`}
         >
           <FileType className="h-4 w-4" />
-          File Upload
+          {t('fileUpload')}
         </button>
         <button
           type="button"
@@ -104,7 +106,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
           }`}
         >
           <Link className="h-4 w-4" />
-          URL
+          {t('url')}
         </button>
       </div>
 
@@ -127,10 +129,10 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
                 <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
               )}
               <p className="mt-2 text-sm font-medium text-foreground">
-                {fileName ?? 'Click to upload file'}
+                {fileName ?? t('clickToUpload')}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Supported: .txt, .md, .pdf
+                {t('supported')}
               </p>
             </label>
           </div>
@@ -138,17 +140,17 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
           <button
             type="submit"
             disabled={isLoading || !fileName}
-            className="w-full bg-accent text-accent-foreground py-2.5 px-4 rounded-md font-medium disabled:opacity-50 hover:bg-accent/90 transition-colors"
+            className="w-full bg-button text-button-foreground py-2.5 px-4 rounded-md font-medium disabled:opacity-50 hover:bg-button-hover transition-colors"
           >
             {isPending ? (
               <>
                 <Loader2 className="inline mr-2 h-4 w-4 animate-spin" />
-                Extracting...
+                {t('extracting')}
               </>
             ) : (
               <>
                 <FileText className="inline mr-2 h-4 w-4" />
-                Extract from File
+                {t('extractFromFile')}
               </>
             )}
           </button>
@@ -160,35 +162,35 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
         <form onSubmit={handleUrlSubmit} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="url-input" className="text-sm font-medium text-foreground">
-              Product Page URL
+              {t('productPageUrl')}
             </label>
             <input
               id="url-input"
               type="url"
               value={url}
               onChange={(e) => { setUrl(e.target.value); setError(null) }}
-              placeholder="https://example.com/product/..."
+              placeholder={t('urlPlaceholder')}
               className="w-full border border-border rounded-md px-3 py-2.5 focus:ring-2 focus:ring-accent focus:outline-none bg-background text-sm"
             />
             <p className="text-xs text-muted-foreground">
-              Enter a product page URL from a manufacturer or vendor website
+              {t('urlHelp')}
             </p>
           </div>
 
           <button
             type="submit"
             disabled={isLoading || !url.trim()}
-            className="w-full bg-accent text-accent-foreground py-2.5 px-4 rounded-md font-medium disabled:opacity-50 hover:bg-accent/90 transition-colors"
+            className="w-full bg-button text-button-foreground py-2.5 px-4 rounded-md font-medium disabled:opacity-50 hover:bg-button-hover transition-colors"
           >
             {isPending ? (
               <>
                 <Loader2 className="inline mr-2 h-4 w-4 animate-spin" />
-                Fetching & Extracting...
+                {t('fetchingExtracting')}
               </>
             ) : (
               <>
                 <Link className="inline mr-2 h-4 w-4" />
-                Extract from URL
+                {t('extractFromUrl')}
               </>
             )}
           </button>
@@ -205,7 +207,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
           <div className="w-full border-t border-border"></div>
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or test</span>
+          <span className="bg-background px-2 text-muted-foreground">{t('orTest')}</span>
         </div>
       </div>
 
@@ -220,17 +222,17 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
           {isTestPending ? (
             <>
               <Loader2 className="inline mr-2 h-4 w-4 animate-spin" />
-              Running Test...
+              {t('runningTest')}
             </>
           ) : (
             <>
               <FlaskConical className="inline mr-2 h-4 w-4" />
-              Test with Sample Data
+              {t('testWithSampleData')}
             </>
           )}
         </button>
         <p className="text-xs text-muted-foreground text-center">
-          Uses hardcoded spec: <strong>{TEST_PRODUCT_NAME}</strong>
+          {t('testWithSampleData')}: <strong>{TEST_PRODUCT_NAME}</strong>
         </p>
       </div>
     </div>

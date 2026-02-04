@@ -5,6 +5,7 @@ import { Check, AlertTriangle, X, Loader2, RefreshCw } from 'lucide-react';
 import { type CSVRow } from '@/lib/utils/csv-parser';
 import { importRowSchema, MAPPABLE_FIELDS, type ImportRow } from '@/lib/schemas/import';
 import { checkExistingProducts } from '@/lib/actions/import';
+import { useTranslations } from 'next-intl';
 
 interface ValidationStepProps {
   /** Full parsed CSV data */
@@ -41,6 +42,7 @@ export function ValidationStep({
   vendorId,
   onValidationComplete,
 }: ValidationStepProps) {
+  const t = useTranslations("import");
   const [validatedRows, setValidatedRows] = useState<ValidatedRow[]>([]);
   const [isValidating, setIsValidating] = useState(true);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
@@ -193,7 +195,7 @@ export function ValidationStep({
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
         <Loader2 className="h-8 w-8 animate-spin text-accent" />
-        <p className="text-sm text-muted-foreground">Validating {data.length} rows...</p>
+        <p className="text-sm text-muted-foreground">{t("validation.validating", { count: data.length })}</p>
       </div>
     );
   }
@@ -207,7 +209,7 @@ export function ValidationStep({
             <Check className="h-5 w-5 text-green-500" />
             <span className="font-medium">{stats.valid}</span>
           </div>
-          <p className="text-sm text-muted-foreground">rows ready to import</p>
+          <p className="text-sm text-muted-foreground">{t("validation.readyToImport")}</p>
         </div>
 
         <div className="border border-border rounded-lg p-4">
@@ -215,7 +217,7 @@ export function ValidationStep({
             <AlertTriangle className="h-5 w-5 text-yellow-500" />
             <span className="font-medium">{stats.update}</span>
           </div>
-          <p className="text-sm text-muted-foreground">will update existing</p>
+          <p className="text-sm text-muted-foreground">{t("validation.willUpdate")}</p>
         </div>
 
         <div className="border border-border rounded-lg p-4">
@@ -223,7 +225,7 @@ export function ValidationStep({
             <X className="h-5 w-5 text-red-500" />
             <span className="font-medium">{stats.errors}</span>
           </div>
-          <p className="text-sm text-muted-foreground">rows have errors</p>
+          <p className="text-sm text-muted-foreground">{t("validation.hasErrors")}</p>
         </div>
       </div>
 
@@ -233,11 +235,10 @@ export function ValidationStep({
           <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-yellow-600 dark:text-yellow-400">
-              {stats.update} product{stats.update > 1 ? 's' : ''} will be updated
+              {t("validation.updateWarningTitle", { count: stats.update })}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              These SKUs already exist for the selected vendor. Importing will update the existing
-              records with new data.
+              {t("validation.updateWarningDesc")}
             </p>
           </div>
         </div>
@@ -247,7 +248,7 @@ export function ValidationStep({
       <div className="border border-border rounded-lg overflow-hidden">
         <div className="bg-muted px-4 py-2 border-b border-border">
           <h3 className="font-medium text-sm">
-            Validation Results ({stats.total} rows)
+            {t("validation.results", { count: stats.total })}
           </h3>
         </div>
         <div className="overflow-x-auto max-h-96">
@@ -255,7 +256,7 @@ export function ValidationStep({
             <thead className="sticky top-0 bg-muted/80 backdrop-blur-sm">
               <tr className="border-b border-border">
                 <th className="px-3 py-2 text-left font-medium text-muted-foreground w-12">
-                  Status
+                  {t("validation.status")}
                 </th>
                 <th className="px-3 py-2 text-left font-medium text-muted-foreground w-12">
                   #
@@ -265,7 +266,7 @@ export function ValidationStep({
                     key={field.key}
                     className="px-3 py-2 text-left font-medium text-muted-foreground"
                   >
-                    {field.label}
+                    {t(`fields.${field.key}`)}
                   </th>
                 ))}
               </tr>
@@ -304,7 +305,7 @@ export function ValidationStep({
                             }`}
                           >
                             {value || (
-                              <span className="text-muted-foreground italic">empty</span>
+                              <span className="text-muted-foreground italic">{t("mapping.empty")}</span>
                             )}
                           </td>
                         );
@@ -316,7 +317,7 @@ export function ValidationStep({
                           <ul className="list-disc list-inside space-y-1 text-sm text-red-600 dark:text-red-400">
                             {row.errors.map((err, i) => (
                               <li key={i}>
-                                <span className="font-medium">{err.field}:</span> {err.message}
+                                <span className="font-medium">{t(`fields.${err.field}`, { defaultValue: err.field })}:</span> {err.message}
                               </li>
                             ))}
                           </ul>
@@ -337,10 +338,10 @@ export function ValidationStep({
           <X className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium text-red-600 dark:text-red-400">
-              No valid rows to import
+              {t("validation.noValidRows")}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              All rows have validation errors. Please fix the CSV data and try again.
+              {t("validation.allRowsError")}
             </p>
           </div>
         </div>

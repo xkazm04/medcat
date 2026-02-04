@@ -1,14 +1,25 @@
 "use client";
 
 import { memo, useMemo } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreVertical, ArrowUpDown } from "lucide-react";
 import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { ExpandableCategory } from "./expandable-category";
 import { RegulatoryBadges } from "./regulatory-badges";
 import { RegulatoryFilter } from "./regulatory-filter";
+import { ManufacturerFilter } from "./manufacturer-filter";
 import type { ProductWithRelations, EMDNCategory } from "@/lib/types";
 import type { ColumnVisibility } from "./column-visibility-toggle";
+
+interface ColumnLabels {
+  product: string;
+  price: string;
+  category: string;
+  viewDetails: string;
+  edit: string;
+  delete: string;
+}
 
 // Memoized cell components for performance
 const ProductCell = memo(function ProductCell({
@@ -62,10 +73,11 @@ const ManufacturerCell = memo(function ManufacturerCell({
 });
 
 const PriceCell = memo(function PriceCell({ price }: { price: number | null }) {
+  const locale = useLocale();
   if (price === null || price === undefined) {
     return <span className="text-sm text-muted-foreground/40 text-right block">—</span>;
   }
-  const formatted = new Intl.NumberFormat("cs-CZ", {
+  const formatted = new Intl.NumberFormat(locale === "cs" ? "cs-CZ" : "en-US", {
     style: "currency",
     currency: "CZK",
     minimumFractionDigits: 0,
@@ -83,7 +95,9 @@ export function createColumns(
   onEditProduct: (product: ProductWithRelations) => void,
   onDeleteProduct: (product: ProductWithRelations) => void,
   allCategories: EMDNCategory[],
-  columnVisibility: ColumnVisibility
+  columnVisibility: ColumnVisibility,
+  manufacturers: string[] = [],
+  labels: ColumnLabels
 ): ColumnDef<ProductWithRelations>[] {
   const columns: ColumnDef<ProductWithRelations>[] = [];
 
@@ -97,7 +111,7 @@ export function createColumns(
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs uppercase tracking-wide hover:text-foreground transition-colors"
         >
-          Product
+          {labels.product}
           <ArrowUpDown className="h-3 w-3" />
         </button>
       ),
@@ -109,24 +123,20 @@ export function createColumns(
           onView={() => onViewProduct(row.original)}
         />
       ),
-      size: 260,
+      meta: { width: "40%" },
     });
   }
 
-  // Manufacturer column
+  // Manufacturer column with filter dropdown
   if (columnVisibility.manufacturer) {
     columns.push({
       id: "manufacturer",
       accessorKey: "manufacturer_name",
-      header: () => (
-        <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-          Manufacturer
-        </span>
-      ),
+      header: () => <ManufacturerFilter manufacturers={manufacturers} />,
       cell: ({ row }) => (
         <ManufacturerCell name={row.original.manufacturer_name} />
       ),
-      size: 120,
+      meta: { width: "10%" },
     });
   }
 
@@ -140,12 +150,12 @@ export function createColumns(
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs uppercase tracking-wide hover:text-foreground transition-colors justify-end w-full"
         >
-          Price
+          {labels.price}
           <ArrowUpDown className="h-3 w-3" />
         </button>
       ),
       cell: ({ row }) => <PriceCell price={row.original.price} />,
-      size: 70,
+      meta: { width: "8%" },
     });
   }
 
@@ -160,7 +170,7 @@ export function createColumns(
           mdrClass={row.original.mdr_class}
         />
       ),
-      size: 110,
+      meta: { width: "10%" },
     });
   }
 
@@ -171,7 +181,7 @@ export function createColumns(
       accessorKey: "emdn_category",
       header: () => (
         <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-          Category
+          {labels.category}
         </span>
       ),
       cell: ({ row }) => (
@@ -180,7 +190,7 @@ export function createColumns(
           allCategories={allCategories}
         />
       ),
-      size: 330,
+      meta: { width: "50%" },
     });
   }
 
@@ -198,20 +208,20 @@ export function createColumns(
         align="right"
       >
         <DropdownMenuItem onClick={() => onViewProduct(row.original)}>
-          View details
+          {labels.viewDetails}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onEditProduct(row.original)}>
-          Edit
+          {labels.edit}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => onDeleteProduct(row.original)}
           className="text-red-600"
         >
-          Delete
+          {labels.delete}
         </DropdownMenuItem>
       </DropdownMenu>
     ),
-    size: 48,
+    meta: { width: "48px" },
   });
 
   return columns;
@@ -223,8 +233,21 @@ export function useColumns(
   onEditProduct: (product: ProductWithRelations) => void,
   onDeleteProduct: (product: ProductWithRelations) => void,
   allCategories: EMDNCategory[],
-  columnVisibility: ColumnVisibility
+  columnVisibility: ColumnVisibility,
+  manufacturers: string[] = []
 ) {
+  const tTable = useTranslations('table');
+  const tActions = useTranslations('actions');
+
+  const labels: ColumnLabels = useMemo(() => ({
+    product: tTable('product'),
+    price: tTable('price'),
+    category: tTable('category'),
+    viewDetails: tActions('viewDetails'),
+    edit: tActions('edit'),
+    delete: tActions('delete'),
+  }), [tTable, tActions]);
+
   return useMemo(
     () =>
       createColumns(
@@ -232,8 +255,10 @@ export function useColumns(
         onEditProduct,
         onDeleteProduct,
         allCategories,
-        columnVisibility
+        columnVisibility,
+        manufacturers,
+        labels
       ),
-    [onViewProduct, onEditProduct, onDeleteProduct, allCategories, columnVisibility]
+    [onViewProduct, onEditProduct, onDeleteProduct, allCategories, columnVisibility, manufacturers, labels]
   );
 }

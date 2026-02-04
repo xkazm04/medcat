@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useState, useCallback, useRef, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { PackageX } from "lucide-react";
 import { TablePagination } from "./table-pagination";
@@ -45,6 +46,7 @@ export function DataTable<TData>({
   columnVisibility,
   onColumnVisibilityChange,
 }: DataTableProps<TData>) {
+  const t = useTranslations("table");
   const router = useRouter();
   const searchParams = useSearchParams();
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -148,11 +150,10 @@ export function DataTable<TData>({
             <PackageX className="h-8 w-8 text-muted-foreground" />
           </div>
           <h3 className="text-lg font-medium text-foreground mb-2">
-            No products found
+            {t("noProductsFound")}
           </h3>
           <p className="text-sm text-muted-foreground max-w-sm">
-            Try adjusting your filters or search query to find what you are
-            looking for.
+            {t("adjustFilters")}
           </p>
         </motion.div>
       </div>
@@ -164,8 +165,7 @@ export function DataTable<TData>({
       {/* Header with total count and column toggle */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Showing <span className="font-medium text-foreground">{data.length}</span> of{" "}
-          <span className="font-medium text-foreground">{totalCount.toLocaleString()}</span> products
+          {t("showingTotal", { count: data.length, total: totalCount.toLocaleString() })}
         </div>
         <ColumnVisibilityToggle
           visibility={columnVisibility}
@@ -174,7 +174,7 @@ export function DataTable<TData>({
       </div>
 
       {/* Table container */}
-      <div className="flex flex-col bg-background border border-border rounded-lg shadow-sm overflow-hidden">
+      <div className="flex flex-col bg-background border border-border rounded-lg shadow-sm overflow-hidden ring-1 ring-green-border/30">
         {/* Scrollable table area with virtual scrolling */}
         <div
           ref={tableContainerRef}
@@ -182,25 +182,28 @@ export function DataTable<TData>({
           style={{ maxHeight: "calc(100vh - 320px)", minHeight: "400px" }}
         >
           <table className="w-full table-fixed">
-            <thead className="sticky top-0 z-10 bg-muted/50 border-b border-border">
+            <thead className="sticky top-0 z-10 bg-green-light/50 border-b-2 border-green-border">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className="px-4 py-3 text-left first:pl-4 last:pr-4"
-                      style={{
-                        width: header.getSize() !== 150 ? header.getSize() : undefined,
-                      }}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </th>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    const meta = header.column.columnDef.meta as { width?: string } | undefined;
+                    return (
+                      <th
+                        key={header.id}
+                        className="px-4 py-3 text-left first:pl-4 last:pr-4"
+                        style={{
+                          width: meta?.width,
+                        }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </th>
+                    );
+                  })}
                 </tr>
               ))}
             </thead>

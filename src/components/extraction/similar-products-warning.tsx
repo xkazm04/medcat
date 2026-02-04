@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import type { SimilarProduct } from '@/lib/actions/similarity'
 
@@ -12,11 +13,13 @@ export function SimilarProductsWarning({
   products,
   isLoading,
 }: SimilarProductsWarningProps) {
+  const t = useTranslations('extraction')
+
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <span>Checking for similar products...</span>
+        <span>{t('checkingSimilar')}</span>
       </div>
     )
   }
@@ -30,9 +33,9 @@ export function SimilarProductsWarning({
       <div className="flex items-start gap-3">
         <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-amber-800">Similar products found</h4>
+          <h4 className="font-medium text-amber-800">{t('similarFound')}</h4>
           <p className="text-sm text-amber-700 mt-1">
-            This product may already exist in the catalog. Review before saving.
+            {t('similarDesc')}
           </p>
           <ul className="mt-3 space-y-2">
             {products.map((product) => (
@@ -47,7 +50,7 @@ export function SimilarProductsWarning({
                   )}
                 </span>
                 <span className="text-amber-600 font-mono text-xs flex-shrink-0">
-                  {Math.round(product.name_similarity * 100)}% match
+                  {t('matchScore', { percent: Math.round(product.name_similarity * 100) })}
                 </span>
               </li>
             ))}

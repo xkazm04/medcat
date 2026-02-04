@@ -70,6 +70,7 @@ export interface GetProductsParams {
   material?: string;
   ceMarked?: string;
   mdrClass?: string;
+  manufacturer?: string;
   minPrice?: number;
   maxPrice?: number;
   sortBy?: string;
@@ -95,6 +96,7 @@ export async function getProducts(params: GetProductsParams = {}): Promise<GetPr
     material,
     ceMarked,
     mdrClass,
+    manufacturer,
     minPrice,
     maxPrice,
     sortBy = "name",
@@ -167,14 +169,29 @@ export async function getProducts(params: GetProductsParams = {}): Promise<GetPr
     }
   }
 
-  // Apply CE marked filter
+  // Apply CE marked filter (comma-separated values for multiselect)
   if (ceMarked !== undefined && ceMarked !== null && ceMarked !== "") {
-    query = query.eq("ce_marked", ceMarked === "true");
+    const ceValues = ceMarked.split(",").filter(Boolean);
+    if (ceValues.length === 1) {
+      query = query.eq("ce_marked", ceValues[0] === "true");
+    }
+    // If both true and false are selected, no filter needed (shows all)
   }
 
-  // Apply MDR class filter
+  // Apply MDR class filter (comma-separated values for multiselect)
   if (mdrClass !== undefined && mdrClass !== null && mdrClass !== "") {
-    query = query.eq("mdr_class", mdrClass);
+    const mdrClasses = mdrClass.split(",").filter(Boolean);
+    if (mdrClasses.length > 0) {
+      query = query.in("mdr_class", mdrClasses);
+    }
+  }
+
+  // Apply manufacturer filter (comma-separated names)
+  if (manufacturer !== undefined && manufacturer !== null && manufacturer !== "") {
+    const manufacturers = manufacturer.split(",").filter(Boolean).map(decodeURIComponent);
+    if (manufacturers.length > 0) {
+      query = query.in("manufacturer_name", manufacturers);
+    }
   }
 
   // Apply price range filter
@@ -447,4 +464,33 @@ export async function getEMDNCategoriesAll(): Promise<CategoryNode[]> {
   });
 
   return rootCategories;
+}
+
+/**
+ * Get unique manufacturer names from products.
+ * Returns sorted list of unique manufacturer names (ascending).
+ */
+export async function getManufacturers(): Promise<string[]> {
+  checkCircuit();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("manufacturer_name")
+    .not("manufacturer_name", "is", null)
+    .order("manufacturer_name", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching manufacturers:", error.message);
+    return ["DePuy Synthes Inc.", "Stryker Corporation"];
+  }
+
+  // Extract unique manufacturer names
+  const uniqueManufacturers = [...new Set(
+    (data || [])
+      .map((p) => p.manufacturer_name)
+      .filter((name): name is string => name !== null && name.trim() !== "")
+  )].sort((a, b) => a.localeCompare(b));
+
+  return uniqueManufacturers;
 }

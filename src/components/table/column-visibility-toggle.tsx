@@ -18,9 +18,9 @@ const DEFAULT_VISIBILITY: ColumnVisibility = {
   product: true,
   sku: true,
   vendor: true,
-  manufacturer: false,
-  price: true,
-  regulatory: true,
+  manufacturer: true,
+  price: false,
+  regulatory: false,
   category: true,
 };
 

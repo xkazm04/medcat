@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { ChevronRight } from 'lucide-react'
 import { toTitleCase } from '@/lib/utils/format-category'
 
@@ -9,25 +10,18 @@ interface EMDNBreadcrumbProps {
   compact?: boolean  // For use in table cells
 }
 
-const levelDescriptions: Record<number, string> = {
-  0: 'Category',
-  1: 'Group',
-  2: 'Type',
-  3: 'Subtype',
-  4: 'Variant',
-  5: 'Detail',
-  6: 'Specification',
-}
-
 export function EMDNBreadcrumb({ path, categoryName, compact = false }: EMDNBreadcrumbProps) {
+  const t = useTranslations('emdn')
+
   if (!path) {
-    return <span className="text-muted-foreground italic">Not classified</span>
+    return <span className="text-muted-foreground italic">{t('notClassified')}</span>
   }
 
   // Parse path into segments
   const segments = path.split('/').filter(Boolean)
   const formattedName = toTitleCase(categoryName)
-  const level = levelDescriptions[segments.length - 1] || 'Classification'
+  const levelKey = `level${segments.length - 1}` as any;
+  const level = t.has(levelKey) ? t(levelKey) : t('classification');
 
   if (compact) {
     // Compact view: show only code and name

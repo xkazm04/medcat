@@ -1,29 +1,38 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { LocaleProvider } from "@/components/providers/locale-provider";
+import { type Locale } from "@/i18n/config";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
 });
 
-export const metadata: Metadata = {
-  title: "MedCatalog - Medical Product Comparison",
-  description: "Compare orthopedic medical product prices across vendors",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("header");
+  return {
+    title: `${t("title")} - ${t("metaTitle")}`,
+    description: t("metaDescription"),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = (await getLocale()) as Locale;
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={`${inter.variable} antialiased`}>
-        <QueryProvider>
-          {children}
-        </QueryProvider>
+        <LocaleProvider locale={locale} messages={messages}>
+          <QueryProvider>{children}</QueryProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

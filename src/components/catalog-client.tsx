@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { DataTable, useColumnVisibility } from './table/data-table'
@@ -17,6 +18,7 @@ interface CatalogClientProps {
   vendors: Vendor[]
   emdnCategories: EMDNCategory[]
   categories: CategoryNode[]
+  manufacturers: string[]
   pageCount: number
   totalCount: number
   currentPage: number
@@ -28,11 +30,13 @@ export function CatalogClient({
   vendors,
   emdnCategories,
   categories,
+  manufacturers,
   pageCount,
   totalCount,
   currentPage,
   pageSize,
 }: CatalogClientProps) {
+  const t = useTranslations()
   const [selectedProduct, setSelectedProduct] = useState<ProductWithRelations | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [extractionSheetOpen, setExtractionSheetOpen] = useState(false)
@@ -82,7 +86,8 @@ export function CatalogClient({
     handleEditProduct,
     handleDeleteProduct,
     emdnCategories,
-    columnVisibility
+    columnVisibility,
+    manufacturers
   )
 
   return (
@@ -90,17 +95,17 @@ export function CatalogClient({
       {/* Header with title and add button */}
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Products</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t('catalog.products')}</h2>
           <p className="text-sm text-muted-foreground">
-            {totalCount.toLocaleString()} {totalCount === 1 ? 'product' : 'products'} found
+            {t('catalog.productsFound', { count: totalCount })}
           </p>
         </div>
         <button
           onClick={() => setExtractionSheetOpen(true)}
-          className="flex items-center gap-2 bg-accent text-accent-foreground py-2 px-4 rounded-md font-medium hover:bg-accent/90 transition-colors"
+          className="flex items-center gap-2 bg-button text-button-foreground py-2 px-4 rounded-md font-medium hover:bg-button-hover transition-colors shadow-sm"
         >
           <Plus className="h-4 w-4" />
-          Add Product
+          {t('catalog.addProduct')}
         </button>
       </div>
 
@@ -140,7 +145,7 @@ export function CatalogClient({
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                   className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full"
                 />
-                <span className="text-sm">Loading...</span>
+                <span className="text-sm">{t('common.loading')}</span>
               </div>
             </motion.div>
           )}

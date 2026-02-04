@@ -2,10 +2,11 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { X, FolderTree, Building2, Search, Shield } from "lucide-react";
+import { X, FolderTree, Building2, Search, Shield, Factory } from "lucide-react";
 import { toTitleCase } from "@/lib/utils/format-category";
 import type { Vendor, EMDNCategory } from "@/lib/types";
 import type { CategoryNode } from "@/lib/queries";
+import { useTranslations } from "next-intl";
 
 interface ActiveFiltersProps {
   vendors: Vendor[];
@@ -45,6 +46,7 @@ interface FilterChipProps {
 }
 
 function FilterChip({ label, value, icon, onRemove, variant = "default" }: FilterChipProps) {
+  const t = useTranslations("activeFilters");
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -54,8 +56,8 @@ function FilterChip({ label, value, icon, onRemove, variant = "default" }: Filte
       className={`
         inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm
         ${variant === "category"
-          ? "bg-accent/10 text-accent border border-accent/20"
-          : "bg-muted text-foreground border border-border"
+          ? "bg-green-light text-accent border border-green-border"
+          : "bg-background text-foreground border border-border hover:border-green-border/50 transition-colors"
         }
       `}
     >
@@ -65,7 +67,7 @@ function FilterChip({ label, value, icon, onRemove, variant = "default" }: Filte
       <button
         onClick={onRemove}
         className="ml-1 p-0.5 rounded-full hover:bg-foreground/10 transition-colors"
-        aria-label={`Remove ${label} filter`}
+        aria-label={t("removeFilter", { label })}
       >
         <X className="h-3 w-3" />
       </button>
@@ -74,6 +76,7 @@ function FilterChip({ label, value, icon, onRemove, variant = "default" }: Filte
 }
 
 export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
+  const t = useTranslations("activeFilters");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -81,8 +84,9 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
   const search = searchParams.get("search");
   const vendorIds = searchParams.get("vendor")?.split(",").filter(Boolean) || [];
   const categoryId = searchParams.get("category");
-  const ceMarked = searchParams.get("ceMarked");
-  const mdrClass = searchParams.get("mdrClass");
+  const ceMarkedValues = searchParams.get("ceMarked")?.split(",").filter(Boolean) || [];
+  const mdrClassValues = searchParams.get("mdrClass")?.split(",").filter(Boolean) || [];
+  const manufacturerValues = searchParams.get("manufacturer")?.split(",").filter(Boolean).map(decodeURIComponent) || [];
 
   // Map IDs to names
   const selectedVendors = vendorIds
@@ -90,7 +94,7 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
     .filter(Boolean) as Vendor[];
   const categoryPath = categoryId ? getCategoryPath(categories, categoryId) : [];
 
-  const hasFilters = search || vendorIds.length > 0 || categoryId || ceMarked || mdrClass;
+  const hasFilters = search || vendorIds.length > 0 || categoryId || ceMarkedValues.length > 0 || mdrClassValues.length > 0 || manufacturerValues.length > 0;
 
   if (!hasFilters) {
     return null;
@@ -105,6 +109,27 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
         params.set("vendor", newVendors.join(","));
       } else {
         params.delete("vendor");
+      }
+    } else if (key === "ceMarked" && value) {
+      const newValues = ceMarkedValues.filter((v) => v !== value);
+      if (newValues.length > 0) {
+        params.set("ceMarked", newValues.join(","));
+      } else {
+        params.delete("ceMarked");
+      }
+    } else if (key === "mdrClass" && value) {
+      const newValues = mdrClassValues.filter((v) => v !== value);
+      if (newValues.length > 0) {
+        params.set("mdrClass", newValues.join(","));
+      } else {
+        params.delete("mdrClass");
+      }
+    } else if (key === "manufacturer" && value) {
+      const newValues = manufacturerValues.filter((v) => v !== value);
+      if (newValues.length > 0) {
+        params.set("manufacturer", newValues.map(encodeURIComponent).join(","));
+      } else {
+        params.delete("manufacturer");
       }
     } else {
       params.delete(key);
@@ -129,14 +154,14 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-4 p-3 bg-muted/30 border border-border rounded-lg"
+      className="mb-4 p-3 bg-green-light/30 border border-green-border/50 rounded-lg"
     >
       {/* Category breadcrumb - prominent display */}
       {categoryPath.length > 0 && (
         <div className="mb-3 pb-3 border-b border-border">
           <div className="flex items-center gap-2 text-sm">
             <FolderTree className="h-4 w-4 text-accent shrink-0" />
-            <span className="text-muted-foreground">Category:</span>
+            <span className="text-muted-foreground">{t("category")}</span>
             <div className="flex items-center gap-1 flex-wrap">
               {categoryPath.map((cat, index) => (
                 <span key={cat.id} className="flex items-center">
@@ -156,7 +181,7 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
             <button
               onClick={() => removeFilter("category")}
               className="ml-auto p-1 rounded hover:bg-muted transition-colors"
-              aria-label="Remove category filter"
+              aria-label={t("removeCategory")}
             >
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
@@ -171,7 +196,7 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
           {search && (
             <FilterChip
               key="search"
-              label="Search"
+              label={t("search")}
               value={search}
               icon={<Search className="h-3 w-3" />}
               onRemove={() => removeFilter("search")}
@@ -182,7 +207,7 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
           {selectedVendors.map((vendor) => (
             <FilterChip
               key={`vendor-${vendor.id}`}
-              label="Vendor"
+              label={t("vendor")}
               value={vendor.name}
               icon={<Building2 className="h-3 w-3" />}
               onRemove={() => removeFilter("vendor", vendor.id)}
@@ -190,35 +215,46 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
           ))}
 
           {/* CE Marked */}
-          {ceMarked && (
+          {ceMarkedValues.map((value) => (
             <FilterChip
-              key="ceMarked"
-              label="CE"
-              value={ceMarked === "true" ? "Marked" : "Not Marked"}
+              key={`ceMarked-${value}`}
+              label={t("ce")}
+              value={value === "true" ? t("ceMarked") : t("ceNotMarked")}
               icon={<Shield className="h-3 w-3" />}
-              onRemove={() => removeFilter("ceMarked")}
+              onRemove={() => removeFilter("ceMarked", value)}
             />
-          )}
+          ))}
 
           {/* MDR Class */}
-          {mdrClass && (
+          {mdrClassValues.map((value) => (
             <FilterChip
-              key="mdrClass"
-              label="MDR"
-              value={`Class ${mdrClass}`}
+              key={`mdrClass-${value}`}
+              label={t("mdr")}
+              value={t("mdrClass", { mdrClass: value })}
               icon={<Shield className="h-3 w-3" />}
-              onRemove={() => removeFilter("mdrClass")}
+              onRemove={() => removeFilter("mdrClass", value)}
             />
-          )}
+          ))}
+
+          {/* Manufacturers */}
+          {manufacturerValues.map((name) => (
+            <FilterChip
+              key={`manufacturer-${name}`}
+              label={t("manufacturer")}
+              value={name}
+              icon={<Factory className="h-3 w-3" />}
+              onRemove={() => removeFilter("manufacturer", name)}
+            />
+          ))}
         </AnimatePresence>
 
         {/* Clear all button */}
-        {(search || selectedVendors.length > 0 || ceMarked || mdrClass) && (
+        {(search || selectedVendors.length > 0 || ceMarkedValues.length > 0 || mdrClassValues.length > 0 || manufacturerValues.length > 0) && (
           <button
             onClick={clearAll}
             className="ml-auto text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            Clear all
+            {t("clearAll")}
           </button>
         )}
       </div>

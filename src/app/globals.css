@@ -7,13 +7,19 @@
   --color-muted: #f5f5f5;
   --color-muted-foreground: #6b7280;
   --color-border: #e5e7eb;
-  --color-accent: #374151;
+  --color-accent: #166534;
   --color-accent-foreground: #ffffff;
+
+  /* Button colors - neutral gray for primary actions */
+  --color-button: #374151;
+  --color-button-hover: #1f2937;
+  --color-button-foreground: #ffffff;
 
   /* Green tones for subtle decorations */
   --color-green-subtle: #166534;
   --color-green-light: #f0fdf4;
   --color-green-border: #bbf7d0;
+  --color-green-hover: #15803d;
 
   /* Blue tones for research section */
   --color-blue-subtle: #1e40af;

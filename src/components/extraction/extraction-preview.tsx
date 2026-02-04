@@ -4,9 +4,11 @@ import { useState, useTransition, useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslations } from 'next-intl'
 import { Check, Plus } from 'lucide-react'
 import { productSchema } from '@/lib/schemas/product'
 import { createProduct } from '@/lib/actions/products'
+import { createVendor } from '@/lib/actions/vendors'
 import { findSimilarProducts, type SimilarProduct } from '@/lib/actions/similarity'
 import { SimilarProductsWarning } from './similar-products-warning'
 import type { ExtractedProduct } from '@/lib/schemas/extraction'
@@ -15,6 +17,9 @@ import type { ExtractedProduct } from '@/lib/schemas/extraction'
 type ProductFormInput = z.input<typeof productSchema>
 // Define output type after validation
 type ProductFormOutput = z.output<typeof productSchema>
+
+// Special value to indicate a new vendor should be created
+const NEW_VENDOR_PREFIX = '__new__:'
 
 interface ExtractionPreviewProps {
   extractedData: ExtractedProduct
@@ -26,18 +31,19 @@ interface ExtractionPreviewProps {
 
 // Badge component to show match status for catalog fields
 function StatusBadge({ matched }: { matched: boolean }) {
+  const t = useTranslations('extraction')
   if (matched) {
     return (
       <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ml-2 bg-green-100 text-green-700">
         <Check className="h-2.5 w-2.5" />
-        Matched
+        {t('matched')}
       </span>
     )
   }
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-full ml-2 bg-amber-100 text-amber-700">
       <Plus className="h-2.5 w-2.5" />
-      New
+      {t('new')}
     </span>
   )
 }
@@ -49,6 +55,10 @@ export function ExtractionPreview({
   onSuccess,
   onCancel,
 }: ExtractionPreviewProps) {
+  const t = useTranslations('extraction')
+  const tp = useTranslations('product')
+  const tr = useTranslations('regulatory')
+  const tc = useTranslations('common')
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
   const [similarProducts, setSimilarProducts] = useState<SimilarProduct[]>([])
@@ -84,6 +94,10 @@ export function ExtractionPreview({
     checkSimilarity()
   }, [extractedData.name, extractedData.sku])
 
+  // Determine default vendor value: matched ID, or new vendor prefix if extracted but not matched
+  const defaultVendorId = matchedVendor?.id
+    ?? (extractedData.vendor_name ? `${NEW_VENDOR_PREFIX}${extractedData.vendor_name}` : undefined)
+
   const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -91,7 +105,7 @@ export function ExtractionPreview({
       sku: extractedData.sku,
       description: extractedData.description ?? undefined,
       price: extractedData.price ?? undefined,
-      vendor_id: matchedVendor?.id ?? undefined,
+      vendor_id: defaultVendorId,
       emdn_category_id: matchedEmdn?.id ?? undefined,
       udi_di: extractedData.udi_di ?? undefined,
       ce_marked: extractedData.ce_marked ?? false,
@@ -103,12 +117,25 @@ export function ExtractionPreview({
   const onSubmit: SubmitHandler<ProductFormOutput> = (data) => {
     setServerError(null)
     startTransition(async () => {
+      let vendorId = data.vendor_id || ''
+
+      // Check if we need to create a new vendor
+      if (vendorId.startsWith(NEW_VENDOR_PREFIX)) {
+        const newVendorName = vendorId.slice(NEW_VENDOR_PREFIX.length)
+        const vendorResult = await createVendor(newVendorName)
+        if (!vendorResult.success || !vendorResult.vendorId) {
+          setServerError(vendorResult.error || 'Failed to create vendor')
+          return
+        }
+        vendorId = vendorResult.vendorId
+      }
+
       const formData = new FormData()
       formData.append('name', data.name)
       formData.append('sku', data.sku)
       formData.append('description', data.description || '')
       formData.append('price', data.price?.toString() || '')
-      formData.append('vendor_id', data.vendor_id || '')
+      formData.append('vendor_id', vendorId)
       formData.append('emdn_category_id', data.emdn_category_id || '')
       formData.append('material_id', data.material_id || '')
       formData.append('udi_di', data.udi_di || '')
@@ -158,12 +185,12 @@ export function ExtractionPreview({
       <div className="grid grid-cols-2 gap-6">
         {/* Left Column - Product Info */}
         <div className="flex flex-col space-y-3">
-          <h3 className={sectionTitleClass}>Product Information</h3>
+          <h3 className={sectionTitleClass}>{t('productInfo')}</h3>
 
           {/* Name */}
           <div>
             <label htmlFor="name" className={labelClass}>
-              Name <span className="text-red-500 ml-1">*</span>
+              {tp('name')} <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               id="name"
@@ -179,7 +206,7 @@ export function ExtractionPreview({
           {/* SKU */}
           <div>
             <label htmlFor="sku" className={labelClass}>
-              SKU / REF <span className="text-red-500 ml-1">*</span>
+              {tp('sku')} <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               id="sku"
@@ -195,7 +222,7 @@ export function ExtractionPreview({
           {/* Description with flex-grow to fill space */}
           <div className="flex-1 flex flex-col min-h-[180px]">
             <label htmlFor="description" className={labelClass}>
-              Description
+              {tp('description')}
             </label>
             <textarea
               id="description"
@@ -212,7 +239,7 @@ export function ExtractionPreview({
           {/* Price */}
           <div>
             <label htmlFor="price" className={labelClass}>
-              Price (CZK)
+              {tp('priceCZK')}
             </label>
             <input
               id="price"
@@ -231,12 +258,12 @@ export function ExtractionPreview({
         <div className="flex flex-col space-y-5">
           {/* Vendor & Manufacturer Section */}
           <div className="space-y-3">
-            <h3 className={sectionTitleClass}>Vendor & Manufacturer</h3>
+            <h3 className={sectionTitleClass}>{t('vendorManufacturer')}</h3>
 
             {/* Vendor */}
             <div>
               <label htmlFor="vendor_id" className={labelClass}>
-                Vendor
+                {tp('vendor')}
                 {extractedData.vendor_name && <StatusBadge matched={!!matchedVendor} />}
               </label>
               <select
@@ -244,43 +271,46 @@ export function ExtractionPreview({
                 {...form.register('vendor_id')}
                 className={inputClass}
               >
-                <option value="">Select vendor</option>
+                <option value="">{tp('selectVendor')}</option>
+                {/* Show extracted vendor as "Add new" option if not matched */}
+                {extractedData.vendor_name && !matchedVendor && (
+                  <option
+                    value={`${NEW_VENDOR_PREFIX}${extractedData.vendor_name}`}
+                    className="font-medium"
+                  >
+                    + {t('addNewVendor', { name: extractedData.vendor_name })}
+                  </option>
+                )}
                 {vendors.map((vendor) => (
                   <option key={vendor.id} value={vendor.id}>
                     {vendor.name}
                   </option>
                 ))}
               </select>
-              {/* Show extracted text only if no match found */}
-              {extractedData.vendor_name && !matchedVendor && (
-                <p className="text-xs text-amber-600 mt-1">
-                  Extracted: "{extractedData.vendor_name}" - please select manually
-                </p>
-              )}
             </div>
 
             {/* Manufacturer Name */}
             <div>
               <label htmlFor="manufacturer_name" className={labelClass}>
-                Manufacturer
+                {tp('manufacturer')}
               </label>
               <input
                 id="manufacturer_name"
                 type="text"
                 {...form.register('manufacturer_name')}
                 className={inputClass}
-                placeholder="Original equipment manufacturer"
+                placeholder={tp('manufacturer')}
               />
             </div>
           </div>
 
           {/* EMDN Classification Section */}
           <div className="space-y-3">
-            <h3 className={sectionTitleClass}>EMDN Classification</h3>
+            <h3 className={sectionTitleClass}>{t('emdnClassificationTitle')}</h3>
 
             <div>
               <label htmlFor="emdn_category_id" className={labelClass}>
-                EMDN Category
+                {tp('emdnCategory')}
                 {extractedData.suggested_emdn && <StatusBadge matched={!!matchedEmdn} />}
               </label>
               <select
@@ -288,7 +318,7 @@ export function ExtractionPreview({
                 {...form.register('emdn_category_id')}
                 className={inputClass}
               >
-                <option value="">Select category</option>
+                <option value="">{tp('selectCategory')}</option>
                 {emdnCategories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.code} - {category.name}
@@ -298,7 +328,7 @@ export function ExtractionPreview({
               {/* Show suggested code if no match */}
               {extractedData.suggested_emdn && !matchedEmdn && (
                 <p className="text-xs text-amber-600 mt-1">
-                  Suggested: {extractedData.suggested_emdn} - not found in catalog
+                  {t('suggestedCode', { code: extractedData.suggested_emdn })}
                 </p>
               )}
               {/* Show matched category name for confirmation */}
@@ -312,13 +342,13 @@ export function ExtractionPreview({
 
           {/* Regulatory Section with consistent heights */}
           <div className="space-y-3">
-            <h3 className={sectionTitleClass}>Regulatory & Compliance</h3>
+            <h3 className={sectionTitleClass}>{t('regulatoryCompliance')}</h3>
 
             <div className="grid grid-cols-2 gap-3">
               {/* CE Marked */}
               <div>
                 <label htmlFor="ce_marked" className={`${labelClass} mb-2`}>
-                  CE Marked
+                  {tr('ceMarked')}
                 </label>
                 <div className="flex items-center gap-3 h-[38px] px-3 border border-border rounded-md bg-muted/30">
                   <input
@@ -328,7 +358,7 @@ export function ExtractionPreview({
                     className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
                   />
                   <span className="text-sm text-muted-foreground">
-                    {form.watch('ce_marked') ? 'Yes' : 'No'}
+                    {form.watch('ce_marked') ? tp('yes') : tp('no')}
                   </span>
                 </div>
               </div>
@@ -336,14 +366,14 @@ export function ExtractionPreview({
               {/* MDR Class */}
               <div>
                 <label htmlFor="mdr_class" className={`${labelClass} mb-2`}>
-                  MDR Class
+                  {tr('mdrClass')}
                 </label>
                 <select
                   id="mdr_class"
                   {...form.register('mdr_class')}
                   className={`${inputClass} h-[38px]`}
                 >
-                  <option value="">Select</option>
+                  <option value="">{tp('selectClass')}</option>
                   <option value="I">I</option>
                   <option value="IIa">IIa</option>
                   <option value="IIb">IIb</option>
@@ -355,7 +385,7 @@ export function ExtractionPreview({
             {/* UDI-DI */}
             <div>
               <label htmlFor="udi_di" className={labelClass}>
-                UDI-DI
+                {tp('udiDi')}
               </label>
               <input
                 id="udi_di"
@@ -363,7 +393,7 @@ export function ExtractionPreview({
                 maxLength={14}
                 {...form.register('udi_di')}
                 className={inputClass}
-                placeholder="Device Identifier (max 14 chars)"
+                placeholder={tp('udiDiPlaceholder')}
               />
               {form.formState.errors.udi_di && (
                 <p className={errorClass}>{form.formState.errors.udi_di.message}</p>
@@ -380,14 +410,14 @@ export function ExtractionPreview({
           onClick={onCancel}
           className="flex-1 border border-border text-foreground py-2.5 px-4 rounded-md font-medium hover:bg-muted transition-colors"
         >
-          Cancel
+          {tc('cancel')}
         </button>
         <button
           type="submit"
           disabled={isPending}
-          className="flex-1 bg-accent text-accent-foreground py-2.5 px-4 rounded-md font-medium hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 bg-button text-button-foreground py-2.5 px-4 rounded-md font-medium hover:bg-button-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {isPending ? 'Saving...' : 'Save to Catalog'}
+          {isPending ? tc('saving') : t('saveToCatalog')}
         </button>
       </div>
 
@@ -395,14 +425,14 @@ export function ExtractionPreview({
       {extractedData.emdn_rationale && (
         <div className="mt-6 p-4 bg-muted/30 border border-border rounded-lg">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-            Classification Rationale
+            {t('emdnRationaleTitle')}
           </h4>
           <p className="text-sm text-foreground leading-relaxed">
             {extractedData.emdn_rationale}
           </p>
           {extractedData.suggested_emdn && (
             <p className="text-xs text-muted-foreground mt-2">
-              Suggested code: <span className="font-mono font-medium">{extractedData.suggested_emdn}</span>
+              {t('suggestedCode', { code: extractedData.suggested_emdn })}
             </p>
           )}
         </div>

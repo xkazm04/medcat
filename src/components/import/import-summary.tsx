@@ -3,6 +3,7 @@
 import { CheckCircle, AlertTriangle, Plus, RefreshCw, XCircle, ChevronDown, ChevronUp, List, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { type ImportResult } from '@/lib/actions/import';
 
 interface ImportSummaryProps {
@@ -15,6 +16,7 @@ interface ImportSummaryProps {
  * Displays counts of created, updated, skipped products and any errors.
  */
 export function ImportSummary({ result, onReset }: ImportSummaryProps) {
+  const t = useTranslations('import');
   const [errorsExpanded, setErrorsExpanded] = useState(false);
 
   const hasErrors = result.errors.length > 0;
@@ -29,9 +31,9 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
         ) : (
           <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
         )}
-        <h2 className="mt-4 text-2xl font-semibold">Import Complete</h2>
+        <h2 className="mt-4 text-2xl font-semibold">{t('complete')}</h2>
         <p className="mt-1 text-muted-foreground">
-          {totalProcessed} product{totalProcessed !== 1 ? 's' : ''} processed
+          {t('processed', { count: totalProcessed })}
         </p>
       </div>
 
@@ -42,7 +44,7 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
             <Plus className="h-5 w-5 text-green-500" />
             <span className="text-2xl font-bold">{result.created}</span>
           </div>
-          <p className="text-sm text-muted-foreground">Created</p>
+          <p className="text-sm text-muted-foreground">{t('created')}</p>
         </div>
 
         <div className="border border-border rounded-lg p-4 text-center">
@@ -50,7 +52,7 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
             <RefreshCw className="h-5 w-5 text-blue-500" />
             <span className="text-2xl font-bold">{result.updated}</span>
           </div>
-          <p className="text-sm text-muted-foreground">Updated</p>
+          <p className="text-sm text-muted-foreground">{t('updated')}</p>
         </div>
 
         <div className="border border-border rounded-lg p-4 text-center">
@@ -58,7 +60,7 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
             <HelpCircle className="h-5 w-5 text-yellow-500" />
             <span className="text-2xl font-bold">{result.unclassified}</span>
           </div>
-          <p className="text-sm text-muted-foreground">Unclassified</p>
+          <p className="text-sm text-muted-foreground">{t('unclassified')}</p>
         </div>
 
         <div className="border border-border rounded-lg p-4 text-center">
@@ -66,7 +68,7 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
             <XCircle className="h-5 w-5 text-red-500" />
             <span className="text-2xl font-bold">{result.skipped}</span>
           </div>
-          <p className="text-sm text-muted-foreground">Skipped</p>
+          <p className="text-sm text-muted-foreground">{t('skipped')}</p>
         </div>
       </div>
 
@@ -81,7 +83,7 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-500" />
               <span className="font-medium text-red-600 dark:text-red-400">
-                {result.errors.length} error{result.errors.length !== 1 ? 's' : ''} occurred
+                {t('errorsOccurred', { count: result.errors.length })}
               </span>
             </div>
             {errorsExpanded ? (
@@ -96,9 +98,9 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Row</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Field</th>
-                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">Error</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">{t('row')}</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">{t('field')}</th>
+                    <th className="text-left py-2 px-2 font-medium text-muted-foreground">{t('errorLabel')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -123,14 +125,14 @@ export function ImportSummary({ result, onReset }: ImportSummaryProps) {
           onClick={onReset}
           className="px-6 py-2 border border-border rounded-md hover:bg-muted transition-colors"
         >
-          Import More
+          {t('importMore')}
         </button>
         <Link
           href="/"
-          className="px-6 py-2 bg-accent text-accent-foreground rounded-md hover:bg-accent/90 transition-colors flex items-center gap-2"
+          className="px-6 py-2 bg-button text-button-foreground rounded-md hover:bg-button-hover transition-colors flex items-center gap-2"
         >
           <List className="h-4 w-4" />
-          View Catalog
+          {t('viewCatalog')}
         </Link>
       </div>
     </div>

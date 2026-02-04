@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, Check, Loader2 } from 'lucide-react';
 import { type Vendor } from '@/lib/types';
 import { type CSVRow, parseCSVFull } from '@/lib/utils/csv-parser';
@@ -30,14 +31,7 @@ interface ImportWizardProps {
   vendors: Vendor[];
 }
 
-const STEP_LABELS: Record<ImportStep, string> = {
-  vendor: 'Select Vendor',
-  upload: 'Upload File',
-  mapping: 'Map Columns',
-  validation: 'Validate',
-  importing: 'Import',
-  summary: 'Summary',
-};
+const STEP_KEYS: ImportStep[] = ['vendor', 'upload', 'mapping', 'validation', 'importing', 'summary'];
 
 const STEP_ORDER: ImportStep[] = ['vendor', 'upload', 'mapping', 'validation', 'importing', 'summary'];
 
@@ -47,6 +41,9 @@ const STEP_ORDER: ImportStep[] = ['vendor', 'upload', 'mapping', 'validation', '
  * validation, and batch import with progress feedback.
  */
 export function ImportWizard({ vendors }: ImportWizardProps) {
+  const t = useTranslations('import');
+  const tCommon = useTranslations('common');
+  const tProduct = useTranslations('product');
   const [state, setState] = useState<WizardState>({
     step: 'vendor',
     vendorId: '',
@@ -235,7 +232,7 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
       {/* Step label */}
       <div className="text-center">
         <h2 className="text-lg font-medium">
-          Step {currentStepIndex + 1}: {STEP_LABELS[state.step]}
+          {t('step', { number: currentStepIndex + 1, label: t(`steps.${state.step}`) })}
         </h2>
       </div>
 
@@ -245,13 +242,12 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
         {state.step === 'vendor' && (
           <div className="space-y-6">
             <p className="text-sm text-muted-foreground">
-              Select the vendor for the products you are importing. SKU deduplication is
-              performed per vendor.
+              {t('vendorDescription')}
             </p>
 
             <div className="max-w-md">
               <label htmlFor="vendor-select" className="block text-sm font-medium mb-2">
-                Vendor <span className="text-red-500">*</span>
+                {tProduct('vendor')} <span className="text-red-500">*</span>
               </label>
               <select
                 id="vendor-select"
@@ -259,7 +255,7 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
                 onChange={(e) => handleVendorChange(e.target.value)}
                 className="w-full px-3 py-2 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-accent"
               >
-                <option value="">-- Select a vendor --</option>
+                <option value="">{t('selectVendorLabel')}</option>
                 {vendors.map((vendor) => (
                   <option key={vendor.id} value={vendor.id}>
                     {vendor.name}
@@ -273,9 +269,9 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
                 type="button"
                 onClick={handleVendorNext}
                 disabled={!state.vendorId}
-                className="px-6 py-2 bg-accent text-accent-foreground rounded-md hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-button text-button-foreground rounded-md hover:bg-button-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {tCommon('next')}
               </button>
             </div>
           </div>
@@ -285,8 +281,7 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
         {state.step === 'upload' && (
           <div className="space-y-6">
             <p className="text-sm text-muted-foreground">
-              Upload a CSV file containing your product data. The file should have headers in the
-              first row.
+              {t('uploadDescription')}
             </p>
 
             <FileUploadStep
@@ -302,7 +297,7 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
                 className="px-4 py-2 border border-border rounded-md hover:bg-muted transition-colors flex items-center gap-2"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Back
+                {tCommon('back')}
               </button>
             </div>
           </div>
@@ -325,15 +320,15 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
                 className="px-4 py-2 border border-border rounded-md hover:bg-muted transition-colors flex items-center gap-2"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Back
+                {tCommon('back')}
               </button>
               <button
                 type="button"
                 onClick={handleMappingNext}
                 disabled={!isMappingValid}
-                className="px-6 py-2 bg-accent text-accent-foreground rounded-md hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-button text-button-foreground rounded-md hover:bg-button-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {tCommon('next')}
               </button>
             </div>
           </div>
@@ -356,15 +351,15 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
                 className="px-4 py-2 border border-border rounded-md hover:bg-muted transition-colors flex items-center gap-2"
               >
                 <ChevronLeft className="h-4 w-4" />
-                Back
+                {tCommon('back')}
               </button>
               <button
                 type="button"
                 onClick={handleStartImport}
                 disabled={!canImport}
-                className="px-6 py-2 bg-accent text-accent-foreground rounded-md hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-button text-button-foreground rounded-md hover:bg-button-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Import {state.validRows.length} Product{state.validRows.length !== 1 ? 's' : ''}
+                {t('importCount', { count: state.validRows.length })}
               </button>
             </div>
           </div>
@@ -376,7 +371,7 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-accent" />
             <div>
               <p className="text-lg font-medium">
-                Importing... {importProgress.current}/{importProgress.total} rows
+                {t('importing', { current: importProgress.current, total: importProgress.total })}
               </p>
               <div className="mt-4 w-full max-w-md mx-auto bg-muted rounded-full h-2">
                 <div
@@ -391,7 +386,7 @@ export function ImportWizard({ vendors }: ImportWizardProps) {
                 />
               </div>
               <p className="mt-2 text-sm text-muted-foreground">
-                Please wait while products are being imported...
+                {t('pleaseWait')}
               </p>
             </div>
           </div>

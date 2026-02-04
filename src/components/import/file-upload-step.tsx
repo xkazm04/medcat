@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, X, Loader2 } from 'lucide-react';
 import { parseCSVPreview, type CSVRow } from '@/lib/utils/csv-parser';
+import { useTranslations } from 'next-intl';
 
 interface FileUploadStepProps {
   onFileSelect: (file: File, headers: string[], preview: CSVRow[]) => void;
@@ -20,6 +21,7 @@ export function FileUploadStep({
   onClear,
   selectedFile,
 }: FileUploadStepProps) {
+  const t = useTranslations("import");
   const [isParsing, setIsParsing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -28,7 +30,7 @@ export function FileUploadStep({
     async (file: File) => {
       // Validate file type
       if (!file.name.endsWith('.csv') && file.type !== 'text/csv') {
-        setError('Please select a CSV file');
+        setError(t("pleaseSelectFile"));
         return;
       }
 
@@ -39,25 +41,25 @@ export function FileUploadStep({
         const result = await parseCSVPreview(file);
 
         if (result.errors.length > 0) {
-          setError(`Parse error: ${result.errors[0].message}`);
+          setError(t("parseError", { error: result.errors[0].message }));
           setIsParsing(false);
           return;
         }
 
         if (result.headers.length === 0) {
-          setError('CSV file appears to be empty');
+          setError(t("emptyFile"));
           setIsParsing(false);
           return;
         }
 
         onFileSelect(file, result.headers, result.data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to parse CSV');
+        setError(err instanceof Error ? err.message : t("parseFailed"));
       } finally {
         setIsParsing(false);
       }
     },
-    [onFileSelect]
+    [onFileSelect, t]
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +114,7 @@ export function FileUploadStep({
             type="button"
             onClick={handleClear}
             className="p-2 hover:bg-muted rounded-md transition-colors"
-            aria-label="Remove file"
+            aria-label={t("removeFile")}
           >
             <X className="h-5 w-5 text-muted-foreground" />
           </button>
@@ -150,11 +152,11 @@ export function FileUploadStep({
           )}
           <p className="mt-4 text-sm font-medium">
             {isParsing
-              ? 'Parsing CSV...'
-              : 'Drop your CSV file here or click to browse'}
+              ? t("parsingCsv")
+              : t("dropCsv")}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Only .csv files are accepted
+            {t("csvOnly")}
           </p>
         </label>
       </div>

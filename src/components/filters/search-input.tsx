@@ -2,10 +2,13 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useDebounceValue } from "usehooks-ts";
 import { Search, X, Loader2 } from "lucide-react";
 
 export function SearchInput() {
+  const t = useTranslations('filters');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -84,7 +87,7 @@ export function SearchInput() {
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Search products..."
+        placeholder={t('search')}
         className="w-full pl-9 pr-20 py-2.5 text-sm border border-border rounded-lg bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all"
       />
 
@@ -94,7 +97,7 @@ export function SearchInput() {
           <button
             onClick={handleClear}
             className="p-1 rounded hover:bg-muted transition-colors"
-            aria-label="Clear search"
+            aria-label={tCommon('clear')}
           >
             <X className="h-3.5 w-3.5 text-muted-foreground" />
           </button>

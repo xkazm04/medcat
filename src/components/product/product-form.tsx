@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { productSchema } from '@/lib/schemas/product'
@@ -26,6 +27,9 @@ export function ProductForm({
   vendors,
   emdnCategories,
 }: ProductFormProps) {
+  const t = useTranslations('product')
+  const tRegulatory = useTranslations('regulatory')
+  const tCommon = useTranslations('common')
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
 
@@ -74,7 +78,7 @@ export function ProductForm({
           Object.values(result.error.fieldErrors || {})
             .flat()
             .join(', ') ||
-          'An error occurred'
+          tCommon('error')
         setServerError(errorMessage)
       }
     })
@@ -96,7 +100,7 @@ export function ProductForm({
       {/* Name */}
       <div>
         <label htmlFor="name" className={labelClass}>
-          Name <span className="text-red-500">*</span>
+          {t('name')} <span className="text-red-500">*</span>
         </label>
         <input
           id="name"
@@ -112,7 +116,7 @@ export function ProductForm({
       {/* SKU */}
       <div>
         <label htmlFor="sku" className={labelClass}>
-          SKU <span className="text-red-500">*</span>
+          {t('sku')} <span className="text-red-500">*</span>
         </label>
         <input
           id="sku"
@@ -128,7 +132,7 @@ export function ProductForm({
       {/* Description */}
       <div>
         <label htmlFor="description" className={labelClass}>
-          Description
+          {t('description')}
         </label>
         <textarea
           id="description"
@@ -146,7 +150,7 @@ export function ProductForm({
       {/* Manufacturer Name */}
       <div>
         <label htmlFor="manufacturer_name" className={labelClass}>
-          Manufacturer
+          {t('manufacturer')}
         </label>
         <input
           id="manufacturer_name"
@@ -164,7 +168,7 @@ export function ProductForm({
       {/* Manufacturer SKU */}
       <div>
         <label htmlFor="manufacturer_sku" className={labelClass}>
-          Manufacturer SKU
+          {t('manufacturerSku')}
         </label>
         <input
           id="manufacturer_sku"
@@ -182,7 +186,7 @@ export function ProductForm({
       {/* Price */}
       <div>
         <label htmlFor="price" className={labelClass}>
-          Price (CZK)
+          {t('priceCZK')}
         </label>
         <input
           id="price"
@@ -199,14 +203,14 @@ export function ProductForm({
       {/* Vendor */}
       <div>
         <label htmlFor="vendor_id" className={labelClass}>
-          Vendor
+          {t('vendor')}
         </label>
         <select
           id="vendor_id"
           {...form.register('vendor_id')}
           className={inputClass}
         >
-          <option value="">Select vendor</option>
+          <option value="">{t('selectVendor')}</option>
           {vendors.map((vendor) => (
             <option key={vendor.id} value={vendor.id}>
               {vendor.name}
@@ -223,14 +227,14 @@ export function ProductForm({
       {/* EMDN Category */}
       <div>
         <label htmlFor="emdn_category_id" className={labelClass}>
-          EMDN Category
+          {t('emdnCategory')}
         </label>
         <select
           id="emdn_category_id"
           {...form.register('emdn_category_id')}
           className={inputClass}
         >
-          <option value="">Select category</option>
+          <option value="">{t('selectCategory')}</option>
           {emdnCategories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.code} - {category.name}
@@ -247,7 +251,7 @@ export function ProductForm({
       {/* UDI-DI */}
       <div>
         <label htmlFor="udi_di" className={labelClass}>
-          UDI-DI
+          {t('udiDi')}
         </label>
         <input
           id="udi_di"
@@ -255,7 +259,7 @@ export function ProductForm({
           maxLength={14}
           {...form.register('udi_di')}
           className={inputClass}
-          placeholder="Max 14 characters"
+          placeholder={t('udiDiPlaceholder')}
         />
         {form.formState.errors.udi_di && (
           <p className={errorClass}>{form.formState.errors.udi_di.message}</p>
@@ -271,25 +275,25 @@ export function ProductForm({
           className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
         />
         <label htmlFor="ce_marked" className={labelClass}>
-          CE Marked
+          {tRegulatory('ceMarked')}
         </label>
       </div>
 
       {/* MDR Class */}
       <div>
         <label htmlFor="mdr_class" className={labelClass}>
-          MDR Class
+          {tRegulatory('mdrClass')}
         </label>
         <select
           id="mdr_class"
           {...form.register('mdr_class')}
           className={inputClass}
         >
-          <option value="">Select class</option>
-          <option value="I">I - Low risk</option>
-          <option value="IIa">IIa - Low to medium risk</option>
-          <option value="IIb">IIb - Medium to high risk</option>
-          <option value="III">III - High risk</option>
+          <option value="">{t('selectClass')}</option>
+          <option value="I">{tRegulatory('mdrClassI')}</option>
+          <option value="IIa">{tRegulatory('mdrClassIIa')}</option>
+          <option value="IIb">{tRegulatory('mdrClassIIb')}</option>
+          <option value="III">{tRegulatory('mdrClassIII')}</option>
         </select>
         {form.formState.errors.mdr_class && (
           <p className={errorClass}>
@@ -302,9 +306,9 @@ export function ProductForm({
       <button
         type="submit"
         disabled={isPending}
-        className="w-full bg-accent text-accent-foreground py-2 px-4 rounded-md font-medium hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full bg-button text-button-foreground py-2 px-4 rounded-md font-medium hover:bg-button-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {isPending ? 'Saving...' : 'Save Changes'}
+        {isPending ? tCommon('saving') : tCommon('save')}
       </button>
     </form>
   )

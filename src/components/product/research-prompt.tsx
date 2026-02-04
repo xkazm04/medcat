@@ -2,24 +2,23 @@
 
 import { useState, useEffect } from 'react'
 import { useCopyToClipboard } from 'usehooks-ts'
-import { Copy, Check, ExternalLink, Search, ChevronDown } from 'lucide-react'
+import { Check, ChevronDown, ExternalLink } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import type { ProductWithRelations } from '@/lib/types'
-import { generateResearchPrompt, generateQuickSearchPrompt } from '@/lib/utils/prompt-template'
+import { generateResearchPrompt } from '@/lib/utils/prompt-template'
+import { useTranslations } from 'next-intl'
 
 interface ResearchPromptProps {
   product: ProductWithRelations
 }
 
 export function ResearchPrompt({ product }: ResearchPromptProps) {
+  const t = useTranslations('research')
   const [, copy] = useCopyToClipboard()
   const [copied, setCopied] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const [promptType, setPromptType] = useState<'full' | 'quick'>('full')
 
-  const prompt = promptType === 'full'
-    ? generateResearchPrompt(product)
-    : generateQuickSearchPrompt(product)
+  const prompt = generateResearchPrompt(product)
 
   useEffect(() => {
     if (copied) {
@@ -35,40 +34,8 @@ export function ResearchPrompt({ product }: ResearchPromptProps) {
     }
   }
 
-  const handleOpenPerplexity = () => {
-    window.open('https://www.perplexity.ai/', '_blank', 'noopener,noreferrer')
-  }
-
-  const handleOpenEudamed = () => {
-    window.open('https://search.eudamed.com/', '_blank', 'noopener,noreferrer')
-  }
-
   return (
     <div className="space-y-4">
-      {/* Prompt Type Toggle */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setPromptType('full')}
-          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-            promptType === 'full'
-              ? 'bg-blue-subtle/20 text-blue-subtle border border-blue-subtle/30'
-              : 'bg-muted text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Full Research
-        </button>
-        <button
-          onClick={() => setPromptType('quick')}
-          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
-            promptType === 'quick'
-              ? 'bg-blue-subtle/20 text-blue-subtle border border-blue-subtle/30'
-              : 'bg-muted text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          Quick Search
-        </button>
-      </div>
-
       {/* Expandable Prompt Preview */}
       <div className="bg-muted/50 rounded-lg overflow-hidden">
         <button
@@ -76,7 +43,7 @@ export function ResearchPrompt({ product }: ResearchPromptProps) {
           className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-muted/70 transition-colors"
         >
           <span className="text-sm font-medium text-muted-foreground">
-            {promptType === 'full' ? 'Comprehensive Research Prompt' : 'Quick Search Prompt'}
+            {t('promptLabel')}
           </span>
           <motion.div
             animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -106,47 +73,61 @@ export function ResearchPrompt({ product }: ResearchPromptProps) {
         </AnimatePresence>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-3">
-        <button
-          onClick={handleCopy}
-          className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-md hover:bg-accent/90 transition-colors"
-        >
-          {copied ? (
-            <>
-              <Check className="h-4 w-4" />
-              Copied!
-            </>
-          ) : (
-            <>
-              <Copy className="h-4 w-4" />
-              Copy Prompt
-            </>
-          )}
-        </button>
-
-        <button
-          onClick={handleOpenPerplexity}
-          className="flex items-center gap-2 px-4 py-2 border border-border rounded-md hover:bg-muted transition-colors"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Perplexity AI
-        </button>
-
-        <button
-          onClick={handleOpenEudamed}
-          className="flex items-center gap-2 px-4 py-2 border border-border rounded-md hover:bg-muted transition-colors"
-        >
-          <Search className="h-4 w-4" />
-          EUDAMED
-        </button>
-      </div>
-
-      {/* Quick Tips */}
-      <p className="text-xs text-muted-foreground">
-        Copy the prompt and paste into Perplexity AI for best results.
-        Use EUDAMED to search manufacturers by EMDN code directly.
-      </p>
+      {/* Action Links as bullet list */}
+      <ul className="space-y-2 text-sm">
+        <li>
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-2 text-blue-subtle hover:underline"
+          >
+            <span className="text-muted-foreground">•</span>
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                <span>{t('copied')}</span>
+              </>
+            ) : (
+              <span>{t('copyPrompt')}</span>
+            )}
+          </button>
+        </li>
+        <li>
+          <a
+            href="https://www.perplexity.ai/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-blue-subtle hover:underline"
+          >
+            <span className="text-muted-foreground">•</span>
+            <span>{t('goToPerplexity')}</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://gemini.google.com/app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-blue-subtle hover:underline"
+          >
+            <span className="text-muted-foreground">•</span>
+            <span>{t('goToGemini')}</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://search.eudamed.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-blue-subtle hover:underline"
+          >
+            <span className="text-muted-foreground">•</span>
+            <span>{t('goToEudamed')}</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </li>
+      </ul>
     </div>
   )
 }

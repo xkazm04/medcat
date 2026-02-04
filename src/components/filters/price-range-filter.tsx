@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useDebounceValue } from "usehooks-ts";
 
 export function PriceRangeFilter() {
+  const t = useTranslations("filters");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -56,7 +58,7 @@ export function PriceRangeFilter() {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <div className="flex-1">
-          <label htmlFor="min-price" className="sr-only">Minimum price</label>
+          <label htmlFor="min-price" className="sr-only">{t("min")}</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
               Kč
@@ -66,7 +68,7 @@ export function PriceRangeFilter() {
               type="number"
               value={minPrice}
               onChange={(e) => setMinPrice(e.target.value)}
-              placeholder="Min"
+              placeholder={t("min")}
               min="0"
               className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-md bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
@@ -76,7 +78,7 @@ export function PriceRangeFilter() {
         <span className="text-muted-foreground text-sm">–</span>
 
         <div className="flex-1">
-          <label htmlFor="max-price" className="sr-only">Maximum price</label>
+          <label htmlFor="max-price" className="sr-only">{t("max")}</label>
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
               Kč
@@ -86,7 +88,7 @@ export function PriceRangeFilter() {
               type="number"
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
-              placeholder="Max"
+              placeholder={t("max")}
               min="0"
               className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-md bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
@@ -130,7 +132,7 @@ export function PriceRangeFilter() {
           onClick={handleClear}
           className="text-xs text-accent hover:underline"
         >
-          Clear price range
+          {t("clearPriceRange")}
         </button>
       )}
     </div>

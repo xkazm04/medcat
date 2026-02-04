@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from 'react';
 import { MAPPABLE_FIELDS } from '@/lib/schemas/import';
 import { type CSVRow } from '@/lib/utils/csv-parser';
+import { useTranslations } from 'next-intl';
 
 interface ColumnMappingStepProps {
   /** CSV column headers from parse */
@@ -59,6 +60,7 @@ export function ColumnMappingStep({
   onMappingChange,
   previewData,
 }: ColumnMappingStepProps) {
+  const t = useTranslations("import");
   // Auto-detect mapping on initial mount
   useEffect(() => {
     if (Object.keys(mapping).length === 0) {
@@ -108,7 +110,7 @@ export function ColumnMappingStep({
     <div className="space-y-6">
       {/* Mapping form */}
       <div className="border border-border rounded-lg p-4">
-        <h3 className="font-medium mb-4">Map CSV Columns to Product Fields</h3>
+        <h3 className="font-medium mb-4">{t("mapping.title")}</h3>
         <div className="grid gap-4">
           {MAPPABLE_FIELDS.map((field) => (
             <div key={field.key} className="grid grid-cols-2 gap-4 items-center">
@@ -116,7 +118,7 @@ export function ColumnMappingStep({
                 htmlFor={`map-${field.key}`}
                 className="text-sm font-medium"
               >
-                {field.label}
+                {t(`fields.${field.key}`)}
                 {field.required && (
                   <span className="text-red-500 ml-1" aria-label="required">
                     *
@@ -133,7 +135,7 @@ export function ColumnMappingStep({
                     : 'border-border'
                 }`}
               >
-                <option value="">-- Not mapped --</option>
+                <option value="">{t("mapping.notMapped")}</option>
                 {headers.map((header) => (
                   <option key={header} value={header}>
                     {header}
@@ -145,7 +147,7 @@ export function ColumnMappingStep({
         </div>
         {Object.keys(requiredErrors).length > 0 && (
           <p className="text-sm text-red-500 mt-4">
-            Please map all required fields (marked with *)
+            {t("mapping.requiredWarning")}
           </p>
         )}
       </div>
@@ -154,7 +156,7 @@ export function ColumnMappingStep({
       {previewRows.length > 0 && (
         <div className="border border-border rounded-lg overflow-hidden">
           <div className="bg-muted px-4 py-2 border-b border-border">
-            <h3 className="font-medium text-sm">Preview (first {previewRows.length} rows)</h3>
+            <h3 className="font-medium text-sm">{t("mapping.preview", { count: previewRows.length })}</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -168,7 +170,7 @@ export function ColumnMappingStep({
                       key={field.key}
                       className="px-3 py-2 text-left font-medium text-muted-foreground"
                     >
-                      {field.label}
+                      {t(`fields.${field.key}`)}
                     </th>
                   ))}
                 </tr>
@@ -185,7 +187,7 @@ export function ColumnMappingStep({
                     {MAPPABLE_FIELDS.filter((f) => mapping[f.key]).map((field) => (
                       <td key={field.key} className="px-3 py-2 truncate max-w-xs">
                         {row.mappedValues[field.key] || (
-                          <span className="text-muted-foreground italic">empty</span>
+                          <span className="text-muted-foreground italic">{t("mapping.empty")}</span>
                         )}
                       </td>
                     ))}

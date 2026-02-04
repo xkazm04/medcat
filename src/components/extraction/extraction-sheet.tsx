@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Sheet,
   SheetContent,
@@ -25,6 +26,7 @@ export function ExtractionSheet({
   vendors,
   emdnCategories,
 }: ExtractionSheetProps) {
+  const t = useTranslations('extraction')
   const [step, setStep] = useState<'upload' | 'preview'>('upload')
   const [extractedData, setExtractedData] = useState<ExtractedProduct | null>(null)
 
@@ -55,7 +57,7 @@ export function ExtractionSheet({
       <SheetContent side="right">
         <SheetHeader>
           <SheetTitle>
-            {step === 'upload' ? 'Extract Product from File' : 'Review Extracted Data'}
+            {step === 'upload' ? t('title') : t('titleReview')}
           </SheetTitle>
         </SheetHeader>
 

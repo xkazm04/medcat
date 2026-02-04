@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'motion/react'
 import { ChevronRight, FolderTree, Check, Loader2 } from 'lucide-react'
 import { useCategories, useCategoryAncestors } from '@/lib/query/hooks'
@@ -140,6 +141,7 @@ function CategoryItem({
  * - Auto-expand to show selected category
  */
 export function CategoryTreeClient() {
+  const t = useTranslations('filters');
   const router = useRouter()
   const searchParams = useSearchParams()
   const selectedId = searchParams.get('category')
@@ -216,7 +218,7 @@ export function CategoryTreeClient() {
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        <span className="ml-2 text-sm text-muted-foreground">Loading categories...</span>
+        <span className="ml-2 text-sm text-muted-foreground">{t('loadingCategories')}</span>
       </div>
     )
   }
@@ -226,7 +228,7 @@ export function CategoryTreeClient() {
     return (
       <div className="flex flex-col items-center justify-center py-6 text-center px-4">
         <FolderTree className="h-8 w-8 text-destructive/40 mb-2" />
-        <p className="text-sm text-destructive">Failed to load categories</p>
+        <p className="text-sm text-destructive">{t('failedCategories')}</p>
         <p className="text-xs text-muted-foreground mt-1">
           {error instanceof Error ? error.message : 'Unknown error'}
         </p>
@@ -239,9 +241,9 @@ export function CategoryTreeClient() {
     return (
       <div className="flex flex-col items-center justify-center py-6 text-center px-4">
         <FolderTree className="h-8 w-8 text-muted-foreground/40 mb-2" />
-        <p className="text-sm text-muted-foreground">No categorized products</p>
+        <p className="text-sm text-muted-foreground">{t('noCategorized')}</p>
         <p className="text-xs text-muted-foreground/70 mt-1">
-          Products need EMDN categories assigned to enable filtering
+          {t('noCategorizedDesc')}
         </p>
       </div>
     )
@@ -255,7 +257,7 @@ export function CategoryTreeClient() {
           onClick={toggleAllExpanded}
           className="text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
-          {isAllExpanded ? 'Collapse all' : 'Expand all'}
+          {isAllExpanded ? t('collapseAll') : t('expandAll')}
         </button>
       </div>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'motion/react'
 import { Pencil, Trash2, Eye, DollarSign, X } from 'lucide-react'
 import {
@@ -34,6 +35,8 @@ export function ProductSheet({
   vendors,
   emdnCategories,
 }: ProductSheetProps) {
+  const t = useTranslations('product')
+  const tActions = useTranslations('actions')
   const [mode, setMode] = useState<'view' | 'edit'>('view')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [comparisonProducts, setComparisonProducts] = useState<ProductPriceComparison[]>([])
@@ -95,7 +98,7 @@ export function ProductSheet({
                     <div className="px-4 py-4 border-b border-border flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-green-600" />
-                        <h3 className="font-semibold text-sm">Price Comparison</h3>
+                        <h3 className="font-semibold text-sm">{t('priceComparison')}</h3>
                       </div>
                       <button
                         onClick={() => setIsPriceComparisonOpen(false)}
@@ -106,7 +109,7 @@ export function ProductSheet({
                     </div>
                     <div className="flex-1 overflow-y-auto p-4">
                       <p className="text-sm text-muted-foreground mb-4">
-                        Same or similar products from other vendors
+                        {t('comparisonDesc')}
                       </p>
                       <PriceComparisonTable
                         products={comparisonProducts}
@@ -124,14 +127,14 @@ export function ProductSheet({
               <SheetHeader className="px-6 py-4 border-b-2 border-green-border">
                 <div className="flex items-start justify-between pr-8">
                   <SheetTitle className="text-lg font-semibold">
-                    {product?.name || 'Product'}
+                    {product?.name || t('name')}
                   </SheetTitle>
                   <div className="flex items-center gap-2">
                     {mode === 'edit' && (
                       <button
                         onClick={() => setMode('view')}
                         className="p-2 rounded-md hover:bg-muted transition-colors"
-                        title="View mode"
+                        title={tActions('viewMode')}
                       >
                         <Eye className="h-4 w-4" />
                       </button>
@@ -140,7 +143,7 @@ export function ProductSheet({
                       <button
                         onClick={() => setMode('edit')}
                         className="p-2 rounded-md hover:bg-muted transition-colors"
-                        title="Edit mode"
+                        title={tActions('editMode')}
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
@@ -148,7 +151,7 @@ export function ProductSheet({
                     <button
                       onClick={() => setDeleteDialogOpen(true)}
                       className="p-2 rounded-md hover:bg-muted transition-colors text-red-600"
-                      title="Delete product"
+                      title={tActions('deleteProduct')}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -160,7 +163,7 @@ export function ProductSheet({
               <div className="flex-1 overflow-y-auto">
                 {!product ? (
                   <div className="px-6 py-4 text-muted-foreground">
-                    No product selected
+                    {t('noProductSelected')}
                   </div>
                 ) : mode === 'view' ? (
                   <ProductDetail product={product} />
@@ -194,7 +197,7 @@ export function ProductSheet({
                       : 'bg-background hover:bg-muted'
                     }
                   `}
-                  title={isPriceComparisonOpen ? 'Close price comparison' : 'Open price comparison'}
+                  title={isPriceComparisonOpen ? t('closeComparison') : t('openComparison')}
                 >
                   <DollarSign className={`h-4 w-4 ${isPriceComparisonOpen ? 'text-white' : 'text-green-600'}`} />
                   <span className={`text-sm font-medium ${isPriceComparisonOpen ? 'text-white' : 'text-green-600'}`}>
