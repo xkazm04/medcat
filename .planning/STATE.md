@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 8 of 12 (Streaming Foundation)
-Plan: 1 of TBD complete
+Plan: 2 of TBD complete
 Status: In progress
-Last activity: 2026-02-05 - Completed 08-01-PLAN.md (Streaming Foundation infrastructure)
+Last activity: 2026-02-05 - Completed 08-02-PLAN.md (Chat Widget UI)
 
-Progress: [##        ] 20% (1/5 plans complete in Phase 8)
+Progress: [####      ] 40% (2/5 plans complete in Phase 8)
 
 ## Milestone History
 
@@ -44,6 +44,13 @@ v1.2 decisions (implemented in 08-01):
 - SSE with proper AbortController cleanup via req.signal passthrough
 - Use existing GEMINI_API_KEY env var (not GOOGLE_GENERATIVE_AI_API_KEY)
 
+v1.2 decisions (implemented in 08-02):
+
+- Motion layoutId for button-to-panel animation (not separate animated components)
+- TWO cleanup effects in ChatPanel - both isOpen change and unmount call stop()
+- UIMessage.parts array extraction (AI SDK v6 uses parts not content string)
+- sendMessage({ text }) signature (not { content })
+
 ### Technical Debt
 
 - Permissive RLS policies need tightening when auth is added
@@ -59,7 +66,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-05T10:07:52Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-02-05T10:15:58Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None
-Next action: Execute 08-02-PLAN.md (Chat Interface) or plan remaining Phase 8 plans
+Next action: Execute 08-03-PLAN.md (Tool Calling) or plan remaining Phase 8 plans
