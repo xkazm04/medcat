@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 10 of 12 (Context and Error Handling)
-Plan: 1 of 2 complete
-Status: In progress
-Last activity: 2026-02-05 - Completed 10-01-PLAN.md
+Plan: 2 of 2 complete
+Status: Phase complete
+Last activity: 2026-02-05 - Completed 10-02-PLAN.md
 
-Progress: [#####-----] 50% (1/2 plans complete in Phase 10)
+Progress: [##########] 100% (2/2 plans complete in Phase 10)
 
 ## Milestone History
 
@@ -69,6 +69,12 @@ v1.2 decisions (implemented in 10-01):
 - HTTP status codes: 429 (rate limit), 503 (retryable), 500 (generic)
 - MAX_MESSAGES = 50 as hard cap per CONTEXT.md
 
+v1.2 decisions (implemented in 10-02):
+
+- AI SDK v6 uses regenerate() with clearError() for retry (not reload())
+- Auto-retry: one silent retry for retryable errors before showing ErrorBubble
+- Chat full state renders alternative UI instead of input field
+
 ### Technical Debt
 
 - Permissive RLS policies need tightening when auth is added
@@ -84,7 +90,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-05T12:58:54Z
-Stopped at: Completed 10-01-PLAN.md
+Last session: 2026-02-05T13:15:00Z
+Stopped at: Completed 10-02-PLAN.md (Phase 10 complete)
 Resume file: None
-Next action: Execute 10-02-PLAN.md (client-side error handling)
+Next action: Execute Phase 11 (Persistence and Recovery)
