@@ -91,8 +91,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-01 | Phase 8 | Complete |
 | INFRA-02 | Phase 8 | Complete |
 | INFRA-03 | Phase 9 | Complete |
-| INFRA-04 | Phase 10 | Pending |
-| INFRA-05 | Phase 10 | Pending |
+| INFRA-04 | Phase 10 | Complete |
+| INFRA-05 | Phase 10 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 26 total
