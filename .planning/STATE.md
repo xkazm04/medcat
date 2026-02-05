@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Procurement can quickly compare prices for identical orthopedic products across multiple vendors
-**Current focus:** Milestone v1.2 - Chatbot Interface (Phase 9: Catalog Search Tools)
+**Current focus:** Milestone v1.2 - Chatbot Interface (Phase 10: Context and Error Handling)
 
 ## Current Position
 
-Phase: 9 of 12 (Catalog Search Tools) ✓ COMPLETE
-Plan: 2 of 2 complete
-Status: Phase complete, verified
-Last activity: 2026-02-05 - Phase 9 verified (09-VERIFICATION.md)
+Phase: 10 of 12 (Context and Error Handling)
+Plan: 1 of 2 complete
+Status: In progress
+Last activity: 2026-02-05 - Completed 10-01-PLAN.md
 
-Progress: [##########] 100% (2/2 plans complete in Phase 9)
+Progress: [#####-----] 50% (1/2 plans complete in Phase 10)
 
 ## Milestone History
 
@@ -63,6 +63,12 @@ v1.2 decisions (implemented in 09-02):
 - Single-vendor comparison as text, multi-vendor as table (CONTEXT.md)
 - "View in catalog" button is placeholder, full integration deferred to Phase 12
 
+v1.2 decisions (implemented in 10-01):
+
+- classifyError utility using APICallError.isInstance for error classification
+- HTTP status codes: 429 (rate limit), 503 (retryable), 500 (generic)
+- MAX_MESSAGES = 50 as hard cap per CONTEXT.md
+
 ### Technical Debt
 
 - Permissive RLS policies need tightening when auth is added
@@ -78,7 +84,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-05T12:30:00Z
-Stopped at: Phase 9 complete and verified
+Last session: 2026-02-05T12:58:54Z
+Stopped at: Completed 10-01-PLAN.md
 Resume file: None
-Next action: Plan Phase 10 (Context and Error Handling) or discuss phase first
+Next action: Execute 10-02-PLAN.md (client-side error handling)
