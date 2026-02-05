@@ -1,6 +1,10 @@
 // Chat model configuration
 export const CHAT_MODEL = 'gemini-2.5-flash';
 
+// Message limits
+export const MAX_MESSAGES = 50; // Hard cap per CONTEXT.md
+export const CHAT_FULL_MESSAGE = 'Chat full. Clear to continue.';
+
 // System prompt for MedCatalog Assistant with tool awareness
 export const SYSTEM_PROMPT = `You are MedCatalog Assistant, a helpful AI for orthopedic medical device procurement.
 
