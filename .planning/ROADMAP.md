@@ -17,7 +17,7 @@ MedCatalog v1.2 adds a conversational AI interface to the orthopedic product cat
 **Milestone Goal:** Natural language interface for product search, price comparison, and EU market alternative discovery.
 
 - [x] **Phase 8: Streaming Foundation** - Chat widget with basic streaming responses ✓
-- [ ] **Phase 9: Catalog Search Tools** - NL-to-filter translation via tool calling
+- [x] **Phase 9: Catalog Search Tools** - NL-to-filter translation via tool calling ✓
 - [ ] **Phase 10: Context and Error Handling** - Conversation memory and graceful degradation
 - [ ] **Phase 11: External Web Search** - EU market alternatives via Gemini grounding
 - [ ] **Phase 12: UI Polish and Integration** - Typing indicators, quick actions, catalog integration
@@ -53,8 +53,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md - Tool definitions + API route integration
-- [ ] 09-02-PLAN.md - Tool rendering components (cards, tables, chips)
+- [x] 09-01-PLAN.md - Tool definitions + API route integration ✓
+- [x] 09-02-PLAN.md - Tool rendering components (cards, tables, chips) ✓
 
 ### Phase 10: Context and Error Handling
 **Goal**: Conversations maintain context across turns and handle errors gracefully
@@ -105,7 +105,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 8. Streaming Foundation | v1.2 | 2/2 | Complete | 2026-02-05 |
-| 9. Catalog Search Tools | v1.2 | 0/2 | Not started | - |
+| 9. Catalog Search Tools | v1.2 | 2/2 | Complete | 2026-02-05 |
 | 10. Context and Error Handling | v1.2 | 0/? | Not started | - |
 | 11. External Web Search | v1.2 | 0/? | Not started | - |
 | 12. UI Polish and Integration | v1.2 | 0/? | Not started | - |

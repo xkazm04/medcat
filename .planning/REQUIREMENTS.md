@@ -67,30 +67,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHAT-01 | Phase 8 | Pending |
-| CHAT-02 | Phase 8 | Pending |
-| CHAT-03 | Phase 8 | Pending |
-| CHAT-04 | Phase 8 | Pending |
+| CHAT-01 | Phase 8 | Complete |
+| CHAT-02 | Phase 8 | Complete |
+| CHAT-03 | Phase 8 | Complete |
+| CHAT-04 | Phase 8 | Complete |
 | CHAT-05 | Phase 12 | Pending |
 | CHAT-06 | Phase 12 | Pending |
-| CHAT-07 | Phase 8 | Pending |
-| SRCH-01 | Phase 9 | Pending |
-| SRCH-02 | Phase 9 | Pending |
-| SRCH-03 | Phase 9 | Pending |
-| SRCH-04 | Phase 9 | Pending |
+| CHAT-07 | Phase 8 | Complete |
+| SRCH-01 | Phase 9 | Complete |
+| SRCH-02 | Phase 9 | Complete |
+| SRCH-03 | Phase 9 | Complete |
+| SRCH-04 | Phase 9 | Complete |
 | SRCH-05 | Phase 12 | Pending |
-| SRCH-06 | Phase 9 | Pending |
+| SRCH-06 | Phase 9 | Complete |
 | SRCH-07 | Phase 12 | Pending |
-| COMP-01 | Phase 9 | Pending |
-| COMP-02 | Phase 9 | Pending |
-| COMP-03 | Phase 9 | Pending |
+| COMP-01 | Phase 9 | Complete |
+| COMP-02 | Phase 9 | Complete |
+| COMP-03 | Phase 9 | Complete |
 | ALT-01 | Phase 11 | Pending |
 | ALT-02 | Phase 11 | Pending |
 | ALT-03 | Phase 11 | Pending |
 | ALT-04 | Phase 11 | Pending |
-| INFRA-01 | Phase 8 | Pending |
-| INFRA-02 | Phase 8 | Pending |
-| INFRA-03 | Phase 9 | Pending |
+| INFRA-01 | Phase 8 | Complete |
+| INFRA-02 | Phase 8 | Complete |
+| INFRA-03 | Phase 9 | Complete |
 | INFRA-04 | Phase 10 | Pending |
 | INFRA-05 | Phase 10 | Pending |
 
