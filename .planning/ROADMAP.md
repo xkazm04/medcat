@@ -16,7 +16,7 @@ MedCatalog v1.2 adds a conversational AI interface to the orthopedic product cat
 
 **Milestone Goal:** Natural language interface for product search, price comparison, and EU market alternative discovery.
 
-- [ ] **Phase 8: Streaming Foundation** - Chat widget with basic streaming responses
+- [x] **Phase 8: Streaming Foundation** - Chat widget with basic streaming responses ✓
 - [ ] **Phase 9: Catalog Search Tools** - NL-to-filter translation via tool calling
 - [ ] **Phase 10: Context and Error Handling** - Conversation memory and graceful degradation
 - [ ] **Phase 11: External Web Search** - EU market alternatives via Gemini grounding
@@ -37,8 +37,8 @@ MedCatalog v1.2 adds a conversational AI interface to the orthopedic product cat
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md - Streaming infrastructure (Vercel AI SDK + API route)
-- [ ] 08-02-PLAN.md - Chat widget UI (components + page integration)
+- [x] 08-01-PLAN.md - Streaming infrastructure (Vercel AI SDK + API route) ✓
+- [x] 08-02-PLAN.md - Chat widget UI (components + page integration) ✓
 
 ### Phase 9: Catalog Search Tools
 **Goal**: Users can search the product catalog via natural language and get structured results
@@ -104,7 +104,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 8. Streaming Foundation | v1.2 | 0/2 | Planned | - |
+| 8. Streaming Foundation | v1.2 | 2/2 | Complete | 2026-02-05 |
 | 9. Catalog Search Tools | v1.2 | 0/? | Not started | - |
 | 10. Context and Error Handling | v1.2 | 0/? | Not started | - |
 | 11. External Web Search | v1.2 | 0/? | Not started | - |
