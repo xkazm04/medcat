@@ -50,11 +50,11 @@ Plans:
   3. User can request price comparison for a product and see vendors/prices in an inline table
   4. When query is ambiguous, AI suggests relevant EMDN categories to narrow search
   5. Tool calls wrap existing queries (getProducts, findSimilar, comparePrices) without duplicating logic
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 09-01: TBD
-- [ ] 09-02: TBD
+- [ ] 09-01-PLAN.md - Tool definitions + API route integration
+- [ ] 09-02-PLAN.md - Tool rendering components (cards, tables, chips)
 
 ### Phase 10: Context and Error Handling
 **Goal**: Conversations maintain context across turns and handle errors gracefully
@@ -105,7 +105,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 8. Streaming Foundation | v1.2 | 2/2 | Complete | 2026-02-05 |
-| 9. Catalog Search Tools | v1.2 | 0/? | Not started | - |
+| 9. Catalog Search Tools | v1.2 | 0/2 | Not started | - |
 | 10. Context and Error Handling | v1.2 | 0/? | Not started | - |
 | 11. External Web Search | v1.2 | 0/? | Not started | - |
 | 12. UI Polish and Integration | v1.2 | 0/? | Not started | - |
