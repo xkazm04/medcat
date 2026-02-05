@@ -7,7 +7,12 @@ import {
 } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { SYSTEM_PROMPT, CHAT_MODEL } from '@/lib/chat/constants';
-import { searchProducts, comparePrices, suggestCategories } from '@/lib/chat/tools';
+import {
+  searchProducts,
+  comparePrices,
+  suggestCategories,
+  searchExternalProducts,
+} from '@/lib/chat/tools';
 
 // Initialize Google provider with existing GEMINI_API_KEY
 const google = createGoogleGenerativeAI({
@@ -26,6 +31,7 @@ export async function POST(req: Request) {
         searchProducts,
         comparePrices,
         suggestCategories,
+        searchExternalProducts,
       },
       stopWhen: stepCountIs(3), // Allow up to 3 steps for complex queries (search -> compare -> synthesize)
       abortSignal: req.signal, // CRITICAL: Pass abort signal for cleanup
