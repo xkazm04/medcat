@@ -12,6 +12,7 @@ import { VendorFilter } from "@/components/filters/vendor-filter";
 import { CatalogClient } from "@/components/catalog-client";
 import { CatalogSkeleton } from "@/components/catalog-skeleton";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ChatWidget } from "@/components/chat/chat-widget";
 import { Package } from "lucide-react";
 
 interface HomeProps {
@@ -119,6 +120,9 @@ export default async function Home({ searchParams }: HomeProps) {
           </Suspense>
         </div>
       </div>
+
+      {/* Chat Widget */}
+      <ChatWidget />
     </main>
   );
 }

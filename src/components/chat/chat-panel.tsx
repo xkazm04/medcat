@@ -33,7 +33,7 @@ export function ChatPanel({ isOpen }: ChatPanelProps) {
 
   const handleSubmit = (text: string) => {
     if (text.trim()) {
-      sendMessage({ content: text });
+      sendMessage({ text });
     }
   };
 
