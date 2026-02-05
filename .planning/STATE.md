@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-05)
 
 **Core value:** Procurement can quickly compare prices for identical orthopedic products across multiple vendors
-**Current focus:** Milestone v1.2 - Chatbot Interface (Phase 10: Context and Error Handling)
+**Current focus:** Milestone v1.2 - Chatbot Interface (Phase 11: External Web Search)
 
 ## Current Position
 
-Phase: 10 of 12 (Context and Error Handling) ✓ COMPLETE
-Plan: 2 of 2 complete
-Status: Phase complete, verified
-Last activity: 2026-02-05 - Phase 10 verified (10-VERIFICATION.md)
+Phase: 11 of 12 (External Web Search)
+Plan: 1 of 2 complete
+Status: In progress
+Last activity: 2026-02-05 - Completed 11-01-PLAN.md
 
-Progress: [##########] 100% (2/2 plans complete in Phase 10)
+Progress: [#####-----] 50% (1/2 plans complete in Phase 11)
 
 ## Milestone History
 
@@ -75,6 +75,13 @@ v1.2 decisions (implemented in 10-02):
 - Auto-retry: one silent retry for retryable errors before showing ErrorBubble
 - Chat full state renders alternative UI instead of input field
 
+v1.2 decisions (implemented in 11-01):
+
+- Isolated generateText call inside tool for Gemini Search grounding (cannot mix provider tools with custom tools)
+- temperature: 1.0 recommended for grounding queries
+- Return hasResults boolean to distinguish "no results" from "search failed"
+- Limit external sources to 5 per CONTEXT.md
+
 ### Technical Debt
 
 - Permissive RLS policies need tightening when auth is added
@@ -90,7 +97,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-05T13:45:00Z
-Stopped at: Phase 10 complete and verified
+Last session: 2026-02-05T14:27:35Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None
-Next action: Plan Phase 11 (External Web Search)
+Next action: Execute 11-02-PLAN.md (External Result UI)
