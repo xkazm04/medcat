@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 8 of 12 (Streaming Foundation)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-02-05 - Roadmap created for v1.2 (5 phases, 26 requirements)
+Plan: 1 of TBD complete
+Status: In progress
+Last activity: 2026-02-05 - Completed 08-01-PLAN.md (Streaming Foundation infrastructure)
 
-Progress: [          ] 0% (0/5 phases complete in v1.2)
+Progress: [##        ] 20% (1/5 plans complete in Phase 8)
 
 ## Milestone History
 
@@ -36,12 +36,13 @@ Key decisions still applicable:
 - Use pg_trgm extension for trigram similarity
 - Default threshold 0.3 for duplicate warning, 0.5 for price comparison
 
-v1.2 research decisions (pending implementation):
+v1.2 decisions (implemented in 08-01):
 
 - Vercel AI SDK (`ai`, `@ai-sdk/react`, `@ai-sdk/google`) for streaming and tool calling
 - Keep existing `@google/genai` extraction client separate from chat
 - Read-only chat design (no mutations via chatbot)
-- SSE with proper AbortController cleanup to prevent memory leaks
+- SSE with proper AbortController cleanup via req.signal passthrough
+- Use existing GEMINI_API_KEY env var (not GOOGLE_GENERATIVE_AI_API_KEY)
 
 ### Technical Debt
 
@@ -58,7 +59,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-05
-Stopped at: Roadmap created for v1.2 milestone
+Last session: 2026-02-05T10:07:52Z
+Stopped at: Completed 08-01-PLAN.md
 Resume file: None
-Next action: `/gsd:plan-phase 8` to plan Streaming Foundation
+Next action: Execute 08-02-PLAN.md (Chat Interface) or plan remaining Phase 8 plans
