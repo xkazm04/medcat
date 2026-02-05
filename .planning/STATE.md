@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-05)
 ## Current Position
 
 Phase: 9 of 12 (Catalog Search Tools)
-Plan: 1 of 2 complete
-Status: In progress
-Last activity: 2026-02-05 - Completed 09-01-PLAN.md (Tool Definitions)
+Plan: 2 of 2 complete
+Status: Phase complete
+Last activity: 2026-02-05 - Completed 09-02-PLAN.md (Tool Result Rendering)
 
-Progress: [#####-----] 50% (1/2 plans complete in Phase 9)
+Progress: [##########] 100% (2/2 plans complete in Phase 9)
 
 ## Milestone History
 
@@ -57,6 +57,12 @@ v1.2 decisions (implemented in 09-01):
 - Server-side tool execute for read-only operations
 - stepCountIs(3) for multi-step execution (search -> compare -> synthesize)
 
+v1.2 decisions (implemented in 09-02):
+
+- Part-based rendering in MessageList: switch on part.type for text vs tools
+- Single-vendor comparison as text, multi-vendor as table (CONTEXT.md)
+- "View in catalog" button is placeholder, full integration deferred to Phase 12
+
 ### Technical Debt
 
 - Permissive RLS policies need tightening when auth is added
@@ -72,7 +78,7 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-05T12:01:00Z
-Stopped at: Completed 09-01-PLAN.md
+Last session: 2026-02-05T12:07:00Z
+Stopped at: Completed 09-02-PLAN.md (Phase 9 complete)
 Resume file: None
-Next action: Execute 09-02-PLAN.md (Tool Result Rendering)
+Next action: Execute Phase 10 (External Web Search)
