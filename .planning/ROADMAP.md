@@ -95,10 +95,11 @@ Plans:
   2. Chat shows suggested starter prompts when opened (helps new users)
   3. Quick action buttons appear after product results ("Compare prices", "Show more", "Filter by vendor")
   4. User can click "Open in catalog" to apply chat filters to the main data table
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 12-01: TBD
+- [ ] 12-01-PLAN.md - Typing indicator + starter prompts (visual feedback + onboarding)
+- [ ] 12-02-PLAN.md - Quick actions + catalog integration (action buttons + URL params + scroll)
 
 ## Progress
 
@@ -110,7 +111,7 @@ Plans:
 | 9. Catalog Search Tools | v1.2 | 2/2 | Complete | 2026-02-05 |
 | 10. Context and Error Handling | v1.2 | 2/2 | Complete | 2026-02-05 |
 | 11. External Web Search | v1.2 | 2/2 | Complete | 2026-02-05 |
-| 12. UI Polish and Integration | v1.2 | 0/? | Not started | - |
+| 12. UI Polish and Integration | v1.2 | 0/2 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-05*
