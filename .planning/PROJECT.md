@@ -10,8 +10,9 @@ Procurement can quickly compare prices for identical orthopedic products across 
 
 ## Requirements
 
-### Validated (v1.0)
+### Validated (v1.0 + v1.1)
 
+**v1.0 - Core Catalog**
 - [x] User can upload txt/markdown vendor product sheet and have it analyzed by Gemini
 - [x] Gemini extracts structured data: name, description, SKU, pricing, specs, materials, regulatory info
 - [x] Gemini classifies product per EMDN (orthopedic subset)
@@ -25,21 +26,28 @@ Procurement can quickly compare prices for identical orthopedic products across 
 - [x] Same products from different vendors are grouped for price comparison
 - [x] UI is elegant, light-themed, with smooth animations (Motion)
 
-### Active (v1.1)
+**v1.1 - Deep Research & Bulk Import**
+- [x] User can generate structured research prompt from product specs
+- [x] Research prompt opens Perplexity with copy-to-clipboard
+- [x] User can import products from CSV files (bulk import)
+- [x] CSV import supports column mapping to schema fields
+- [x] Schema supports manufacturer (separate from vendor/supplier)
+- [x] System deduplicates products by SKU during import
+- [x] User can navigate EMDN categories hierarchically (tree view)
+- [x] Catalog performs well with 1000+ products
 
-**Deep Research & Bulk Import**
+### Active (v1.2)
 
-- [ ] User can generate structured research prompt from product specs
-- [ ] Research prompt opens Perplexity with copy-to-clipboard
-- [ ] Research output format enables consistent price comparison
-- [ ] User can import products from CSV files (bulk import)
-- [ ] CSV import supports column mapping to schema fields
-- [ ] Schema supports manufacturer (separate from vendor/supplier)
-- [ ] Schema supports manufacturer SKU (separate from supplier SKU)
-- [ ] System deduplicates products by SKU during import
-- [ ] User can navigate EMDN categories hierarchically (tree view)
-- [ ] Catalog performs well with 1000+ products
-- [ ] EMDN tree loads efficiently (lazy loading)
+**Chatbot Interface (Experimental)**
+
+- [ ] User can open floating chat widget from catalog page
+- [ ] Chatbot queries product catalog via natural language
+- [ ] Chatbot uses Gemini with web search for EU market alternatives
+- [ ] Responses include interactive button options (quick actions)
+- [ ] Responses include inline tables for product comparisons
+- [ ] User can find products by category, price, material, specs
+- [ ] User can request price comparison across vendors
+- [ ] User can search for alternative products on EU market
 
 ### Out of Scope
 
@@ -89,4 +97,4 @@ Procurement can quickly compare prices for identical orthopedic products across 
 | Dark gray + green UI accents | Professional, minimal design with subtle green highlights | ✓ v1.0 |
 
 ---
-*Last updated: 2026-02-02 after v1.1 milestone start*
+*Last updated: 2026-02-05 after v1.2 milestone start*
