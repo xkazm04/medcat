@@ -48,11 +48,12 @@ async function verify() {
 
   console.log(`\n📦 Sample Products:`)
   if (samples) {
-    samples.forEach((p: { name: string; sku: string; manufacturer_name: string | null; vendor?: { name: string } }, i: number) => {
+    samples.forEach((p, i) => {
+      const vendor = p.vendor as unknown as { name: string } | null
       console.log(`\n   ${i + 1}. ${p.name}`)
       console.log(`      SKU: ${p.sku}`)
       console.log(`      Manufacturer: ${p.manufacturer_name || 'N/A'}`)
-      console.log(`      Vendor: ${p.vendor?.name || 'N/A'}`)
+      console.log(`      Vendor: ${vendor?.name || 'N/A'}`)
     })
   }
 }
