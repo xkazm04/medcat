@@ -84,10 +84,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-01 | Phase 9 | Complete |
 | COMP-02 | Phase 9 | Complete |
 | COMP-03 | Phase 9 | Complete |
-| ALT-01 | Phase 11 | Pending |
-| ALT-02 | Phase 11 | Pending |
-| ALT-03 | Phase 11 | Pending |
-| ALT-04 | Phase 11 | Pending |
+| ALT-01 | Phase 11 | Complete |
+| ALT-02 | Phase 11 | Complete |
+| ALT-03 | Phase 11 | Complete |
+| ALT-04 | Phase 11 | Complete |
 | INFRA-01 | Phase 8 | Complete |
 | INFRA-02 | Phase 8 | Complete |
 | INFRA-03 | Phase 9 | Complete |

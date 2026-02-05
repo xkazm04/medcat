@@ -19,7 +19,7 @@ MedCatalog v1.2 adds a conversational AI interface to the orthopedic product cat
 - [x] **Phase 8: Streaming Foundation** - Chat widget with basic streaming responses ✓
 - [x] **Phase 9: Catalog Search Tools** - NL-to-filter translation via tool calling ✓
 - [x] **Phase 10: Context and Error Handling** - Conversation memory and graceful degradation ✓
-- [ ] **Phase 11: External Web Search** - EU market alternatives via Gemini grounding
+- [x] **Phase 11: External Web Search** - EU market alternatives via Gemini grounding ✓
 - [ ] **Phase 12: UI Polish and Integration** - Typing indicators, quick actions, catalog integration
 
 ## Phase Details
@@ -83,8 +83,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 11-01-PLAN.md - External search tool (isolated Gemini grounding wrapper)
-- [ ] 11-02-PLAN.md - External result rendering (ExternalProductCard + message-list integration)
+- [x] 11-01-PLAN.md - External search tool (isolated Gemini grounding wrapper) ✓
+- [x] 11-02-PLAN.md - External result rendering (ExternalProductCard + message-list integration) ✓
 
 ### Phase 12: UI Polish and Integration
 **Goal**: Chat interface has production-ready UX with full catalog integration
@@ -109,7 +109,7 @@ Plans:
 | 8. Streaming Foundation | v1.2 | 2/2 | Complete | 2026-02-05 |
 | 9. Catalog Search Tools | v1.2 | 2/2 | Complete | 2026-02-05 |
 | 10. Context and Error Handling | v1.2 | 2/2 | Complete | 2026-02-05 |
-| 11. External Web Search | v1.2 | 0/2 | Planned | - |
+| 11. External Web Search | v1.2 | 2/2 | Complete | 2026-02-05 |
 | 12. UI Polish and Integration | v1.2 | 0/? | Not started | - |
 
 ---
