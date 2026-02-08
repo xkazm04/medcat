@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useCallback, useDeferredValue } from 'react'
+import { useState, useCallback, useDeferredValue, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Plus, Loader2 } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { DataTable, useColumnVisibility } from './table/data-table'
+import { useColumnSizing } from './table/use-column-sizing'
 import { useColumns } from './table/columns'
 import { ProductSheet } from './product/product-sheet'
 import { ExtractionSheet } from './extraction/extraction-sheet'
@@ -18,6 +19,7 @@ interface CatalogClientProps {
   emdnCategories: EMDNCategory[]
   categories: CategoryNode[]
   manufacturers: string[]
+  refPricePaths: string[]
   pageCount: number
   totalCount: number
   currentPage: number
@@ -30,6 +32,7 @@ export function CatalogClient({
   emdnCategories,
   categories,
   manufacturers,
+  refPricePaths,
   pageCount,
   totalCount,
   currentPage,
@@ -43,6 +46,8 @@ export function CatalogClient({
 
   // Column visibility state with localStorage persistence
   const { visibility: columnVisibility, setVisibility: setColumnVisibility } = useColumnVisibility()
+  // Column sizing state with localStorage persistence
+  const { columnSizing, setColumnSizing, resetColumnSizing } = useColumnSizing()
 
   // Use deferred value for smooth transitions - shows stale data while loading
   const deferredProducts = useDeferredValue(products)
@@ -54,18 +59,33 @@ export function CatalogClient({
     setSheetOpen(true)
   }, [])
 
+  // Stabilize references that change identity on every server navigation
+  // Stabilize references — use cheap string key instead of JSON.stringify
+  const categoriesKey = useMemo(() => emdnCategories.map(c => c.id).join(','), [emdnCategories])
+  const stableCategories = useMemo(() => emdnCategories, [categoriesKey])
+  const manufacturersKey = useMemo(() => manufacturers.join(','), [manufacturers])
+  const stableManufacturers = useMemo(() => manufacturers, [manufacturersKey])
+  const refPricePathsKey = useMemo(() => refPricePaths.join(','), [refPricePaths])
+  const stableRefPricePaths = useMemo(() => refPricePaths, [refPricePathsKey])
+
   // Use memoized columns hook
   const columns = useColumns(
     handleOpenProduct,
     handleOpenProduct,
     handleOpenProduct,
-    emdnCategories,
+    stableCategories,
     columnVisibility,
-    manufacturers
+    stableManufacturers,
+    stableRefPricePaths
   )
 
   return (
     <>
+      {/* Screen reader announcement for filter changes */}
+      <div aria-live="polite" className="sr-only">
+        {t('accessibility.showingProducts', { count: deferredProducts.length, total: totalCount })}
+      </div>
+
       {/* Header with title and add button */}
       <div className="mb-4 flex items-center justify-between">
         <div>
@@ -89,11 +109,11 @@ export function CatalogClient({
         categories={categories}
       />
 
-      {/* Data table with loading overlay - uses CSS instead of motion for better performance */}
-      <div className="relative" data-table-container>
+      {/* Data table with shimmer loading overlay */}
+      <div className={`relative ${isTransitioning ? 'table-shimmer' : ''}`} data-table-container>
         <div
-          className="transition-opacity duration-150"
-          style={{ opacity: isTransitioning ? 0.6 : 1 }}
+          className="transition-opacity duration-200"
+          style={{ opacity: isTransitioning ? 0.7 : 1 }}
         >
           <DataTable
             columns={columns}
@@ -104,16 +124,11 @@ export function CatalogClient({
             pageSize={pageSize}
             columnVisibility={columnVisibility}
             onColumnVisibilityChange={setColumnVisibility}
+            columnSizing={columnSizing}
+            onColumnSizingChange={setColumnSizing}
+            onResetColumnSizing={resetColumnSizing}
           />
         </div>
-        {isTransitioning && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/40 backdrop-blur-[2px] rounded-lg pointer-events-none">
-            <div className="flex items-center gap-2 text-muted-foreground bg-background/90 px-4 py-2 rounded-md shadow-lg border border-border/60">
-              <Loader2 className="w-5 h-5 animate-spin text-accent" />
-              <span className="text-sm font-medium">{t('common.loading')}</span>
-            </div>
-          </div>
-        )}
       </div>
       <ProductSheet
         product={selectedProduct}

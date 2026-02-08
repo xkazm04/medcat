@@ -8,11 +8,15 @@ export const ERROR_RETRYABLE =
   "Hmm, something went wrong on my end. Let me try again?";
 export const ERROR_GENERIC = 'Something went wrong. Please try again.';
 
+export type ErrorType = 'rate_limit' | 'network' | 'generic';
+
 export interface ClassifiedError {
   /** User-friendly message in conversational tone */
   userMessage: string;
   /** True for network/timeout errors, false for rate limits */
   isRetryable: boolean;
+  /** Error category for UI differentiation */
+  errorType: ErrorType;
 }
 
 /**
@@ -22,11 +26,12 @@ export interface ClassifiedError {
 export function classifyError(error: unknown): ClassifiedError {
   // Handle AI SDK APICallError
   if (APICallError.isInstance(error)) {
-    // Rate limit - not retryable
+    // Rate limit - retryable after cooldown (UI shows countdown)
     if (error.statusCode === 429) {
       return {
         userMessage: ERROR_RATE_LIMIT,
-        isRetryable: false,
+        isRetryable: true,
+        errorType: 'rate_limit',
       };
     }
 
@@ -35,6 +40,7 @@ export function classifyError(error: unknown): ClassifiedError {
       return {
         userMessage: ERROR_RETRYABLE,
         isRetryable: true,
+        errorType: 'generic',
       };
     }
   }
@@ -50,6 +56,7 @@ export function classifyError(error: unknown): ClassifiedError {
       return {
         userMessage: ERROR_NETWORK,
         isRetryable: true,
+        errorType: 'network',
       };
     }
   }
@@ -58,5 +65,6 @@ export function classifyError(error: unknown): ClassifiedError {
   return {
     userMessage: ERROR_GENERIC,
     isRetryable: true,
+    errorType: 'generic',
   };
 }

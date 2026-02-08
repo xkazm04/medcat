@@ -73,15 +73,22 @@ export async function getProducts(params: GetProductsParams = {}): Promise<GetPr
       { count: "exact" }
     );
 
-  // Apply search filter using ILIKE on indexed columns
+  // Apply search filter using tsvector full-text search (migration 009)
+  // Falls back to ILIKE for single-character queries that tsquery can't parse
   if (search) {
     const searchQuery = search.trim();
     if (searchQuery) {
-      // Search across name, SKU, description, and manufacturer name
-      // Uses the idx_products_fulltext GIN index for performance
-      query = query.or(
-        `name.ilike.%${searchQuery}%,sku.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,manufacturer_name.ilike.%${searchQuery}%`
-      );
+      if (searchQuery.length <= 1) {
+        // Single char: tsquery can't parse, use ILIKE fallback
+        // Escape PostgREST filter syntax chars and SQL wildcards to prevent injection
+        const escaped = searchQuery.replace(/[%_.,()\\]/g, c => `\\${c}`);
+        query = query.or(
+          `name.ilike.%${escaped}%,sku.ilike.%${escaped}%,description.ilike.%${escaped}%,manufacturer_name.ilike.%${escaped}%`
+        );
+      } else {
+        // Use websearch_to_tsquery via the search_vector column (GIN-indexed, weighted A-D)
+        query = query.textSearch('search_vector', searchQuery, { type: 'websearch', config: 'english' });
+      }
     }
   }
 
@@ -423,6 +430,45 @@ export async function getEMDNCategoriesAll(): Promise<CategoryNode[]> {
   });
 
   return rootCategories;
+}
+
+/**
+ * Get EMDN category paths that have reference prices.
+ * Used to show "EU Ref" indicator in catalog table.
+ * Returns paths like ["P/P09/P0908", "P/P09/P0909"] — products whose
+ * emdn_category.path starts with any of these have reference price coverage.
+ */
+export async function getRefPricePaths(): Promise<string[]> {
+  checkCircuit();
+  const supabase = await createClient();
+
+  // First get distinct category IDs from reference_prices
+  const { data: refData, error: refError } = await supabase
+    .from("reference_prices")
+    .select("emdn_category_id")
+    .not("emdn_category_id", "is", null);
+
+  if (refError || !refData) {
+    console.error("Error fetching ref price category IDs:", refError?.message);
+    return [];
+  }
+
+  // Deduplicate category IDs client-side (much smaller payload than full rows)
+  const uniqueIds = [...new Set(refData.map(r => r.emdn_category_id as string))];
+  if (uniqueIds.length === 0) return [];
+
+  // Batch-fetch only the paths we need
+  const { data: catData, error: catError } = await supabase
+    .from("emdn_categories")
+    .select("path")
+    .in("id", uniqueIds);
+
+  if (catError || !catData) {
+    console.error("Error fetching category paths:", catError?.message);
+    return [];
+  }
+
+  return catData.map(c => c.path).filter(Boolean);
 }
 
 /**

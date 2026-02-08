@@ -1,19 +1,24 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
-import { getProducts, getVendors, getEMDNCategories, getManufacturers } from "@/lib/queries";
+import { getProducts, getVendors, getEMDNCategories, getManufacturers, getRefPricePaths } from "@/lib/queries";
 import { flattenCategories } from "@/lib/utils/format-category";
 
 // ISR: Revalidate page every 60 seconds for fresh data without blocking
 export const revalidate = 60;
 import { FilterSidebar, FilterSection } from "@/components/filters/filter-sidebar";
-import { SearchInput } from "@/components/filters/search-input";
+import { MobileFilterTrigger } from "@/components/filters/mobile-filter-trigger";
 import { CategoryTree } from "@/components/filters/category-tree";
 import { VendorFilter } from "@/components/filters/vendor-filter";
 import { CatalogClient } from "@/components/catalog-client";
 import { CatalogSkeleton } from "@/components/catalog-skeleton";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { ChatWidget } from "@/components/chat/chat-widget";
-import { Package } from "lucide-react";
+import { ChatContextWrapper } from "@/components/chat-context-wrapper";
+import { CommandPalette } from "@/components/command-palette/command-palette";
+import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
+import { Package, BarChart3 } from "lucide-react";
+import Link from "next/link";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -32,12 +37,13 @@ interface HomeProps {
 export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
   const t = await getTranslations();
+  const isDev = process.env.NEXT_PUBLIC_DEVELOPMENT === 'true';
 
   const page = parseInt(params.page || "1");
   const pageSize = 20;
 
   // Fetch data in parallel (removed redundant getEMDNCategoriesFlat - derive from tree instead)
-  const [productsResult, allVendors, categories, manufacturers] = await Promise.all([
+  const [productsResult, allVendors, categories, manufacturers, refPricePaths] = await Promise.all([
     getProducts({
       page,
       pageSize,
@@ -53,6 +59,7 @@ export default async function Home({ searchParams }: HomeProps) {
     getVendors(),
     getEMDNCategories(),
     getManufacturers(),
+    getRefPricePaths(),
   ]);
 
   // Flatten category tree for components that need flat list (O(n) single pass)
@@ -83,46 +90,82 @@ export default async function Home({ searchParams }: HomeProps) {
             <p className="text-xs text-muted-foreground">{t("header.subtitle")}</p>
           </div>
         </div>
-        <LanguageSwitcher />
+        <div className="flex items-center gap-2">
+          {isDev && (
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted transition-colors"
+            >
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Dashboard</span>
+            </Link>
+          )}
+          {isDev && <ThemeToggle />}
+          <LanguageSwitcher />
+        </div>
       </header>
 
-      <div className="flex">
-        <Suspense fallback={<div className="w-[420px] shrink-0 border-r border-border" />}>
-          <FilterSidebar>
-            {/* Search at top, not in a section */}
-            <div className="pb-4 mb-1 border-b border-border">
-              <SearchInput />
-            </div>
+      <ChatContextWrapper>
+        {/* Skip to content link for accessibility */}
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-16 focus:left-4 focus:z-50 focus:bg-accent focus:text-accent-foreground focus:px-4 focus:py-2 focus:rounded-md focus:shadow-lg">
+          {t("accessibility.skipToContent")}
+        </a>
 
-            <FilterSection title={t("filters.category")} badge={params.category ? 1 : 0}>
-              <CategoryTree initialCategories={categories} />
-            </FilterSection>
+        <div className="flex">
+          {/* Desktop sidebar — hidden on mobile */}
+          <div className="hidden md:block">
+            <Suspense fallback={<div className="w-[280px] shrink-0 border-r border-border" />}>
+              <FilterSidebar>
+                <FilterSection title={t("filters.category")} badge={params.category ? 1 : 0}>
+                  <CategoryTree initialCategories={categories} />
+                </FilterSection>
 
-            <FilterSection title={t("filters.vendor")} badge={selectedVendorCount}>
-              <VendorFilter vendors={vendors} />
-            </FilterSection>
-          </FilterSidebar>
-        </Suspense>
+                <FilterSection title={t("filters.vendor")} badge={selectedVendorCount}>
+                  <VendorFilter vendors={vendors} />
+                </FilterSection>
+              </FilterSidebar>
+            </Suspense>
+          </div>
 
-        <div className="flex-1 p-6 min-w-0">
-          <Suspense fallback={<CatalogSkeleton />}>
-            <CatalogClient
-              products={products}
-              vendors={vendors}
-              emdnCategories={emdnCategoriesFlat}
-              categories={categories}
-              manufacturers={manufacturers}
-              pageCount={pageCount}
-              totalCount={count}
-              currentPage={page}
-              pageSize={pageSize}
-            />
-          </Suspense>
+          {/* Mobile filter drawer */}
+          <div className="md:hidden">
+            <MobileFilterTrigger>
+              <div className="space-y-4">
+                <FilterSection title={t("filters.category")} badge={params.category ? 1 : 0}>
+                  <CategoryTree initialCategories={categories} />
+                </FilterSection>
+                <FilterSection title={t("filters.vendor")} badge={selectedVendorCount}>
+                  <VendorFilter vendors={vendors} />
+                </FilterSection>
+              </div>
+            </MobileFilterTrigger>
+          </div>
+
+          <div id="main-content" className="flex-1 p-4 md:p-6 min-w-0">
+            <Suspense fallback={<CatalogSkeleton />}>
+              <CatalogClient
+                products={products}
+                vendors={vendors}
+                emdnCategories={emdnCategoriesFlat}
+                categories={categories}
+                manufacturers={manufacturers}
+                refPricePaths={refPricePaths}
+                pageCount={pageCount}
+                totalCount={count}
+                currentPage={page}
+                pageSize={pageSize}
+              />
+            </Suspense>
+          </div>
         </div>
-      </div>
 
-      {/* Chat Widget */}
-      <ChatWidget />
+        {/* Chat Widget — dev only for now */}
+        {isDev && <ChatWidget />}
+
+        {/* Global overlays */}
+        <CommandPalette />
+        <KeyboardShortcuts />
+      </ChatContextWrapper>
     </main>
   );
 }

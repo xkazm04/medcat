@@ -3,12 +3,14 @@
 import { memo, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreVertical, ArrowUpDown } from "lucide-react";
-import { DropdownMenu, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { MoreVertical, ArrowUpDown, ArrowUp, ArrowDown, MessageCircle, Globe } from "lucide-react";
+import { DropdownMenu, DropdownMenuItem, DropdownMenuDivider } from "@/components/ui/dropdown-menu";
+import { useChatContextOptional } from "@/lib/hooks/use-chat-context";
 import { ExpandableCategory } from "./expandable-category";
 import { RegulatoryBadges } from "./regulatory-badges";
 import { RegulatoryFilter } from "./regulatory-filter";
 import { ManufacturerFilter } from "./manufacturer-filter";
+import { ChatInsertCell } from "./chat-insert-cell";
 import type { ProductWithRelations, EMDNCategory } from "@/lib/types";
 import type { ColumnVisibility } from "./column-visibility-toggle";
 import { getPriceFormatter } from "@/lib/utils/format-price";
@@ -20,6 +22,7 @@ interface ColumnLabels {
   viewDetails: string;
   edit: string;
   delete: string;
+  askAI: string;
 }
 
 // Memoized cell components for performance
@@ -52,7 +55,11 @@ const ProductCell = memo(function ProductCell({
             <span className="text-muted-foreground/40">·</span>
           )}
           {showVendor && product.vendor && (
-            <span className="truncate">{product.vendor.name}</span>
+            <ChatInsertCell
+              value={product.vendor.name}
+              prefix="Show me products from "
+              className="truncate"
+            />
           )}
         </div>
       )}
@@ -73,20 +80,92 @@ const ManufacturerCell = memo(function ManufacturerCell({
   );
 });
 
-const PriceCell = memo(function PriceCell({ price }: { price: number | null }) {
+const PriceCell = memo(function PriceCell({
+  price,
+  hasRefPrices,
+}: {
+  price: number | null;
+  hasRefPrices: boolean;
+}) {
   const locale = useLocale();
-  if (price === null || price === undefined) {
-    return <span className="text-sm text-muted-foreground/40 text-right block">—</span>;
-  }
-  // Use memoized formatter for performance (avoids creating Intl object on every render)
-  const formatter = getPriceFormatter(locale);
-  const formatted = formatter.format(price);
   return (
-    <span className="text-sm font-medium tabular-nums text-right block text-foreground">
-      {formatted}
-    </span>
+    <div className="text-right">
+      {price !== null && price !== undefined ? (
+        <span className="text-sm font-medium tabular-nums text-foreground">
+          {getPriceFormatter(locale).format(price)}
+        </span>
+      ) : (
+        <span className="text-sm text-muted-foreground/40">—</span>
+      )}
+      {hasRefPrices && (
+        <span className="flex items-center justify-end gap-0.5 mt-0.5">
+          <Globe className="h-2.5 w-2.5 text-blue-subtle" />
+          <span className="text-[10px] text-blue-subtle font-medium">EU Ref</span>
+        </span>
+      )}
+    </div>
   );
 });
+
+// Actions cell with Ask AI integration
+const ActionsCell = memo(function ActionsCell({
+  product,
+  onView,
+  onEdit,
+  onDelete,
+  labels,
+}: {
+  product: ProductWithRelations;
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  labels: { viewDetails: string; edit: string; delete: string; askAI: string };
+}) {
+  const chatContext = useChatContextOptional();
+
+  return (
+    <DropdownMenu
+      trigger={
+        <div className="p-1 rounded hover:bg-muted transition-colors">
+          <MoreVertical className="h-4 w-4 text-muted-foreground" />
+        </div>
+      }
+      align="right"
+    >
+      <DropdownMenuItem onClick={onView}>
+        {labels.viewDetails}
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={onEdit}>
+        {labels.edit}
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        onClick={onDelete}
+        className="text-red-600"
+      >
+        {labels.delete}
+      </DropdownMenuItem>
+      {chatContext && (
+        <>
+          <DropdownMenuDivider />
+          <DropdownMenuItem
+            onClick={() => chatContext.sendMessage(`Tell me about ${product.name}`)}
+          >
+            <span className="flex items-center gap-2">
+              <MessageCircle className="h-3.5 w-3.5 text-accent" />
+              {labels.askAI}
+            </span>
+          </DropdownMenuItem>
+        </>
+      )}
+    </DropdownMenu>
+  );
+});
+
+/** Check if a product's EMDN category path matches any reference price path (exact or ancestor) */
+function hasRefPriceCoverage(productPath: string | null | undefined, refPricePaths: string[]): boolean {
+  if (!productPath || refPricePaths.length === 0) return false;
+  return refPricePaths.some(rpp => productPath === rpp || productPath.startsWith(rpp + '/'));
+}
 
 export function createColumns(
   onViewProduct: (product: ProductWithRelations) => void,
@@ -95,24 +174,64 @@ export function createColumns(
   allCategories: EMDNCategory[],
   columnVisibility: ColumnVisibility,
   manufacturers: string[] = [],
-  labels: ColumnLabels
+  labels: ColumnLabels,
+  refPricePaths: string[] = []
 ): ColumnDef<ProductWithRelations>[] {
   const columns: ColumnDef<ProductWithRelations>[] = [];
+
+  // Selection checkbox column
+  columns.push({
+    id: "select",
+    header: ({ table }) => (
+      <input
+        type="checkbox"
+        checked={table.getIsAllPageRowsSelected()}
+        onChange={table.getToggleAllPageRowsSelectedHandler()}
+        className="h-4 w-4 rounded"
+        aria-label="Select all rows"
+      />
+    ),
+    cell: ({ row }) => (
+      <input
+        type="checkbox"
+        checked={row.getIsSelected()}
+        onChange={row.getToggleSelectedHandler()}
+        onClick={e => e.stopPropagation()}
+        className="h-4 w-4 rounded"
+        aria-label="Select row"
+      />
+    ),
+    size: 40,
+    minSize: 40,
+    maxSize: 40,
+    enableResizing: false,
+  });
 
   // Product column (always visible) - includes SKU and Vendor info
   if (columnVisibility.product) {
     columns.push({
       id: "product",
       accessorKey: "name",
-      header: ({ column }) => (
-        <button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs uppercase tracking-wide hover:text-foreground transition-colors"
-        >
-          {labels.product}
-          <ArrowUpDown className="h-3 w-3" />
-        </button>
-      ),
+      header: ({ column }) => {
+        const sorted = column.getIsSorted();
+        return (
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className={`flex items-center gap-1.5 text-xs uppercase tracking-wide hover:text-foreground transition-colors ${
+              sorted ? 'font-semibold text-accent' : 'font-medium text-muted-foreground'
+            }`}
+          >
+            {labels.product}
+            {sorted === "asc" ? (
+              <ArrowUp className="h-3 w-3" />
+            ) : sorted === "desc" ? (
+              <ArrowDown className="h-3 w-3" />
+            ) : (
+              <ArrowUpDown className="h-3 w-3 opacity-50" />
+            )}
+          </button>
+        );
+      },
       cell: ({ row }) => (
         <ProductCell
           product={row.original}
@@ -121,7 +240,10 @@ export function createColumns(
           onView={() => onViewProduct(row.original)}
         />
       ),
-      meta: { width: "40%" },
+      size: 450,
+      minSize: 200,
+      maxSize: 1200,
+      enableResizing: true,
     });
   }
 
@@ -134,7 +256,10 @@ export function createColumns(
       cell: ({ row }) => (
         <ManufacturerCell name={row.original.manufacturer_name} />
       ),
-      meta: { width: "10%" },
+      size: 140,
+      minSize: 80,
+      maxSize: 400,
+      enableResizing: true,
     });
   }
 
@@ -143,17 +268,36 @@ export function createColumns(
     columns.push({
       id: "price",
       accessorKey: "price",
-      header: ({ column }) => (
-        <button
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="flex items-center gap-1.5 font-medium text-muted-foreground text-xs uppercase tracking-wide hover:text-foreground transition-colors justify-end w-full"
-        >
-          {labels.price}
-          <ArrowUpDown className="h-3 w-3" />
-        </button>
+      header: ({ column }) => {
+        const sorted = column.getIsSorted();
+        return (
+          <button
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className={`flex items-center gap-1.5 text-xs uppercase tracking-wide hover:text-foreground transition-colors justify-end w-full ${
+              sorted ? 'font-semibold text-accent' : 'font-medium text-muted-foreground'
+            }`}
+          >
+            {labels.price}
+            {sorted === "asc" ? (
+              <ArrowUp className="h-3 w-3" />
+            ) : sorted === "desc" ? (
+              <ArrowDown className="h-3 w-3" />
+            ) : (
+              <ArrowUpDown className="h-3 w-3 opacity-50" />
+            )}
+          </button>
+        );
+      },
+      cell: ({ row }) => (
+        <PriceCell
+          price={row.original.price}
+          hasRefPrices={hasRefPriceCoverage(row.original.emdn_category?.path, refPricePaths)}
+        />
       ),
-      cell: ({ row }) => <PriceCell price={row.original.price} />,
-      meta: { width: "8%" },
+      size: 110,
+      minSize: 80,
+      maxSize: 300,
+      enableResizing: true,
     });
   }
 
@@ -168,7 +312,10 @@ export function createColumns(
           mdrClass={row.original.mdr_class}
         />
       ),
-      meta: { width: "10%" },
+      size: 140,
+      minSize: 80,
+      maxSize: 300,
+      enableResizing: true,
     });
   }
 
@@ -188,38 +335,30 @@ export function createColumns(
           allCategories={allCategories}
         />
       ),
-      meta: { width: "50%" },
+      size: 340,
+      minSize: 120,
+      maxSize: 800,
+      enableResizing: true,
     });
   }
 
-  // Actions column (always visible)
+  // Actions column (always visible) — includes "Ask AI" option
   columns.push({
     id: "actions",
     header: () => null,
     cell: ({ row }) => (
-      <DropdownMenu
-        trigger={
-          <div className="p-1 rounded hover:bg-muted transition-colors">
-            <MoreVertical className="h-4 w-4 text-muted-foreground" />
-          </div>
-        }
-        align="right"
-      >
-        <DropdownMenuItem onClick={() => onViewProduct(row.original)}>
-          {labels.viewDetails}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onEditProduct(row.original)}>
-          {labels.edit}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => onDeleteProduct(row.original)}
-          className="text-red-600"
-        >
-          {labels.delete}
-        </DropdownMenuItem>
-      </DropdownMenu>
+      <ActionsCell
+        product={row.original}
+        onView={() => onViewProduct(row.original)}
+        onEdit={() => onEditProduct(row.original)}
+        onDelete={() => onDeleteProduct(row.original)}
+        labels={labels}
+      />
     ),
-    meta: { width: "48px" },
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
+    enableResizing: false,
   });
 
   return columns;
@@ -232,7 +371,8 @@ export function useColumns(
   onDeleteProduct: (product: ProductWithRelations) => void,
   allCategories: EMDNCategory[],
   columnVisibility: ColumnVisibility,
-  manufacturers: string[] = []
+  manufacturers: string[] = [],
+  refPricePaths: string[] = []
 ) {
   const tTable = useTranslations('table');
   const tActions = useTranslations('actions');
@@ -244,6 +384,7 @@ export function useColumns(
     viewDetails: tActions('viewDetails'),
     edit: tActions('edit'),
     delete: tActions('delete'),
+    askAI: tActions('askAI'),
   }), [tTable, tActions]);
 
   return useMemo(
@@ -255,8 +396,9 @@ export function useColumns(
         allCategories,
         columnVisibility,
         manufacturers,
-        labels
+        labels,
+        refPricePaths
       ),
-    [onViewProduct, onEditProduct, onDeleteProduct, allCategories, columnVisibility, manufacturers, labels]
+    [onViewProduct, onEditProduct, onDeleteProduct, allCategories, columnVisibility, manufacturers, labels, refPricePaths]
   );
 }

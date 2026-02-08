@@ -1,0 +1,637 @@
+{
+  "XC1.1": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.1.1": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.2": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.2.1": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.3": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.4": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.5": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.7": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.8": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.9": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.11": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.13": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.14": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.15": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.16": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.17": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC1.18": {
+    "emdn_id": "fc00ca61-9e2f-4288-ab66-19b6307a2567",
+    "emdn_code": "P0908",
+    "emdn_name": "HIP PROSTHESES"
+  },
+  "XC2.1": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.2": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.3": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.4": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.5": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.7": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.8": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.10": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.11": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.12": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.13": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.14": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.15": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.16": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.17": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC2.18": {
+    "emdn_id": "e3f618b3-7382-4a85-8ad7-27f0b0ca7ac0",
+    "emdn_code": "P0909",
+    "emdn_name": "KNEE PROSTHESES"
+  },
+  "XC3.1": {
+    "emdn_id": "6f339daa-d45e-49a8-b646-f0d000b4d9a9",
+    "emdn_code": "P0901",
+    "emdn_name": "SHOULDER PROSTHESES"
+  },
+  "XC3.2": {
+    "emdn_id": "6f339daa-d45e-49a8-b646-f0d000b4d9a9",
+    "emdn_code": "P0901",
+    "emdn_name": "SHOULDER PROSTHESES"
+  },
+  "XC3.3": {
+    "emdn_id": "6f339daa-d45e-49a8-b646-f0d000b4d9a9",
+    "emdn_code": "P0901",
+    "emdn_name": "SHOULDER PROSTHESES"
+  },
+  "XC3.4": {
+    "emdn_id": "f6b956e6-f66f-48ea-8181-805bf663f491",
+    "emdn_code": "P0902",
+    "emdn_name": "ELBOW PROSTHESES"
+  },
+  "XC3.5": {
+    "emdn_id": "940b4e06-bc88-4a55-b239-ba0a48a72a28",
+    "emdn_code": "P0905",
+    "emdn_name": "ANKLE PROSTHESES"
+  },
+  "XC3.6": {
+    "emdn_id": "0af41102-3759-40dd-bded-567ed1d2a2a0",
+    "emdn_code": "P090204",
+    "emdn_name": "ELBOW PROSTHESES RADIAL COMPONENTS"
+  },
+  "XC3.7": {
+    "emdn_id": "dc08c6e6-2145-499c-b050-61c0f149fded",
+    "emdn_code": "P090404",
+    "emdn_name": "HAND PROSTHESES TRAPEZIO-METACARPAL COMPONENTS"
+  },
+  "XC3.9": {
+    "emdn_id": "e45ae7fb-e7bc-47a5-bf09-b080f0269e9c",
+    "emdn_code": "P090199",
+    "emdn_name": "SHOULDER PROSTHESES - OTHER"
+  },
+  "XC4.1.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.1.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.1.3": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.1.4": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.1.5": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.1.6": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.1.7": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.2.1": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.2.2": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.2.4": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.2.5": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.2.6": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.2.7": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.2.8": {
+    "emdn_id": "d625e0bd-42d4-4b88-b709-d00a39e62632",
+    "emdn_code": "P091299",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC4.2.9": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.3.1.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.3.1.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.3.1.3": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.3.3": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.3.4": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.3.5": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.3.6": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.3.7": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.3.8": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.4.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.4.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.4.3.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.4.3.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.4.4": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.4.5": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.5.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.5.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.5.3": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.5.4": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.5.5": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.5.6": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.6.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.6.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.6.3": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.6.4": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.6.5": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.6.6": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.6.7": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.7.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.7.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.8.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.8.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.8.3": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.9.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.9.3": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.10.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.10.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.10.3": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.10.4": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.11.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.11.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.12": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.13": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.14": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.15": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC4.16": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.1": {
+    "emdn_id": "abd398cd-4272-49e2-b77c-c2a9991387f7",
+    "emdn_code": "P0999",
+    "emdn_name": "ORTHOPAEDIC PROSTHESES, OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC5.2": {
+    "emdn_id": "abd398cd-4272-49e2-b77c-c2a9991387f7",
+    "emdn_code": "P0999",
+    "emdn_name": "ORTHOPAEDIC PROSTHESES, OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC5.3": {
+    "emdn_id": "abd398cd-4272-49e2-b77c-c2a9991387f7",
+    "emdn_code": "P0999",
+    "emdn_name": "ORTHOPAEDIC PROSTHESES, OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS - OTHER"
+  },
+  "XC5.3.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.3.2": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.4": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.5": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.5.1": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.6": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.7": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.8": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.9": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.10": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.11": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.12": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.13": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.14": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.15": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.17": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC5.18": {
+    "emdn_id": "2ce1b68f-0cab-4f15-9d12-c0775ee0890c",
+    "emdn_code": "P0912",
+    "emdn_name": "OSTEOSYNTHESIS DEVICES, DEVICES FOR TENDON AND LIGAMENT SYNTHESIS"
+  },
+  "XC3.10": {
+    "emdn_id": "6f339daa-d45e-49a8-b646-f0d000b4d9a9",
+    "emdn_code": "P0901",
+    "emdn_name": "SHOULDER PROSTHESES"
+  },
+  "XC3.12": {
+    "emdn_id": "e45ae7fb-e7bc-47a5-bf09-b080f0269e9c",
+    "emdn_code": "P090199",
+    "emdn_name": "SHOULDER PROSTHESES - OTHER"
+  },
+  "XC3.13": {
+    "emdn_id": "e45ae7fb-e7bc-47a5-bf09-b080f0269e9c",
+    "emdn_code": "P090199",
+    "emdn_name": "SHOULDER PROSTHESES - OTHER"
+  },
+  "XC3.14": {
+    "emdn_id": "e45ae7fb-e7bc-47a5-bf09-b080f0269e9c",
+    "emdn_code": "P090199",
+    "emdn_name": "SHOULDER PROSTHESES - OTHER"
+  },
+  "XC3.15": {
+    "emdn_id": "e45ae7fb-e7bc-47a5-bf09-b080f0269e9c",
+    "emdn_code": "P090199",
+    "emdn_name": "SHOULDER PROSTHESES - OTHER"
+  }
+}

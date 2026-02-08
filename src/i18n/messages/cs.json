@@ -85,8 +85,11 @@
     "vendorUnderProduct": "Dodavatel (pod produktem)",
     "showingRange": "Zobrazuji {start} až {end} z {total} produktů",
     "showingTotal": "Zobrazuji {count} z {total} produktů",
-    "noProductsFound": "Nebyly nalezeny žádné produkty",
+    "noProductsFound": "Žádné produkty neodpovídají filtrům",
+    "noProductsYet": "V katalogu nejsou žádné produkty",
+    "addFirstProduct": "Přidejte svůj první produkt a začněte s katalogem.",
     "adjustFilters": "Zkuste upravit filtry nebo hledaný výraz pro nalezení toho, co hledáte.",
+    "clearFilters": "Vymazat všechny filtry",
     "toggleColumnVisibility": "Přepnout viditelnost sloupců",
     "pagination": {
       "previous": "Předchozí",
@@ -100,7 +103,8 @@
     "delete": "Smazat",
     "viewMode": "Režim prohlížení",
     "editMode": "Režim úprav",
-    "deleteProduct": "Smazat produkt"
+    "deleteProduct": "Smazat produkt",
+    "askAI": "Zeptat se AI"
   },
   "product": {
     "name": "Název",
@@ -288,7 +292,60 @@
     "copyPrompt": "Kopírovat dotaz",
     "goToPerplexity": "Přejít na Perplexity AI",
     "goToGemini": "Přejít na Gemini",
-    "goToEudamed": "Přejít na EUDAMED"
+    "goToEudamed": "Přejít na EUDAMED",
+    "goToLPPR": "Přejít na LPPR (Francie)",
+    "goToKategorizacia": "Přejít na MZ SR (Slovensko)"
+  },
+  "referencePricing": {
+    "title": "Referenční ceny EU",
+    "description": "Oficiální úhradové sazby a ceny z veřejných zakázek z registrů EU",
+    "noPrices": "Pro tento produkt nejsou k dispozici referenční ceny",
+    "price": "cena",
+    "prices": "cen",
+    "country": "země",
+    "countries": "zemí",
+    "rangeLabel": "Referenční rozsah",
+    "bestMatchRange": "Nejlepší shoda",
+    "categoryRange": "Rozsah kategorie",
+    "vendorPrice": "Cena dodavatele (přibl.)",
+    "productLevel": "produkt",
+    "categoryLevel": "kategorie",
+    "matchProduct": "Shoda",
+    "matchCategory": "Kategorie",
+    "matchBroad": "Široká",
+    "tabAll": "Vše",
+    "confidence": "spolehlivost",
+    "matchCount": "{matched} shod · {category} na úrovni kategorie",
+    "scopeSet": "Cena setu",
+    "scopeComponent": "Cena komponenty",
+    "scopeProcedure": "Cena výkonu",
+    "scopeSetShort": "Set",
+    "scopeComponentShort": "Komponenta",
+    "scopeProcedureShort": "Výkon",
+    "scopeNote": "Ceny setu pokrývají kompletní chirurgickou sadu, nikoliv jednotlivé komponenty",
+    "estimatedComponent": "Odhad {label}",
+    "fractionNote": "Odhadováno na {range} z ceny setu na základě typického rozložení nákladů",
+    "whyThisPrice": "Proč tato cena?",
+    "whyMatch": "Shoda",
+    "whyScope": "Rozsah",
+    "legendTitle": "Vysvětlení cen",
+    "legendConfidence": "Spolehlivost shody",
+    "legendMatchHigh": "Shoda výrobce s tímto produktem (vysoká spolehlivost)",
+    "legendMatchMedium": "Stejná podkategorie EMDN (střední spolehlivost)",
+    "legendMatchLow": "Široká shoda kategorie (přibližná)",
+    "legendScopes": "Rozsah ceny",
+    "legendScopeComponent": "Komponenta — cena za jednotlivý díl",
+    "legendScopeSet": "Set — cena za kompletní chirurgickou sadu",
+    "legendScopeProcedure": "Výkon — zahrnuje implantát + operaci",
+    "legendSources": "Zdroje dat",
+    "legendSourceSK": "Úhradové stropy Ministerstva zdravotnictví SR",
+    "legendSourceFR": "Tarify francouzského seznamu LPPR",
+    "legendDisclaimer": "Ceny jsou z oficiálních registrů EU a mohou se lišit od skutečných sjednaných cen. Odhady komponent jsou přibližné.",
+    "showAllInScope": "Zobrazit {count} dalších bez shody",
+    "colPrice": "Cena",
+    "colCode": "Kód",
+    "colSource": "Zdroj",
+    "colDate": "Datum"
   },
   "emdn": {
     "level0": "Kategorie",
@@ -301,6 +358,71 @@
     "notClassified": "Neklasifikováno",
     "classification": "Klasifikace"
   },
+  "export": {
+    "export": "Export",
+    "exportData": "Export dat",
+    "exportPageCSV": "Exportovat stránku (CSV)",
+    "exportPageDesc": "{count} produktů na aktuální stránce"
+  },
+  "darkMode": {
+    "light": "Světlý",
+    "dark": "Tmavý",
+    "system": "Systém"
+  },
+  "commandPalette": {
+    "placeholder": "Hledat produkty, akce...",
+    "noResults": "Žádné výsledky",
+    "products": "Produkty",
+    "actions": "Akce",
+    "recent": "Poslední hledání",
+    "clearRecent": "Vymazat poslední",
+    "toggleDarkMode": "Přepnout tmavý režim",
+    "switchLanguage": "Přepnout jazyk",
+    "clearFilters": "Vymazat všechny filtry",
+    "openChat": "Otevřít AI chat"
+  },
+  "savedViews": {
+    "title": "Uložené pohledy",
+    "save": "Uložit pohled",
+    "saveCurrentView": "Uložit aktuální filtry",
+    "viewName": "Název pohledu",
+    "namePlaceholder": "např. Kyčelní implantáty od Zimmer",
+    "apply": "Použít",
+    "rename": "Přejmenovat",
+    "delete": "Smazat",
+    "noViews": "Zatím žádné uložené pohledy",
+    "noViewsDesc": "Použijte filtry a uložte je pro rychlý přístup",
+    "maxViews": "Dosažen maximální počet 20 pohledů"
+  },
+  "bulkActions": {
+    "selected": "{count} vybráno",
+    "compare": "Porovnat",
+    "exportSelected": "Exportovat",
+    "askAI": "Zeptat se AI",
+    "clear": "Zrušit",
+    "maxCompare": "Max 20 pro porovnání"
+  },
+  "chatHistory": {
+    "sessions": "Historie chatu",
+    "newChat": "Nový chat",
+    "noSessions": "Žádná historie chatu",
+    "previousResults": "Předchozí výsledky nástrojů"
+  },
+  "shortcuts": {
+    "title": "Klávesové zkratky",
+    "search": "Hledat",
+    "close": "Zavřít",
+    "nextRow": "Další řádek",
+    "prevRow": "Předchozí řádek",
+    "openDetail": "Otevřít detail",
+    "toggleChat": "Přepnout chat",
+    "toggleFilters": "Přepnout filtry",
+    "showShortcuts": "Zobrazit zkratky"
+  },
+  "accessibility": {
+    "skipToContent": "Přeskočit na hlavní obsah",
+    "showingProducts": "Zobrazuji {count} z {total} produktů"
+  },
   "columnVisibility": {
     "product": "Produkt",
     "sku": "SKU (pod produktem)",
@@ -308,6 +430,7 @@
     "manufacturer": "Výrobce",
     "price": "Cena",
     "regulatory": "Regulace",
-    "category": "Kategorie"
+    "category": "Kategorie",
+    "resetWidths": "Obnovit šířky sloupců"
   }
 }

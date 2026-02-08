@@ -2,24 +2,24 @@
 
 export function TypingIndicator() {
   return (
-    <div className="px-4 py-2 flex items-center gap-1">
-      <span className="text-sm text-muted-foreground animate-pulse">
-        Generating response
-      </span>
-      <span className="flex gap-0.5">
-        <span
-          className="w-1 h-1 rounded-full bg-muted-foreground animate-bounce"
-          style={{ animationDelay: '0ms' }}
-        />
-        <span
-          className="w-1 h-1 rounded-full bg-muted-foreground animate-bounce"
-          style={{ animationDelay: '150ms' }}
-        />
-        <span
-          className="w-1 h-1 rounded-full bg-muted-foreground animate-bounce"
-          style={{ animationDelay: '300ms' }}
-        />
-      </span>
+    <div className="flex justify-start mb-3 px-4" role="status" aria-live="polite">
+      <div className="max-w-[85%] px-4 py-3 bg-muted rounded-2xl rounded-bl-md">
+        {/* Skeleton text bars mimicking incoming message */}
+        <div className="space-y-2">
+          <div className="h-3 bg-muted-foreground/15 rounded-full w-[80%] animate-pulse" />
+          <div
+            className="h-3 bg-muted-foreground/12 rounded-full w-[60%] animate-pulse"
+            style={{ animationDelay: '75ms' }}
+          />
+          <div
+            className="h-3 bg-muted-foreground/10 rounded-full w-[40%] animate-pulse"
+            style={{ animationDelay: '150ms' }}
+          />
+        </div>
+        <span className="text-[11px] text-muted-foreground/60 mt-2 block">
+          Generating response...
+        </span>
+      </div>
     </div>
   );
 }

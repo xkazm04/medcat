@@ -81,8 +81,11 @@
     "vendorUnderProduct": "Vendor (under product)",
     "showingRange": "Showing {start} to {end} of {total} products",
     "showingTotal": "Showing {count} of {total} products",
-    "noProductsFound": "No products found",
+    "noProductsFound": "No products match your filters",
+    "noProductsYet": "No products in catalog",
+    "addFirstProduct": "Add your first product to get started with the catalog.",
     "adjustFilters": "Try adjusting your filters or search query to find what you are looking for.",
+    "clearFilters": "Clear all filters",
     "toggleColumnVisibility": "Toggle column visibility",
     "pagination": {
       "previous": "Previous",
@@ -96,7 +99,8 @@
     "delete": "Delete",
     "viewMode": "View mode",
     "editMode": "Edit mode",
-    "deleteProduct": "Delete product"
+    "deleteProduct": "Delete product",
+    "askAI": "Ask AI"
   },
   "product": {
     "name": "Name",
@@ -284,7 +288,60 @@
     "copyPrompt": "Copy prompt",
     "goToPerplexity": "Go to Perplexity AI",
     "goToGemini": "Go to Gemini",
-    "goToEudamed": "Go to EUDAMED"
+    "goToEudamed": "Go to EUDAMED",
+    "goToLPPR": "Go to LPPR (France)",
+    "goToKategorizacia": "Go to MZ SR (Slovakia)"
+  },
+  "referencePricing": {
+    "title": "EU Reference Prices",
+    "description": "Official reimbursement rates and tender prices from EU registries",
+    "noPrices": "No reference prices available for this product",
+    "price": "price",
+    "prices": "prices",
+    "country": "country",
+    "countries": "countries",
+    "rangeLabel": "Reference range",
+    "bestMatchRange": "Best match",
+    "categoryRange": "Category range",
+    "vendorPrice": "Vendor price (approx.)",
+    "productLevel": "product",
+    "categoryLevel": "category",
+    "matchProduct": "Matched",
+    "matchCategory": "Category",
+    "matchBroad": "Broad",
+    "tabAll": "All",
+    "confidence": "confidence",
+    "matchCount": "{matched} matched · {category} category-level",
+    "scopeSet": "Set price",
+    "scopeComponent": "Component price",
+    "scopeProcedure": "Procedure price",
+    "scopeSetShort": "Set",
+    "scopeComponentShort": "Component",
+    "scopeProcedureShort": "Procedure",
+    "scopeNote": "Set prices cover a complete surgical kit, not individual components",
+    "estimatedComponent": "Est. {label} cost",
+    "fractionNote": "Estimated at {range} of set price based on typical cost breakdown",
+    "whyThisPrice": "Why this price?",
+    "whyMatch": "Match",
+    "whyScope": "Scope",
+    "legendTitle": "Understanding these prices",
+    "legendConfidence": "Match confidence",
+    "legendMatchHigh": "Manufacturer-matched to this product (high confidence)",
+    "legendMatchMedium": "Same EMDN subcategory (medium confidence)",
+    "legendMatchLow": "Broad category match (approximate)",
+    "legendScopes": "Price scope",
+    "legendScopeComponent": "Component — price for a single part",
+    "legendScopeSet": "Set — price for a complete surgical kit",
+    "legendScopeProcedure": "Procedure — includes implant + surgery",
+    "legendSources": "Data sources",
+    "legendSourceSK": "Slovakia Ministry of Health reimbursement ceilings",
+    "legendSourceFR": "France Liste des Produits et Prestations tariffs",
+    "legendDisclaimer": "Prices are from official EU registries and may differ from actual negotiated prices. Component estimates are approximate.",
+    "showAllInScope": "Show {count} more unmatched",
+    "colPrice": "Price",
+    "colCode": "Code",
+    "colSource": "Source",
+    "colDate": "Date"
   },
   "emdn": {
     "level0": "Category",
@@ -297,6 +354,71 @@
     "notClassified": "Not classified",
     "classification": "Classification"
   },
+  "export": {
+    "export": "Export",
+    "exportData": "Export Data",
+    "exportPageCSV": "Export page (CSV)",
+    "exportPageDesc": "{count} products on current page"
+  },
+  "darkMode": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "commandPalette": {
+    "placeholder": "Search products, actions...",
+    "noResults": "No results found",
+    "products": "Products",
+    "actions": "Actions",
+    "recent": "Recent Searches",
+    "clearRecent": "Clear recent",
+    "toggleDarkMode": "Toggle dark mode",
+    "switchLanguage": "Switch language",
+    "clearFilters": "Clear all filters",
+    "openChat": "Open AI chat"
+  },
+  "savedViews": {
+    "title": "Saved Views",
+    "save": "Save view",
+    "saveCurrentView": "Save current filters",
+    "viewName": "View name",
+    "namePlaceholder": "e.g. Hip implants from Zimmer",
+    "apply": "Apply",
+    "rename": "Rename",
+    "delete": "Delete",
+    "noViews": "No saved views yet",
+    "noViewsDesc": "Apply filters and save them for quick access",
+    "maxViews": "Maximum of 20 views reached"
+  },
+  "bulkActions": {
+    "selected": "{count} selected",
+    "compare": "Compare",
+    "exportSelected": "Export",
+    "askAI": "Ask AI",
+    "clear": "Clear",
+    "maxCompare": "Max 20 for compare"
+  },
+  "chatHistory": {
+    "sessions": "Chat Sessions",
+    "newChat": "New Chat",
+    "noSessions": "No chat history",
+    "previousResults": "Previous tool results"
+  },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "search": "Search",
+    "close": "Close",
+    "nextRow": "Next row",
+    "prevRow": "Previous row",
+    "openDetail": "Open detail",
+    "toggleChat": "Toggle chat",
+    "toggleFilters": "Toggle filters",
+    "showShortcuts": "Show shortcuts"
+  },
+  "accessibility": {
+    "skipToContent": "Skip to main content",
+    "showingProducts": "Showing {count} of {total} products"
+  },
   "columnVisibility": {
     "product": "Product",
     "sku": "SKU (under product)",
@@ -304,6 +426,7 @@
     "manufacturer": "Manufacturer",
     "price": "Price",
     "regulatory": "Regulatory",
-    "category": "Category"
+    "category": "Category",
+    "resetWidths": "Reset column widths"
   }
 }

@@ -1,16 +1,20 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { ArrowDown } from 'lucide-react';
 import { MessageBubble } from './message-bubble';
 import { ProductCard } from './product-card';
 import { ExternalProductCard } from './external-product-card';
 import { ComparisonTable } from './comparison-table';
+import { ReferencePriceTable } from './reference-price-table';
+import { PriceSummaryCard } from './price-summary-card';
 import { CategoryChips } from './category-chips';
 import { LoadingSpinner } from './loading-spinner';
 import { StarterPrompts } from './starter-prompts';
 import { QuickActions } from './quick-actions';
+import { MessageActions } from './message-actions';
 import type { UIMessage } from 'ai';
-import type { ProductWithRelations } from '@/lib/types';
+import type { ProductWithRelations, ReferencePrice } from '@/lib/types';
 import type { ProductPriceComparison } from '@/lib/actions/similarity';
 
 interface MessageListProps {
@@ -23,6 +27,10 @@ interface MessageListProps {
   onCompareResults: () => void;
   onShowMore: () => void;
   onFilterVendor: () => void;
+  onRegenerate?: () => void;
+  activeSearch?: string;
+  activeVendor?: string;
+  activeCategory?: string;
 }
 
 // Type guards for tool parts
@@ -67,6 +75,24 @@ interface ExternalSearchOutput {
   hasResults: boolean;
 }
 
+interface PriceSummary {
+  totalPrices: number;
+  productMatchCount: number;
+  categoryMatchCount: number;
+  bestMatchRange: { min: number; max: number } | null;
+  allRange: { min: number; max: number };
+  scopeBreakdown: { set: number; component: number; procedure: number };
+  componentEstimate?: { min: number; max: number; label: string; fractionRange: string } | null;
+  hint: string;
+}
+
+interface LookupReferencePricesOutput {
+  prices: ReferencePrice[];
+  count: number;
+  summary?: PriceSummary | null;
+  error?: string;
+}
+
 export function MessageList({
   messages,
   isStreaming,
@@ -77,14 +103,41 @@ export function MessageList({
   onCompareResults,
   onShowMore,
   onFilterVendor,
+  onRegenerate,
+  activeSearch,
+  activeVendor,
+  activeCategory,
 }: MessageListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [userScrolled, setUserScrolled] = useState(false);
+  const scrollFrameRef = useRef<number>(0);
+  // Track initial message count to skip entrance animations for pre-loaded messages
+  const [initialMessageCount] = useState(messages.length);
 
-  // Auto-scroll to bottom when new messages arrive or content streams
+  // Detect user scrolling away from bottom
+  const handleScroll = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const threshold = 80;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    setUserScrolled(!atBottom);
+  }, []);
+
+  // Debounced auto-scroll (RAF batching) when not manually scrolled up
   useEffect(() => {
+    if (userScrolled) return;
+    cancelAnimationFrame(scrollFrameRef.current);
+    scrollFrameRef.current = requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    });
+    return () => cancelAnimationFrame(scrollFrameRef.current);
+  }, [messages, isStreaming, userScrolled]);
+
+  const scrollToBottom = useCallback(() => {
+    setUserScrolled(false);
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isStreaming]);
+  }, []);
 
   // Helper to check if a message has a completed tool output of the same type
   // Used to hide loading spinners when a later tool call has output
@@ -96,26 +149,47 @@ export function MessageList({
     });
   };
 
+  // Find the last assistant message index for regenerate button placement
+  const lastAssistantIndex = messages.reduce((acc, msg, idx) =>
+    msg.role === 'assistant' ? idx : acc, -1
+  );
+
   // Render a single message part based on its type
   const renderPart = (
     part: UIMessage['parts'][number],
     partIndex: number,
     messageRole: UIMessage['role'],
-    allParts: UIMessage['parts']
+    allParts: UIMessage['parts'],
+    messageIndex: number
   ) => {
     // Type guard to check for tool parts
     const isToolPart = (p: unknown): p is ToolPartBase =>
       typeof p === 'object' && p !== null && 'toolCallId' in p && 'state' in p;
 
     switch (part.type) {
-      case 'text':
+      case 'text': {
+        const isAssistant = messageRole === 'assistant';
+        const isLast = messageIndex === lastAssistantIndex;
+        const isPreloaded = messageIndex < initialMessageCount;
         return (
-          <MessageBubble
-            key={partIndex}
-            content={part.text}
-            role={messageRole as 'user' | 'assistant'}
-          />
+          <div key={partIndex} className={isAssistant ? 'group' : ''}>
+            <MessageBubble
+              content={part.text}
+              role={messageRole as 'user' | 'assistant'}
+              skipAnimation={isPreloaded}
+            />
+            {isAssistant && (
+              <div className="flex justify-start pl-1">
+                <MessageActions
+                  text={part.text}
+                  isLastAssistant={isLast}
+                  onRegenerate={onRegenerate}
+                />
+              </div>
+            )}
+          </div>
         );
+      }
 
       case 'tool-searchProducts': {
         if (!isToolPart(part)) return null;
@@ -243,25 +317,65 @@ export function MessageList({
         );
       }
 
+      case 'tool-lookupReferencePrices': {
+        if (!isToolPart(part)) return null;
+        const toolPart = part as ToolPartBase & { output?: LookupReferencePricesOutput };
+        if (toolPart.state === 'output-available' && toolPart.output) {
+          const countrySet = new Set(toolPart.output.prices.map(p => p.source_country));
+          return (
+            <div key={toolPart.toolCallId}>
+              {toolPart.output.summary && (
+                <PriceSummaryCard
+                  summary={toolPart.output.summary}
+                  countryCount={countrySet.size}
+                />
+              )}
+              <ReferencePriceTable prices={toolPart.output.prices} />
+            </div>
+          );
+        }
+        if (hasCompletedToolOfType(allParts, 'tool-lookupReferencePrices')) {
+          return null;
+        }
+        return <LoadingSpinner key={toolPart.toolCallId} text="Looking up reference prices..." />;
+      }
+
       default:
         return null;
     }
   };
 
   return (
-    <div ref={containerRef} className="flex-1 overflow-y-auto px-4 py-4">
+    <div className="relative flex-1 overflow-hidden">
+    <div ref={containerRef} onScroll={handleScroll} className="h-full overflow-y-auto px-4 py-4">
       {messages.length === 0 ? (
-        <StarterPrompts onSelect={onSendMessage} />
+        <StarterPrompts
+          onSelect={onSendMessage}
+          activeSearch={activeSearch}
+          activeVendor={activeVendor}
+          activeCategory={activeCategory}
+        />
       ) : (
-        messages.map((message) => (
+        messages.map((message, messageIndex) => (
           <div key={message.id}>
             {message.parts.map((part, partIndex) =>
-              renderPart(part, partIndex, message.role, message.parts)
+              renderPart(part, partIndex, message.role, message.parts, messageIndex)
             )}
           </div>
         ))
       )}
       <div ref={bottomRef} />
+    </div>
+    {/* Scroll to bottom button */}
+    {userScrolled && messages.length > 0 && (
+      <button
+        onClick={scrollToBottom}
+        className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-accent text-accent-foreground rounded-full shadow-lg hover:bg-green-hover transition-colors z-10"
+      >
+        <ArrowDown className="w-3 h-3" />
+        New messages
+      </button>
+    )}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Settings2, Check } from "lucide-react";
+import { Settings2, Check, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export interface ColumnVisibility {
@@ -30,6 +30,7 @@ const STORAGE_KEY = "medcatalog-column-visibility";
 interface ColumnVisibilityToggleProps {
   visibility: ColumnVisibility;
   onChange: (visibility: ColumnVisibility) => void;
+  onResetColumnSizing?: () => void;
 }
 
 export function useColumnVisibility() {
@@ -64,6 +65,7 @@ export function useColumnVisibility() {
 export function ColumnVisibilityToggle({
   visibility,
   onChange,
+  onResetColumnSizing,
 }: ColumnVisibilityToggleProps) {
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("table");
@@ -149,6 +151,21 @@ export function ColumnVisibilityToggle({
                     </button>
                   );
                 }
+              )}
+              {onResetColumnSizing && (
+                <>
+                  <div className="border-t border-border my-1" />
+                  <button
+                    onClick={() => {
+                      onResetColumnSizing();
+                      setIsOpen(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left hover:bg-muted transition-colors text-muted-foreground"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span>{tCol("resetWidths")}</span>
+                  </button>
+                </>
               )}
             </motion.div>
           </>

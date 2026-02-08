@@ -12,7 +12,13 @@
     "seed": "tsx scripts/seed-data.ts",
     "enrich:emdn": "tsx scripts/enrich-csv-emdn.ts",
     "enrich:emdn:local": "tsx scripts/enrich-csv-emdn-local.ts",
-    "test:import": "tsx scripts/test-import.ts"
+    "test:import": "tsx scripts/test-import.ts",
+    "import:lppr": "tsx scripts/import-lppr-tariffs.ts",
+    "test:pricing": "tsx scripts/test-pricing-search.ts",
+    "import:sk-szm": "tsx scripts/import-sk-szm.ts",
+    "db:migrate": "tsx scripts/run-migration.ts --all",
+    "db:migrate:dry": "tsx scripts/run-migration.ts --dry-run",
+    "db:test": "tsx scripts/test-db-connection.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.21",
@@ -40,6 +46,7 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.7.0",
     "remark-gfm": "^4.0.1",
     "usehooks-ts": "^3.1.1",
     "zod": "^4.3.6"
@@ -47,11 +54,13 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "pg": "^8.18.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",

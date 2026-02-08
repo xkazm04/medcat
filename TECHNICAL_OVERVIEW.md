@@ -332,3 +332,80 @@ Enables development without database connection.
 5. **Memoized Components** - Cell renderers wrapped in `React.memo`
 6. **Server Components** - Data fetching on server, reduced JS bundle
 7. **URL State** - No client-side filter state to sync
+
+
+# Autoplay process
+
+  Loop: generate → evaluate → (polish) → refine → repeat
+
+  1. START → Status becomes generating
+    - Triggers onRegeneratePrompts() with callback
+    - Callback receives prompts and calls generateImagesFromPrompts()
+  2. GENERATION_COMPLETE → Status becomes evaluating
+    - Watches isGeneratingImages flag
+    - When images complete, calls evaluateImages() via Gemini API
+    - Scores each image 0-100, threshold 70 for approval
+    - Identifies "polish candidates" (score 50-69)
+  3. EVALUATION_COMPLETE → Status becomes polishing or refining
+    - If polish candidates exist → polishing
+    - Otherwise → refining
+  4. POLISH_COMPLETE (if polishing) → Status becomes refining
+    - Attempts to improve borderline images via Leonardo API
+    - Re-evaluates polished images
+  5. REFINING → Saves approved images, extracts feedback
+    - Calls saveImageToPanel() for approved images
+    - Calls extractRefinementFeedback() from rejected images
+    - Stores feedback in ref for next iteration
+  6. ITERATION_COMPLETE → Check exit conditions:
+    - If totalSaved >= targetSavedCount → complete
+    - If currentIteration >= maxIterations (hard cap: 3) → complete
+    - If abortRequested → complete
+    - Otherwise → Back to generating (next iteration)
+
+  ---
+  Multi-Phase Orchestrator (useMultiPhaseAutoplay)
+
+  Phases: sketch → gameplay → poster → hud → complete
+
+  1. START with config (sketchCount, gameplayCount, posterEnabled, hudEnabled)
+    - Sets outputMode to match first phase
+    - Dispatches START action
+  2. SKETCH Phase (if sketchCount > 0)
+    - Sets outputMode to 'sketch'
+    - Delegates to single-phase orchestrator with targetSavedCount = sketchCount
+    - When sketchProgress.saved >= sketchCount → ADVANCE_PHASE
+  3. GAMEPLAY Phase (if gameplayCount > 0)
+    - Sets outputMode to 'gameplay'
+    - Delegates to single-phase orchestrator with targetSavedCount = gameplayCount
+    - When gameplayProgress.saved >= gameplayCount → ADVANCE_PHASE
+  4. POSTER Phase (if posterEnabled)
+    - Calls generatePosters() (creates 3 variations)
+    - Calls selectBestPoster() via Gemini evaluation
+    - Calls savePoster() → ADVANCE_PHASE
+  5. HUD Phase (if hudEnabled)
+    - Gets saved gameplay images from panel slots
+    - Calls hudGenerator.generateHudForImages()
+    - → ADVANCE_PHASE
+  6. COMPLETE
+
+  ---
+  Key Behaviors
+
+  - Hard cap: Max 3 iterations per phase
+  - Phase timeout: 2 minutes per phase (safety net)
+  - Generation timeout: 120 seconds (safety net)
+  - Abort: Stops single-phase orchestrator + HUD generator
+  - Feedback propagation: Uses refs to bypass React state batching
+  - Polish threshold: Score 50-69 (not approved, but worth trying to improve)
+  - Approval threshold: Score >= 70
+
+  ---
+  What the User Actually Sees
+
+  1. Click "Start Autoplay" in Activity Modal
+  2. Configure: sketch count, gameplay count, poster, HUD toggles
+  3. Modal shows phases: SKETCH → GAMEPLAY → POSTER → HUD
+  4. Generate button label shows: GENERATING → EVALUATING → REFINING
+  5. Images auto-save to panel when approved
+  6. Feedback auto-applied between iterations
+  7. Completes when targets met or max iterations reached

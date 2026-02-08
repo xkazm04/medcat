@@ -29,7 +29,14 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
+          }}
+        />
+      </head>
       <body className={`${inter.variable} antialiased`}>
         <LocaleProvider locale={locale} messages={messages}>
           <ToastProvider>

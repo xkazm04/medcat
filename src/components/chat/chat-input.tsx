@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { ArrowUp, Trash2 } from 'lucide-react';
 import { CHAT_FULL_MESSAGE } from '@/lib/chat/constants';
+import { useChatContextOptional } from '@/lib/hooks/use-chat-context';
 
 interface ChatInputProps {
   onSubmit: (text: string) => void;
@@ -14,6 +15,19 @@ interface ChatInputProps {
 export function ChatInput({ onSubmit, disabled, isChatFull, onClearChat }: ChatInputProps) {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const chatContext = useChatContextOptional();
+
+  // Register input setter with context so other components can insert text
+  useEffect(() => {
+    if (chatContext) {
+      chatContext.registerInputSetter((text: string) => {
+        // Append with space if input already has content, otherwise just set
+        setValue(prev => prev.trim() ? `${prev} ${text}` : text);
+        // Focus the textarea after insertion
+        textareaRef.current?.focus();
+      });
+    }
+  }, [chatContext]);
 
   // Auto-expand textarea as user types
   useEffect(() => {

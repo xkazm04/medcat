@@ -79,7 +79,7 @@ export function SearchInput() {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={t('search')}
-        className="w-full pl-9 pr-20 py-2.5 text-sm border border-border rounded-lg bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all shadow-sm focus:shadow-md"
+        className="w-full pl-9 pr-20 py-1.5 text-sm border border-border rounded-md bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all"
       />
 
       {/* Clear button and keyboard hint */}

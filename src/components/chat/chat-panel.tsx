@@ -1,18 +1,22 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 import { MessageList } from './message-list';
 import { ChatInput } from './chat-input';
 import { ErrorBubble } from './error-bubble';
 import { TypingIndicator } from './typing-indicator';
 import { classifyError } from '@/lib/chat/errors';
 import { MAX_MESSAGES } from '@/lib/chat/constants';
+import { useChatContextOptional } from '@/lib/hooks/use-chat-context';
+import type { useChatPersistence } from '@/lib/hooks/use-chat-persistence';
 import type { ProductWithRelations } from '@/lib/types';
 
 interface ChatPanelProps {
   isOpen: boolean;
+  persistence?: ReturnType<typeof useChatPersistence>;
 }
 
 // Extract last shown products from messages for context
@@ -32,18 +36,85 @@ function getLastSearchProducts(messages: ReturnType<typeof useChat>['messages'])
   return [];
 }
 
-export function ChatPanel({ isOpen }: ChatPanelProps) {
+export function ChatPanel({ isOpen, persistence }: ChatPanelProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { messages, sendMessage, status, stop, error, setMessages, regenerate, clearError } = useChat();
+  const chatContext = useChatContextOptional();
+  // Ref for catalog context so transport closure reads latest value
+  const catalogContextRef = useRef<string | undefined>(undefined);
+  const catalogContext = useMemo(() => {
+    const parts: string[] = [];
+    const search = searchParams.get('search');
+    const vendor = searchParams.get('vendor');
+    const category = searchParams.get('category');
+    const ceMarked = searchParams.get('ceMarked');
+    const mdrClass = searchParams.get('mdrClass');
+    const manufacturer = searchParams.get('manufacturer');
+    if (search) parts.push(`Search query: "${search}"`);
+    if (vendor) parts.push(`Vendor filter active (ID: ${vendor})`);
+    if (category) parts.push(`Category filter active (ID: ${category})`);
+    if (ceMarked) parts.push(`CE marked filter: ${ceMarked}`);
+    if (mdrClass) parts.push(`MDR class filter: ${mdrClass}`);
+    if (manufacturer) parts.push(`Manufacturer filter: ${decodeURIComponent(manufacturer)}`);
+    return parts.length > 0 ? parts.join('\n') : undefined;
+  }, [searchParams]);
+  // Sync computed value to ref (read by transport closure at request time)
+  useEffect(() => { catalogContextRef.current = catalogContext; }, [catalogContext]);
+
+  // Stable transport that reads catalog context at request time via ref.
+  // The body function is called during API requests, not during render — ref access is safe.
+  // eslint-disable-next-line react-hooks/refs
+  const transport = useMemo(() => new DefaultChatTransport({
+    api: '/api/chat',
+    body: () => {
+      const ctx = catalogContextRef.current;
+      return ctx ? { catalogContext: ctx } : {};
+    },
+  }), []);
+
+  const { messages, sendMessage, status, stop, error, setMessages, regenerate, clearError } = useChat({
+    transport,
+    id: persistence?.activeSessionId || 'default',
+  });
   const [retryAttempted, setRetryAttempted] = useState(false);
 
   // Extract context from last search for quick actions
   const lastProducts = useMemo(() => getLastSearchProducts(messages), [messages]);
 
+  // Load persisted messages when switching sessions
+  const prevSessionRef = useRef(persistence?.activeSessionId);
+  useEffect(() => {
+    if (!persistence) return;
+    const currentId = persistence.activeSessionId;
+    if (currentId !== prevSessionRef.current) {
+      prevSessionRef.current = currentId;
+      setMessages(persistence.getInitialMessages());
+    }
+  }, [persistence, persistence?.activeSessionId, setMessages]);
+
+  // Register sendMessage with context so other components can send messages
+  useEffect(() => {
+    if (chatContext) {
+      chatContext.registerSendMessage((text: string) => {
+        if (text.trim()) {
+          sendMessage({ text });
+        }
+      });
+    }
+  }, [chatContext, sendMessage]);
+
   const isStreaming = status === 'streaming';
   const showTypingIndicator = status === 'submitted';
   const isChatFull = messages.length >= MAX_MESSAGES;
+
+  // Persist messages after each assistant response
+  const prevStatusRef = useRef(status);
+  useEffect(() => {
+    if (prevStatusRef.current === 'streaming' && status === 'ready' && persistence) {
+      persistence.saveMessages(messages);
+    }
+    prevStatusRef.current = status;
+  }, [status, messages, persistence]);
 
   // CRITICAL: Cleanup on close - abort any active streaming
   // This prevents memory leaks and orphan server processes
@@ -53,14 +124,16 @@ export function ChatPanel({ isOpen }: ChatPanelProps) {
     }
   }, [isOpen, isStreaming, stop]);
 
-  // Also cleanup on unmount (safety net)
+  // Also cleanup on unmount (safety net) — use ref to avoid stale closure
+  const statusRef = useRef(status);
+  useEffect(() => { statusRef.current = status; }, [status]);
   useEffect(() => {
     return () => {
-      if (status === 'streaming') {
+      if (statusRef.current === 'streaming') {
         stop();
       }
     };
-  }, [status, stop]);
+  }, [stop]);
 
   // Auto-retry on retryable errors (once, silently)
   useEffect(() => {
@@ -161,7 +234,7 @@ export function ChatPanel({ isOpen }: ChatPanelProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 min-h-0">
       <MessageList
         messages={messages}
         isStreaming={isStreaming}
@@ -172,6 +245,10 @@ export function ChatPanel({ isOpen }: ChatPanelProps) {
         onCompareResults={handleCompareResults}
         onShowMore={handleShowMore}
         onFilterVendor={handleFilterVendor}
+        onRegenerate={regenerate}
+        activeSearch={searchParams.get('search') || undefined}
+        activeVendor={searchParams.get('vendor') ? 'selected vendor' : undefined}
+        activeCategory={searchParams.get('category') ? 'selected category' : undefined}
       />
       {showTypingIndicator && <TypingIndicator />}
       {showError && classifiedError && (
@@ -179,6 +256,7 @@ export function ChatPanel({ isOpen }: ChatPanelProps) {
           message={classifiedError.userMessage}
           isRetryable={classifiedError.isRetryable}
           onRetry={classifiedError.isRetryable ? handleRetry : undefined}
+          errorType={classifiedError.errorType}
         />
       )}
       <ChatInput

@@ -1,18 +1,26 @@
 'use client';
 
+import { motion } from 'motion/react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 interface MessageBubbleProps {
   content: string;
   role: 'user' | 'assistant';
+  /** Skip entrance animation (e.g. for messages loaded from persistence) */
+  skipAnimation?: boolean;
 }
 
-export function MessageBubble({ content, role }: MessageBubbleProps) {
+export function MessageBubble({ content, role, skipAnimation }: MessageBubbleProps) {
   const isUser = role === 'user';
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
+    <motion.div
+      initial={skipAnimation ? false : { opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}
+    >
       <div
         className={`max-w-[85%] px-4 py-2.5 ${
           isUser
@@ -60,6 +68,12 @@ export function MessageBubble({ content, role }: MessageBubbleProps) {
                     <code className="bg-background/50 px-1 py-0.5 rounded text-xs">{children}</code>
                   );
                 },
+                // Links - safe external links
+                a: ({ href, children }) => (
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="underline text-accent hover:text-green-hover">
+                    {children}
+                  </a>
+                ),
                 // Strong/bold
                 strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
               }}
@@ -69,6 +83,6 @@ export function MessageBubble({ content, role }: MessageBubbleProps) {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

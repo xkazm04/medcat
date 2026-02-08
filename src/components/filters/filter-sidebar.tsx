@@ -4,7 +4,7 @@ import { ReactNode, useState, useMemo, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "motion/react";
-import { X, SlidersHorizontal, ChevronDown, Loader2 } from "lucide-react";
+import { X, ChevronDown, Loader2 } from "lucide-react";
 
 interface FilterSidebarProps {
   children: ReactNode;
@@ -17,18 +17,9 @@ export function FilterSidebar({ children }: FilterSidebarProps) {
   const [isPending, startTransition] = useTransition();
 
   // Memoize filter state to avoid recalculating on every render
-  const { hasActiveFilters, filterCount } = useMemo(() => {
-    const activeFilters = [
-      searchParams.has("search"),
-      searchParams.has("vendor"),
-      searchParams.has("category"),
-      searchParams.has("material"),
-      searchParams.has("minPrice") || searchParams.has("maxPrice"),
-    ];
-    return {
-      hasActiveFilters: activeFilters.some(Boolean),
-      filterCount: activeFilters.filter(Boolean).length,
-    };
+  const hasActiveFilters = useMemo(() => {
+    const filterKeys = ["search", "vendor", "category", "material", "minPrice", "maxPrice"];
+    return filterKeys.some(key => searchParams.has(key));
   }, [searchParams]);
 
   const clearAllFilters = () => {
@@ -39,7 +30,6 @@ export function FilterSidebar({ children }: FilterSidebarProps) {
     if (searchParams.has("sortOrder")) {
       params.set("sortOrder", searchParams.get("sortOrder")!);
     }
-    // Use startTransition to keep UI responsive
     startTransition(() => {
       router.push(`?${params.toString()}`);
     });
@@ -50,26 +40,9 @@ export function FilterSidebar({ children }: FilterSidebarProps) {
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.2 }}
-      className="w-[420px] shrink-0 border-r border-border/60 bg-background/50 backdrop-blur-sm overflow-y-auto h-[calc(100vh-56px)] sticky top-14 shadow-[inset_-1px_0_0_0_rgba(22,101,52,0.03)]"
-      style={{
-        backgroundImage: 'radial-gradient(circle at 20px 20px, rgba(22, 101, 52, 0.015) 1px, transparent 1px)',
-        backgroundSize: '40px 40px'
-      }}
+      className="w-[280px] shrink-0 border-r border-border/60 bg-background/50 backdrop-blur-sm overflow-y-auto h-[calc(100vh-56px)] sticky top-14"
     >
       <div className="p-4">
-        {/* Header */}
-        <div className="flex items-center gap-2 mb-5 pb-4 border-b-2 border-green-border/60">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-green-light to-green-light/40 border border-green-border/50 flex items-center justify-center shadow-sm">
-            <SlidersHorizontal className="h-3.5 w-3.5 text-accent" />
-          </div>
-          <h2 className="text-sm font-semibold text-foreground">{t('title')}</h2>
-          {hasActiveFilters && (
-            <span className="ml-auto flex items-center justify-center min-w-[20px] h-5 text-xs font-medium bg-accent text-accent-foreground px-1.5 rounded-full shadow-sm">
-              {filterCount}
-            </span>
-          )}
-        </div>
-
         <div className="space-y-1">
           {children}
         </div>

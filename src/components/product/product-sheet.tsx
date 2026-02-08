@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'motion/react'
-import { Pencil, Trash2, Eye, DollarSign, X } from 'lucide-react'
+import { Pencil, Trash2, Eye, DollarSign, Globe, X } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
@@ -13,12 +13,14 @@ import {
 import { ProductDetail } from './product-detail'
 import { ProductForm } from './product-form'
 import { DeleteDialog } from './delete-dialog'
+import { ReferencePricesPanel } from './reference-prices'
 import { PriceComparisonTable } from '@/components/comparison/price-comparison-table'
 import {
   getProductPriceComparison,
   type ProductPriceComparison,
 } from '@/lib/actions/similarity'
-import type { ProductWithRelations, Vendor, EMDNCategory } from '@/lib/types'
+import { getReferencePricesForProduct } from '@/lib/actions/reference-prices'
+import type { ProductWithRelations, Vendor, EMDNCategory, ReferencePrice } from '@/lib/types'
 
 interface ProductSheetProps {
   product: ProductWithRelations | null
@@ -36,19 +38,28 @@ export function ProductSheet({
   emdnCategories,
 }: ProductSheetProps) {
   const t = useTranslations('product')
+  const tRef = useTranslations('referencePricing')
   const tActions = useTranslations('actions')
   const [mode, setMode] = useState<'view' | 'edit'>('view')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
+  // Price comparison state
   const [comparisonProducts, setComparisonProducts] = useState<ProductPriceComparison[]>([])
   const [comparisonLoading, setComparisonLoading] = useState(true)
   const [comparisonError, setComparisonError] = useState(false)
   const [isPriceComparisonOpen, setIsPriceComparisonOpen] = useState(false)
 
-  // Reset mode and comparison panel when sheet opens
+  // Reference prices state
+  const [referencePrices, setReferencePrices] = useState<ReferencePrice[]>([])
+  const [referencePricesLoading, setReferencePricesLoading] = useState(true)
+  const [isReferencePricesOpen, setIsReferencePricesOpen] = useState(false)
+
+  // Reset mode and panels when sheet opens
   useEffect(() => {
     if (open) {
       setMode('view')
       setIsPriceComparisonOpen(false)
+      setIsReferencePricesOpen(false)
     }
   }, [open])
 
@@ -74,16 +85,36 @@ export function ProductSheet({
     fetchComparison()
   }, [product?.id, open])
 
+  // Fetch reference prices when product changes
+  useEffect(() => {
+    if (!product?.id || !open) {
+      setReferencePrices([])
+      setReferencePricesLoading(false)
+      return
+    }
+
+    async function fetchRefPrices() {
+      setReferencePricesLoading(true)
+      const result = await getReferencePricesForProduct(product!.id)
+      if (result.success && result.data) {
+        setReferencePrices(result.data)
+      }
+      setReferencePricesLoading(false)
+    }
+    fetchRefPrices()
+  }, [product?.id, open])
+
   // Count of comparable products (excluding current product)
   const comparisonCount = comparisonProducts.filter(p => p.id !== product?.id).length
   const showComparisonButton = !comparisonLoading && !comparisonError && comparisonCount > 0
+  const showRefPricesButton = !referencePricesLoading && referencePrices.length > 0
 
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="!w-auto !max-w-none p-0">
           <div className="flex h-full">
-            {/* Price Comparison Panel (slides in from right) */}
+            {/* Price Comparison Panel (slides in from left) */}
             <AnimatePresence>
               {isPriceComparisonOpen && (
                 <motion.div
@@ -115,6 +146,48 @@ export function ProductSheet({
                         products={comparisonProducts}
                         currentProductId={product?.id || ''}
                         isLoading={false}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* EU Reference Prices Panel (slides in from left) */}
+            <AnimatePresence>
+              {isReferencePricesOpen && (
+                <motion.div
+                  key="reference-prices-panel"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 800, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.2, ease: 'easeInOut' }}
+                  className="h-full border-r border-border bg-background overflow-hidden"
+                >
+                  <div className="w-[800px] h-full flex flex-col">
+                    <div className="px-4 py-4 border-b-2 border-purple-300 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Globe className="h-4 w-4 text-purple-600" />
+                        <h3 className="font-semibold text-sm">{tRef('title')}</h3>
+                        <span className="text-xs text-muted-foreground">
+                          {referencePrices.length} {referencePrices.length === 1 ? tRef('price') : tRef('prices')}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setIsReferencePricesOpen(false)}
+                        className="p-1 rounded hover:bg-muted transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4">
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {tRef('description')}
+                      </p>
+                      <ReferencePricesPanel
+                        prices={referencePrices}
+                        vendorPriceCzk={product?.price}
+                        productEmdnCode={product?.emdn_category?.code}
                       />
                     </div>
                   </div>
@@ -183,27 +256,59 @@ export function ProductSheet({
                 )}
               </div>
 
-              {/* Price Comparison Toggle Button (floating on left edge) */}
-              {showComparisonButton && mode === 'view' && (
-                <button
-                  onClick={() => setIsPriceComparisonOpen(!isPriceComparisonOpen)}
-                  className={`
-                    absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full
-                    flex items-center gap-1 px-2 py-3 rounded-l-lg
-                    border border-r-0 border-border
-                    transition-colors
-                    ${isPriceComparisonOpen
-                      ? 'bg-green-600 text-white border-green-600'
-                      : 'bg-background hover:bg-muted'
-                    }
-                  `}
-                  title={isPriceComparisonOpen ? t('closeComparison') : t('openComparison')}
-                >
-                  <DollarSign className={`h-4 w-4 ${isPriceComparisonOpen ? 'text-white' : 'text-green-600'}`} />
-                  <span className={`text-sm font-medium ${isPriceComparisonOpen ? 'text-white' : 'text-green-600'}`}>
-                    {comparisonCount}
-                  </span>
-                </button>
+              {/* Floating Toggle Buttons (left edge) */}
+              {mode === 'view' && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full flex flex-col gap-2">
+                  {/* Price Comparison Toggle */}
+                  {showComparisonButton && (
+                    <button
+                      onClick={() => {
+                        setIsPriceComparisonOpen(!isPriceComparisonOpen)
+                        if (!isPriceComparisonOpen) setIsReferencePricesOpen(false)
+                      }}
+                      className={`
+                        flex items-center gap-1 px-2 py-3 rounded-l-lg
+                        border border-r-0 border-border
+                        transition-colors
+                        ${isPriceComparisonOpen
+                          ? 'bg-green-600 text-white border-green-600'
+                          : 'bg-background hover:bg-muted'
+                        }
+                      `}
+                      title={isPriceComparisonOpen ? t('closeComparison') : t('openComparison')}
+                    >
+                      <DollarSign className={`h-4 w-4 ${isPriceComparisonOpen ? 'text-white' : 'text-green-600'}`} />
+                      <span className={`text-sm font-medium ${isPriceComparisonOpen ? 'text-white' : 'text-green-600'}`}>
+                        {comparisonCount}
+                      </span>
+                    </button>
+                  )}
+
+                  {/* EU Reference Prices Toggle */}
+                  {showRefPricesButton && (
+                    <button
+                      onClick={() => {
+                        setIsReferencePricesOpen(!isReferencePricesOpen)
+                        if (!isReferencePricesOpen) setIsPriceComparisonOpen(false)
+                      }}
+                      className={`
+                        flex items-center gap-1 px-2 py-3 rounded-l-lg
+                        border border-r-0 border-border
+                        transition-colors
+                        ${isReferencePricesOpen
+                          ? 'bg-purple-600 text-white border-purple-600'
+                          : 'bg-background hover:bg-muted'
+                        }
+                      `}
+                      title={isReferencePricesOpen ? tRef('title') : tRef('title')}
+                    >
+                      <Globe className={`h-4 w-4 ${isReferencePricesOpen ? 'text-white' : 'text-purple-600'}`} />
+                      <span className={`text-sm font-medium ${isReferencePricesOpen ? 'text-white' : 'text-purple-600'}`}>
+                        {referencePrices.length}
+                      </span>
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>

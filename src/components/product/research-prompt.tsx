@@ -127,6 +127,30 @@ export function ResearchPrompt({ product }: ResearchPromptProps) {
             <ExternalLink className="h-3 w-3" />
           </a>
         </li>
+        <li>
+          <a
+            href="https://www.legifrance.gouv.fr/codes/id/LEGISCTA000006156360/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-blue-subtle hover:underline"
+          >
+            <span className="text-muted-foreground">•</span>
+            <span>{t('goToLPPR')}</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://kategorizacia.mzsr.sk/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-blue-subtle hover:underline"
+          >
+            <span className="text-muted-foreground">•</span>
+            <span>{t('goToKategorizacia')}</span>
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </li>
       </ul>
     </div>
   )

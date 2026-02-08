@@ -3,7 +3,7 @@
 import { useMemo, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { X, FolderTree, Building2, Search, Shield, Factory } from "lucide-react";
+import { X, Building2, Search, Shield, Factory } from "lucide-react";
 import { toTitleCase } from "@/lib/utils/format-category";
 import type { Vendor, EMDNCategory } from "@/lib/types";
 import type { CategoryNode } from "@/lib/queries";
@@ -182,35 +182,33 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
       animate={{ opacity: 1, y: 0 }}
       className="mb-4 p-3 bg-green-light/30 border border-green-border/50 rounded-lg shadow-sm"
     >
-      {/* Category breadcrumb - prominent display */}
+      {/* Category hierarchy - indented bullet list */}
       {categoryPath.length > 0 && (
         <div className="mb-3 pb-3 border-b border-border">
-          <div className="flex items-center gap-2 text-sm">
-            <FolderTree className="h-4 w-4 text-accent shrink-0" />
-            <span className="text-muted-foreground">{t("category")}</span>
-            <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-start justify-between gap-2">
+            <ul className="text-sm space-y-0.5">
               {categoryPath.map((cat, index) => {
-                // Use localized category name based on current locale
                 const localizedName = getLocalizedCategoryName(cat, locale);
+                const isLast = index === categoryPath.length - 1;
                 return (
-                  <span key={cat.id} className="flex items-center">
-                    {index > 0 && <span className="mx-1 text-muted-foreground">/</span>}
-                    <span
-                      className={
-                        index === categoryPath.length - 1
-                          ? "font-medium text-accent"
-                          : "text-muted-foreground"
-                      }
-                    >
+                  <li
+                    key={cat.id}
+                    className="flex items-center gap-1.5"
+                    style={{ paddingLeft: `${index * 16}px` }}
+                  >
+                    <span className={`text-xs ${isLast ? 'text-accent' : 'text-muted-foreground/60'}`}>
+                      {isLast ? '●' : '○'}
+                    </span>
+                    <span className={isLast ? "font-medium text-accent" : "text-muted-foreground"}>
                       {toTitleCase(localizedName)}
                     </span>
-                  </span>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
             <button
               onClick={() => removeFilter("category")}
-              className="ml-auto p-1 rounded hover:bg-muted/80 transition-colors duration-150"
+              className="shrink-0 p-1 rounded hover:bg-muted/80 transition-colors duration-150"
               aria-label={t("removeCategory")}
             >
               <X className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />

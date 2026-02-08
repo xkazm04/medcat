@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useTransition } from "react";
+import { useState, useEffect, useMemo, useTransition, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronRight, FolderTree, Check, Loader2 } from "lucide-react";
+import { ChevronRight, FolderTree, Check, Loader2, Search, X } from "lucide-react";
+import { useDebounceValue } from "usehooks-ts";
 import { useCategories, useCategoryAncestors } from "@/lib/query/hooks";
 import type { CategoryNode } from "@/lib/queries";
 import { simplifyChildName } from "@/lib/utils/format-category";
@@ -155,9 +156,51 @@ function CategoryItem({
   );
 }
 
+// Recursively filter tree and collect ancestor IDs to expand
+function filterCategories(
+  nodes: CategoryNode[],
+  query: string
+): { filtered: CategoryNode[]; matchAncestorIds: string[] } {
+  const lowerQuery = query.toLowerCase();
+  const ancestorIds: string[] = [];
+
+  function matches(node: CategoryNode): CategoryNode | null {
+    const nameMatch = node.name.toLowerCase().includes(lowerQuery) ||
+      (node.name_cs && node.name_cs.toLowerCase().includes(lowerQuery)) ||
+      node.code.toLowerCase().includes(lowerQuery);
+
+    // Recursively check children
+    const matchingChildren: CategoryNode[] = [];
+    if (node.children?.length > 0) {
+      for (const child of node.children) {
+        const childMatch = matches(child);
+        if (childMatch) matchingChildren.push(childMatch);
+      }
+    }
+
+    if (nameMatch || matchingChildren.length > 0) {
+      if (matchingChildren.length > 0) {
+        ancestorIds.push(node.id);
+      }
+      return {
+        ...node,
+        children: matchingChildren.length > 0 ? matchingChildren : node.children || [],
+      };
+    }
+    return null;
+  }
+
+  const filtered: CategoryNode[] = [];
+  for (const node of nodes) {
+    const result = matches(node);
+    if (result) filtered.push(result);
+  }
+  return { filtered, matchAncestorIds: ancestorIds };
+}
+
 export function CategoryTree({ initialCategories }: CategoryTreeProps) {
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [selectedId, setCategory] = useUrlFilter("category");
 
   // Fetch categories with TanStack Query (with optional hydration)
@@ -168,6 +211,18 @@ export function CategoryTree({ initialCategories }: CategoryTreeProps) {
   // Create stable string key for dependency tracking
   const ancestorsKey = ancestors.join(',');
 
+  // Category search
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch] = useDebounceValue(searchInput, 200);
+
+  const { filteredCategories, searchExpandIds } = useMemo(() => {
+    if (!debouncedSearch.trim() || categories.length === 0) {
+      return { filteredCategories: categories, searchExpandIds: [] as string[] };
+    }
+    const { filtered, matchAncestorIds } = filterCategories(categories, debouncedSearch);
+    return { filteredCategories: filtered, searchExpandIds: matchAncestorIds };
+  }, [categories, debouncedSearch]);
+
   // Track expanded categories - auto-expand to show selected
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
@@ -177,6 +232,13 @@ export function CategoryTree({ initialCategories }: CategoryTreeProps) {
       setExpandedIds((prev) => new Set([...prev, ...ancestors]));
     }
   }, [selectedId, ancestorsKey]); // Use stable string key instead of array
+
+  // Auto-expand to show search matches
+  useEffect(() => {
+    if (searchExpandIds.length > 0) {
+      setExpandedIds((prev) => new Set([...prev, ...searchExpandIds]));
+    }
+  }, [searchExpandIds]);
 
   const handleSelect = (id: string | null) => {
     // Use startTransition to keep UI responsive during navigation
@@ -238,8 +300,8 @@ export function CategoryTree({ initialCategories }: CategoryTreeProps) {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-6 text-center px-4 animate-in fade-in duration-300">
-        <FolderTree className="h-8 w-8 text-destructive/40 mb-2 transition-colors" />
-        <p className="text-sm text-destructive font-medium">Failed to load categories</p>
+        <FolderTree className="h-8 w-8 text-red-500/40 mb-2 transition-colors" />
+        <p className="text-sm text-red-600 font-medium">Failed to load categories</p>
         <p className="text-xs text-muted-foreground mt-1 transition-colors">
           {error instanceof Error ? error.message : 'Unknown error'}
         </p>
@@ -262,19 +324,50 @@ export function CategoryTree({ initialCategories }: CategoryTreeProps) {
 
   return (
     <div className="space-y-2">
+      {/* Search input for categories */}
+      {categories.length > 5 && (
+        <div className="relative px-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder="Search categories..."
+            className="w-full pl-8 pr-8 py-1.5 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-colors"
+          />
+          {searchInput && (
+            <button
+              onClick={() => setSearchInput("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Expand/collapse toggle */}
-      <div className="flex justify-end px-1">
-        <button
-          onClick={toggleAllExpanded}
-          className="text-xs font-medium text-muted-foreground hover:text-foreground transition-all duration-150 px-2 py-1 rounded-md hover:bg-muted/50 hover:shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
-        >
-          {isAllExpanded ? "Collapse all" : "Expand all"}
-        </button>
+      <div className="flex items-center justify-between px-1">
+        {debouncedSearch && (
+          <span className="text-xs text-muted-foreground">
+            {filteredCategories.length === 0
+              ? "No matches"
+              : `${filteredCategories.length} found`}
+          </span>
+        )}
+        <div className="ml-auto">
+          <button
+            onClick={toggleAllExpanded}
+            className="text-xs font-medium text-muted-foreground hover:text-foreground transition-all duration-150 px-2 py-1 rounded-md hover:bg-muted/50 hover:shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+          >
+            {isAllExpanded ? "Collapse all" : "Expand all"}
+          </button>
+        </div>
       </div>
 
       {/* Category tree */}
-      <div className="space-y-0.5 max-h-[calc(100vh-350px)] overflow-y-auto scrollbar-thin animate-in fade-in slide-in-from-top-2 duration-300">
-        {categories.map((category) => (
+      <div className="space-y-0.5 max-h-[calc(100vh-400px)] overflow-y-auto scrollbar-thin animate-in fade-in slide-in-from-top-2 duration-300">
+        {filteredCategories.map((category) => (
           <CategoryItem
             key={category.id}
             category={category}

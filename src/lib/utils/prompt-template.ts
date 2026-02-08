@@ -60,6 +60,24 @@ export function generateResearchPrompt(product: ProductWithRelations): string {
   sections.push('3. **Manufacturer websites** → Stryker, Zimmer Biomet, DePuy Synthes, Smith+Nephew, B. Braun')
   sections.push('')
 
+  // === PRICING REGISTRIES ===
+  sections.push('## Pricing Registries to Search')
+  sections.push('')
+  if (emdnCode) {
+    sections.push(`1. **France LPPR** (legifrance.gouv.fr) → Search LPP tariff for EMDN code ${emdnCode}`)
+    sections.push('   - Look for "Liste des Produits et Prestations" tariff entries')
+    sections.push('   - Include LPP code and reimbursement amount in EUR')
+  } else {
+    sections.push('1. **France LPPR** (legifrance.gouv.fr) → Search reimbursement tariffs by device type')
+  }
+  sections.push('2. **Slovakia MZ SR** (kategorizacia.mzsr.sk) → Search device category reimbursement')
+  sections.push('   - Look for XC2.* category codes matching the device type')
+  sections.push('3. **Czech Tenders** (cz.openprocurements.com) → CPV 33183100 orthopedic device tenders')
+  sections.push('   - Search recent procurement results for similar devices')
+  sections.push('4. **EU TED** (ted.europa.eu) → Framework agreements with unit prices')
+  sections.push('   - Search CPV 33183100 in recent contract award notices')
+  sections.push('')
+
   // === OUTPUT FORMAT (strict) ===
   sections.push('## Required Output Format')
   sections.push('')
@@ -68,6 +86,16 @@ export function generateResearchPrompt(product: ProductWithRelations): string {
   sections.push('| Manufacturer | Product | REF | Price EUR | EU Distributor |')
   sections.push('|--------------|---------|-----|-----------|----------------|')
   sections.push('| [Company] | [Name] | [SKU] | [Price or "On request"] | [Contact/URL] |')
+  sections.push('')
+
+  // === PRICING OUTPUT FORMAT ===
+  sections.push('## Pricing Data Format')
+  sections.push('')
+  sections.push('If pricing data is found in registries or tenders, include this additional table:')
+  sections.push('')
+  sections.push('| Country | Source | Code | Price EUR | Type | URL |')
+  sections.push('|---------|--------|------|-----------|------|-----|')
+  sections.push('| [CC] | [Registry name] | [LPP/XC2/CPV code] | [Amount] | [reimbursement/tender] | [Source URL] |')
   sections.push('')
 
   // === CONSTRAINTS ===
