@@ -105,7 +105,6 @@ export function CatalogClient({
 
       {/* Active filters bar */}
       <ActiveFilters
-        vendors={vendors}
         categories={categories}
       />
 
@@ -134,7 +133,6 @@ export function CatalogClient({
         product={selectedProduct}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
-        vendors={vendors}
         emdnCategories={emdnCategories}
       />
       <ExtractionSheet

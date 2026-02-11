@@ -45,13 +45,11 @@ export function ChatPanel({ isOpen, persistence }: ChatPanelProps) {
   const catalogContext = useMemo(() => {
     const parts: string[] = [];
     const search = searchParams.get('search');
-    const vendor = searchParams.get('vendor');
     const category = searchParams.get('category');
     const ceMarked = searchParams.get('ceMarked');
     const mdrClass = searchParams.get('mdrClass');
     const manufacturer = searchParams.get('manufacturer');
     if (search) parts.push(`Search query: "${search}"`);
-    if (vendor) parts.push(`Vendor filter active (ID: ${vendor})`);
     if (category) parts.push(`Category filter active (ID: ${category})`);
     if (ceMarked) parts.push(`CE marked filter: ${ceMarked}`);
     if (mdrClass) parts.push(`MDR class filter: ${mdrClass}`);
@@ -178,15 +176,34 @@ export function ChatPanel({ isOpen, persistence }: ChatPanelProps) {
   };
 
   const handleCategorySelect = (categoryId: string, categoryName: string) => {
+    // Apply URL filter and inform chat
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('category', categoryId);
+    params.set('page', '1');
+    router.push(`?${params.toString()}`);
     sendMessage({ text: `Search in category: ${categoryName}` });
+  };
+
+  const handleNavigateToCategory = (categoryId: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('category', categoryId);
+    params.set('page', '1');
+    router.push(`?${params.toString()}`);
+    // Scroll to table
+    setTimeout(() => {
+      document.querySelector('[data-table-container]')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 100);
   };
 
   const handleViewInCatalog = (product: ProductWithRelations) => {
     const params = new URLSearchParams(searchParams.toString());
 
     // Apply filters based on product attributes
-    if (product.vendor?.id) {
-      params.set('vendor', product.vendor.id);
+    if (product.manufacturer_name) {
+      params.set('manufacturer', encodeURIComponent(product.manufacturer_name));
     }
     if (product.emdn_category?.id) {
       params.set('category', product.emdn_category.id);
@@ -219,17 +236,17 @@ export function ChatPanel({ isOpen, persistence }: ChatPanelProps) {
     sendMessage({ text: 'Show more results from the previous search' });
   };
 
-  const handleFilterVendor = () => {
-    // Include vendor names from last products for context
+  const handleFilterManufacturer = () => {
+    // Include manufacturer names from last products for context
     if (lastProducts.length > 0) {
-      const vendors = [...new Set(lastProducts.map(p => p.vendor?.name).filter(Boolean))];
-      if (vendors.length > 0) {
-        sendMessage({ text: `Filter by vendor. The previous results included: ${vendors.join(', ')}. Which vendor do you want?` });
+      const mfrs = [...new Set(lastProducts.map(p => p.manufacturer_name).filter(Boolean))];
+      if (mfrs.length > 0) {
+        sendMessage({ text: `Filter by manufacturer. The previous results included: ${mfrs.join(', ')}. Which manufacturer do you want?` });
       } else {
-        sendMessage({ text: 'Filter the previous results by vendor' });
+        sendMessage({ text: 'Filter the previous results by manufacturer' });
       }
     } else {
-      sendMessage({ text: 'Filter by vendor' });
+      sendMessage({ text: 'Filter by manufacturer' });
     }
   };
 
@@ -240,11 +257,12 @@ export function ChatPanel({ isOpen, persistence }: ChatPanelProps) {
         isStreaming={isStreaming}
         onComparePrice={handleComparePrice}
         onCategorySelect={handleCategorySelect}
+        onNavigateToCategory={handleNavigateToCategory}
         onViewInCatalog={handleViewInCatalog}
         onSendMessage={handleSubmit}
         onCompareResults={handleCompareResults}
         onShowMore={handleShowMore}
-        onFilterVendor={handleFilterVendor}
+        onFilterManufacturer={handleFilterManufacturer}
         onRegenerate={regenerate}
         activeSearch={searchParams.get('search') || undefined}
         activeCategory={searchParams.get('category') ? 'selected category' : undefined}

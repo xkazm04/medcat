@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server'
-import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { CategoryNode } from '@/lib/queries'
 
@@ -7,46 +6,35 @@ import type { CategoryNode } from '@/lib/queries'
  * API Route: GET /api/categories
  *
  * Returns category tree with product counts.
- * Uses Next.js server-side caching for performance.
- *
- * Cache strategy:
- * - Server cache: 5 minutes (revalidate: 300)
- * - Tags: ['categories'] for manual invalidation
+ * Client-side caching is handled by TanStack Query (5 min stale time).
+ * HTTP caching via Cache-Control headers.
  */
 
-// Cache the expensive category tree building operation
-const getCachedCategoryTree = unstable_cache(
-  async (): Promise<CategoryNode[]> => {
-    const supabase = await createClient()
+async function getCategoryTree(): Promise<CategoryNode[]> {
+  const supabase = await createClient()
 
-    // Try to use materialized view first (if it exists)
-    const { data: matViewData, error: matViewError } = await supabase
-      .from('category_product_counts')
-      .select('id, code, name, parent_id, path, depth, total_count')
-      .gt('total_count', 0)
-      .order('code')
+  // Try materialized view first (fast path)
+  const { data: matViewData, error: matViewError } = await supabase
+    .from('category_product_counts')
+    .select('id, code, name, name_cs, parent_id, path, depth, total_count')
+    .gt('total_count', 0)
+    .order('code')
 
-    if (!matViewError && matViewData && matViewData.length > 0) {
-      // Build tree from materialized view (fast path)
-      return buildTreeFromMatView(matViewData)
-    }
-
-    // Fallback: compute counts directly (slower path)
-    console.log('[categories] Materialized view not available, computing counts directly')
-    return computeCategoryTree(supabase)
-  },
-  ['categories-tree'],
-  {
-    revalidate: 300, // 5 minutes
-    tags: ['categories'],
+  if (!matViewError && matViewData && matViewData.length > 0) {
+    return buildTreeFromMatView(matViewData)
   }
-)
+
+  // Fallback: compute counts directly
+  console.log('[categories] Materialized view not available, computing counts directly')
+  return computeCategoryTree(supabase)
+}
 
 // Build tree from materialized view data
 function buildTreeFromMatView(data: Array<{
   id: string
   code: string
   name: string
+  name_cs?: string | null
   parent_id: string | null
   path: string
   depth: number
@@ -61,10 +49,11 @@ function buildTreeFromMatView(data: Array<{
       id: row.id,
       code: row.code,
       name: row.name,
+      name_cs: row.name_cs,
       parent_id: row.parent_id,
       path: row.path,
       depth: row.depth,
-      created_at: '', // Not needed for tree display
+      created_at: '',
       children: [],
       productCount: row.total_count,
     })
@@ -76,11 +65,7 @@ function buildTreeFromMatView(data: Array<{
     if (row.parent_id && categoryMap.has(row.parent_id)) {
       categoryMap.get(row.parent_id)!.children.push(node)
     } else if (!row.parent_id || !categoryMap.has(row.parent_id)) {
-      // Check if this is a root in our filtered set
-      const hasParentInSet = row.parent_id && categoryMap.has(row.parent_id)
-      if (!hasParentInSet) {
-        rootCategories.push(node)
-      }
+      rootCategories.push(node)
     }
   })
 
@@ -89,7 +74,6 @@ function buildTreeFromMatView(data: Array<{
 
 // Fallback: compute tree directly from tables
 async function computeCategoryTree(supabase: Awaited<ReturnType<typeof createClient>>): Promise<CategoryNode[]> {
-  // Get all categories
   const { data: categoriesData, error: catError } = await supabase
     .from('emdn_categories')
     .select('*')
@@ -100,7 +84,6 @@ async function computeCategoryTree(supabase: Awaited<ReturnType<typeof createCli
     return []
   }
 
-  // Get product counts per category
   const { data: productCounts, error: countError } = await supabase
     .from('products')
     .select('emdn_category_id')
@@ -114,11 +97,9 @@ async function computeCategoryTree(supabase: Awaited<ReturnType<typeof createCli
     })
   }
 
-  // Build tree structure
   const categoryMap = new Map<string, CategoryNode>()
   const rootCategories: CategoryNode[] = []
 
-  // First pass: create nodes with direct counts
   categoriesData.forEach((cat) => {
     categoryMap.set(cat.id, {
       ...cat,
@@ -127,7 +108,6 @@ async function computeCategoryTree(supabase: Awaited<ReturnType<typeof createCli
     })
   })
 
-  // Second pass: build tree
   categoriesData.forEach((cat) => {
     const node = categoryMap.get(cat.id)!
     if (cat.parent_id && categoryMap.has(cat.parent_id)) {
@@ -137,7 +117,6 @@ async function computeCategoryTree(supabase: Awaited<ReturnType<typeof createCli
     }
   })
 
-  // Third pass: propagate counts up
   function propagateCounts(node: CategoryNode): number {
     let total = node.productCount
     for (const child of node.children) {
@@ -148,7 +127,6 @@ async function computeCategoryTree(supabase: Awaited<ReturnType<typeof createCli
   }
   rootCategories.forEach(propagateCounts)
 
-  // Filter out categories with no products
   function filterEmpty(nodes: CategoryNode[]): CategoryNode[] {
     return nodes
       .filter((node) => node.productCount > 0)
@@ -163,18 +141,17 @@ async function computeCategoryTree(supabase: Awaited<ReturnType<typeof createCli
 
 export async function GET() {
   try {
-    const categories = await getCachedCategoryTree()
+    const categories = await getCategoryTree()
 
     return NextResponse.json(categories, {
       headers: {
-        // Client cache for 1 minute, CDN cache for 5 minutes
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
       },
     })
   } catch (error) {
     console.error('[categories] Error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch categories' },
+      { error: 'Failed to fetch categories', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }

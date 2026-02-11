@@ -11,10 +11,28 @@ interface ExportColumn {
 const ALL_COLUMNS: ExportColumn[] = [
   { key: 'product', header: 'Product Name', getValue: p => p.name },
   { key: 'sku', header: 'SKU', getValue: p => p.sku || '' },
-  { key: 'vendor', header: 'Vendor', getValue: p => p.vendor?.name || '' },
   { key: 'manufacturer', header: 'Manufacturer', getValue: p => p.manufacturer_name || '' },
   { key: 'manufacturer_sku', header: 'Manufacturer SKU', getValue: p => p.manufacturer_sku || '' },
-  { key: 'price', header: 'Price', getValue: p => p.price != null ? Number(p.price) : null },
+  {
+    key: 'vendor',
+    header: 'Distributors',
+    getValue: p => {
+      const names = (p.offerings ?? [])
+        .map(o => o.vendor?.name)
+        .filter((n): n is string => !!n);
+      return [...new Set(names)].join(', ');
+    },
+  },
+  {
+    key: 'price',
+    header: 'Min Price',
+    getValue: p => {
+      const prices = (p.offerings ?? [])
+        .map(o => o.vendor_price)
+        .filter((v): v is number => v !== null);
+      return prices.length > 0 ? Math.min(...prices) : null;
+    },
+  },
   { key: 'regulatory', header: 'CE Marked', getValue: p => p.ce_marked ? 'Yes' : 'No' },
   { key: 'mdr_class', header: 'MDR Class', getValue: p => p.mdr_class || '' },
   { key: 'udi_di', header: 'UDI-DI', getValue: p => p.udi_di || '' },

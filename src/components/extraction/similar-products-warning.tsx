@@ -45,8 +45,8 @@ export function SimilarProductsWarning({
               >
                 <span className="text-amber-900 truncate">
                   {product.name}
-                  {product.vendor_name && (
-                    <span className="text-amber-700"> ({product.vendor_name})</span>
+                  {product.manufacturer_name && (
+                    <span className="text-amber-700"> ({product.manufacturer_name})</span>
                   )}
                 </span>
                 <span className="text-amber-600 font-mono text-xs flex-shrink-0">

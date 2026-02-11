@@ -9,6 +9,7 @@ export interface GetProductsParams {
   /** When 'or', multi-word searches match ANY word instead of ALL words.
    *  Useful for natural language queries where AND is too restrictive. */
   searchMode?: "and" | "or";
+  /** @deprecated Use manufacturer filter instead. Kept during transition. */
   vendor?: string;
   category?: string;
   material?: string;
@@ -71,7 +72,8 @@ export async function getProducts(params: GetProductsParams = {}): Promise<GetPr
       updated_at,
       vendor:vendors(id, name, code, website, created_at, updated_at),
       emdn_category:emdn_categories(id, code, name, parent_id, depth, path, created_at),
-      material:materials(id, name, code)
+      material:materials(id, name, code),
+      offerings:product_offerings(id, product_id, vendor_id, vendor_sku, vendor_price, currency, is_primary, created_at, updated_at, vendor:vendors(id, name, code, website, created_at, updated_at))
     `,
       { count: "exact" }
     );
@@ -105,13 +107,8 @@ export async function getProducts(params: GetProductsParams = {}): Promise<GetPr
     }
   }
 
-  // Apply vendor filter (comma-separated IDs)
-  if (vendor) {
-    const vendorIds = vendor.split(",").filter(Boolean);
-    if (vendorIds.length > 0) {
-      query = query.in("vendor_id", vendorIds);
-    }
-  }
+  // Legacy vendor filter — kept during transition but no longer active
+  // Vendor filtering now happens via product_offerings join in the UI
 
   // Apply category filter (includes all descendants)
   if (category) {

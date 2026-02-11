@@ -37,6 +37,7 @@ const ProductCell = memo(function ProductCell({
   showVendor: boolean;
   onView: () => void;
 }) {
+  const offeringCount = product.offerings?.length ?? 0;
   return (
     <div className="min-w-0">
       <button
@@ -51,15 +52,13 @@ const ProductCell = memo(function ProductCell({
           {showSku && product.sku && (
             <span className="font-mono truncate">{product.sku}</span>
           )}
-          {showSku && showVendor && product.sku && product.vendor && (
+          {showSku && showVendor && product.sku && offeringCount > 0 && (
             <span className="text-muted-foreground/40">·</span>
           )}
-          {showVendor && product.vendor && (
-            <ChatInsertCell
-              value={product.vendor.name}
-              prefix="Show me products from "
-              className="truncate"
-            />
+          {showVendor && offeringCount > 0 && (
+            <span className="truncate">
+              {offeringCount} distributor{offeringCount !== 1 ? 's' : ''}
+            </span>
           )}
         </div>
       )}
@@ -81,27 +80,38 @@ const ManufacturerCell = memo(function ManufacturerCell({
 });
 
 const PriceCell = memo(function PriceCell({
-  price,
+  offerings,
   hasRefPrices,
 }: {
-  price: number | null;
+  offerings: ProductWithRelations['offerings'];
   hasRefPrices: boolean;
 }) {
   const locale = useLocale();
+  const prices = offerings?.map(o => o.vendor_price).filter((p): p is number => p !== null) ?? [];
+  const minPrice = prices.length > 0 ? Math.min(...prices) : null;
+  const offeringCount = offerings?.length ?? 0;
+
   return (
     <div className="text-right">
-      {price !== null && price !== undefined ? (
+      {minPrice !== null ? (
         <span className="text-sm font-medium tabular-nums text-foreground">
-          {getPriceFormatter(locale).format(price)}
+          {offeringCount > 1 ? 'from ' : ''}{getPriceFormatter(locale).format(minPrice)}
         </span>
       ) : (
         <span className="text-sm text-muted-foreground/40">—</span>
       )}
-      {hasRefPrices && (
-        <span className="flex items-center justify-end gap-0.5 mt-0.5">
-          <Globe className="h-2.5 w-2.5 text-blue-subtle" />
-          <span className="text-[10px] text-blue-subtle font-medium">EU Ref</span>
-        </span>
+      {(hasRefPrices || offeringCount > 1) && (
+        <div className="flex items-center justify-end gap-1.5 mt-0.5">
+          {offeringCount > 1 && (
+            <span className="text-[10px] text-muted-foreground">{offeringCount} offers</span>
+          )}
+          {hasRefPrices && (
+            <span className="flex items-center gap-0.5">
+              <Globe className="h-2.5 w-2.5 text-blue-subtle" />
+              <span className="text-[10px] text-blue-subtle font-medium">EU Ref</span>
+            </span>
+          )}
+        </div>
       )}
     </div>
   );
@@ -290,7 +300,7 @@ export function createColumns(
       },
       cell: ({ row }) => (
         <PriceCell
-          price={row.original.price}
+          offerings={row.original.offerings}
           hasRefPrices={hasRefPriceCoverage(row.original.emdn_category?.path, refPricePaths)}
         />
       ),

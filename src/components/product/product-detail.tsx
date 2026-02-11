@@ -19,11 +19,21 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
   // Build consolidated product info line
   const infoItems: string[] = []
-  if (product.vendor?.name) infoItems.push(product.vendor.name)
-  if (product.price !== null) {
-    infoItems.push(formatPrice(product.price, locale))
-  }
   if (product.manufacturer_name) infoItems.push(product.manufacturer_name)
+  const offeringCount = product.offerings?.length ?? 0
+  if (offeringCount > 0) {
+    const prices = product.offerings.map(o => o.vendor_price).filter((p): p is number => p !== null)
+    if (prices.length > 0) {
+      const minPrice = Math.min(...prices)
+      const maxPrice = Math.max(...prices)
+      if (minPrice === maxPrice) {
+        infoItems.push(formatPrice(minPrice, locale))
+      } else {
+        infoItems.push(`${formatPrice(minPrice, locale)} – ${formatPrice(maxPrice, locale)}`)
+      }
+    }
+    infoItems.push(`${offeringCount} distributor${offeringCount !== 1 ? 's' : ''}`)
+  }
 
   return (
     <div className="space-y-6 px-6 py-4 overflow-y-auto">

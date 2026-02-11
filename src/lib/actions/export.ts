@@ -44,7 +44,8 @@ export async function getProductsForExport(
     updated_at,
     vendor:vendors(id, name, code, website, created_at, updated_at),
     emdn_category:emdn_categories(id, code, name, parent_id, depth, path, created_at),
-    material:materials(id, name, code)
+    material:materials(id, name, code),
+    offerings:product_offerings(id, product_id, vendor_id, vendor_sku, vendor_price, currency, is_primary, created_at, updated_at, vendor:vendors(id, name, code, website, created_at, updated_at))
   `;
 
   // Build query with filters

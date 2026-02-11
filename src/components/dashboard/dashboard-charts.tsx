@@ -11,7 +11,7 @@ import {
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type {
-  DashboardStats, VendorBreakdown, CategoryBreakdown,
+  DashboardStats, DistributorBreakdown, CategoryBreakdown,
   PriceScopeBreakdown, SourceCountryBreakdown, ManufacturerBreakdown,
   DecompositionProgress,
 } from '@/lib/queries/dashboard';
@@ -111,7 +111,7 @@ function scopeLabel(scope: string) {
 
 interface DashboardChartsProps {
   stats: DashboardStats;
-  vendorBreakdown: VendorBreakdown[];
+  distributorBreakdown: DistributorBreakdown[];
   categoryBreakdown: CategoryBreakdown[];
   priceScopeBreakdown: PriceScopeBreakdown[];
   sourceCountryBreakdown: SourceCountryBreakdown[];
@@ -121,7 +121,7 @@ interface DashboardChartsProps {
 
 export function DashboardCharts({
   stats,
-  vendorBreakdown,
+  distributorBreakdown,
   categoryBreakdown,
   priceScopeBreakdown,
   sourceCountryBreakdown,
@@ -190,8 +190,8 @@ export function DashboardCharts({
         />
         <KPICard
           icon={Building2}
-          label={t('dashboard.kpi.vendors')}
-          value={String(stats.vendorCount)}
+          label={t('dashboard.kpi.distributors')}
+          value={String(stats.distributorCount)}
           sub={t('dashboard.kpi.registered')}
           accentColor="#166534"
         />
@@ -284,17 +284,17 @@ export function DashboardCharts({
         </ChartCard>
       </div>
 
-      {/* Charts Row 2: Top Vendors (span 2) + Manufacturers (span 1) */}
+      {/* Charts Row 2: Top Distributors (span 2) + Manufacturers (span 1) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <ChartCard title={t('dashboard.charts.topVendorsByProducts')} className="lg:col-span-2">
+        <ChartCard title={t('dashboard.charts.topDistributorsByProducts')} className="lg:col-span-2">
           <div className="h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={vendorBreakdown.slice(0, 10)} layout="vertical">
+              <BarChart data={distributorBreakdown.slice(0, 10)} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                 <XAxis type="number" tick={{ fontSize: 12, fill: 'var(--color-muted-foreground)' }} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'var(--color-muted-foreground)' }} width={140} />
                 <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="count" fill="#22c55e" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="productCount" fill="#22c55e" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

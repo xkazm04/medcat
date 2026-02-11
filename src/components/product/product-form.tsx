@@ -17,14 +17,12 @@ type ProductFormOutput = z.output<typeof productSchema>
 interface ProductFormProps {
   product: ProductWithRelations
   onSuccess?: () => void
-  vendors: { id: string; name: string }[]
   emdnCategories: { id: string; code: string; name: string }[]
 }
 
 export function ProductForm({
   product,
   onSuccess,
-  vendors,
   emdnCategories,
 }: ProductFormProps) {
   const t = useTranslations('product')
@@ -39,8 +37,6 @@ export function ProductForm({
       name: product.name,
       sku: product.sku,
       description: product.description ?? undefined,
-      price: product.price ?? undefined,
-      vendor_id: product.vendor_id ?? undefined,
       emdn_category_id: product.emdn_category_id ?? undefined,
       material_id: product.material_id ?? undefined,
       udi_di: product.udi_di ?? undefined,
@@ -58,8 +54,6 @@ export function ProductForm({
       formData.append('name', data.name)
       formData.append('sku', data.sku)
       formData.append('description', data.description || '')
-      formData.append('price', data.price?.toString() || '')
-      formData.append('vendor_id', data.vendor_id || '')
       formData.append('emdn_category_id', data.emdn_category_id || '')
       formData.append('material_id', data.material_id || '')
       formData.append('udi_di', data.udi_di || '')
@@ -150,7 +144,7 @@ export function ProductForm({
       {/* Manufacturer Name */}
       <div>
         <label htmlFor="manufacturer_name" className={labelClass}>
-          {t('manufacturer')}
+          {t('manufacturer')} <span className="text-red-500">*</span>
         </label>
         <input
           id="manufacturer_name"
@@ -179,47 +173,6 @@ export function ProductForm({
         {form.formState.errors.manufacturer_sku && (
           <p className={errorClass}>
             {form.formState.errors.manufacturer_sku.message}
-          </p>
-        )}
-      </div>
-
-      {/* Price */}
-      <div>
-        <label htmlFor="price" className={labelClass}>
-          {t('priceCZK')}
-        </label>
-        <input
-          id="price"
-          type="number"
-          step="0.01"
-          {...form.register('price')}
-          className={inputClass}
-        />
-        {form.formState.errors.price && (
-          <p className={errorClass}>{form.formState.errors.price.message}</p>
-        )}
-      </div>
-
-      {/* Vendor */}
-      <div>
-        <label htmlFor="vendor_id" className={labelClass}>
-          {t('vendor')}
-        </label>
-        <select
-          id="vendor_id"
-          {...form.register('vendor_id')}
-          className={inputClass}
-        >
-          <option value="">{t('selectVendor')}</option>
-          {vendors.map((vendor) => (
-            <option key={vendor.id} value={vendor.id}>
-              {vendor.name}
-            </option>
-          ))}
-        </select>
-        {form.formState.errors.vendor_id && (
-          <p className={errorClass}>
-            {form.formState.errors.vendor_id.message}
           </p>
         )}
       </div>

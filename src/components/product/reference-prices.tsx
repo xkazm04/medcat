@@ -8,7 +8,7 @@ import { formatPriceWithCurrency } from '@/lib/utils/format-price'
 import { estimateComponentPrice, formatFractionRange } from '@/lib/utils/component-fractions'
 import { PriceRangeChart } from './price-range-chart'
 import { ConfidenceDots } from '@/components/ui/confidence-dots'
-import type { ReferencePrice } from '@/lib/types'
+import type { ReferencePrice, ProductOffering } from '@/lib/types'
 
 // Country flag emoji from ISO 3166 alpha-2
 const countryFlag = (code: string): string => {
@@ -95,11 +95,13 @@ const TAB_CONFIG: Record<ScopeTab, { icon: typeof Puzzle; activeClass: string; b
 
 interface ReferencePricesPanelProps {
   prices: ReferencePrice[]
+  /** @deprecated Use offerings prop instead */
   vendorPriceCzk?: number | null
+  offerings?: ProductOffering[]
   productEmdnCode?: string | null
 }
 
-export function ReferencePricesPanel({ prices, vendorPriceCzk, productEmdnCode }: ReferencePricesPanelProps) {
+export function ReferencePricesPanel({ prices, vendorPriceCzk, offerings, productEmdnCode }: ReferencePricesPanelProps) {
   const t = useTranslations('referencePricing')
   const locale = useLocale()
 
@@ -162,7 +164,11 @@ export function ReferencePricesPanel({ prices, vendorPriceCzk, productEmdnCode }
   const allMax = Math.max(...allEurPrices)
 
   const EUR_TO_CZK = 25.2
-  const vendorPriceEur = vendorPriceCzk ? vendorPriceCzk / EUR_TO_CZK : null
+  // Compute vendor price: prefer offerings min EUR price, fall back to legacy vendorPriceCzk
+  const offeringPricesEur = (offerings ?? []).map(o => o.vendor_price).filter((p): p is number => p !== null)
+  const vendorPriceEur = offeringPricesEur.length > 0
+    ? Math.min(...offeringPricesEur)
+    : vendorPriceCzk ? vendorPriceCzk / EUR_TO_CZK : null
 
   const hasSetPricesOnly = scopeCounts.set > 0 && scopeCounts.component === 0
   const componentEstimate = hasSetPricesOnly && productEmdnCode

@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { checkCircuit } from "@/lib/supabase/circuit-breaker";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { productSchema } from "@/lib/schemas/product";
+import { productSchema, offeringSchema } from "@/lib/schemas/product";
 
 interface ActionResult {
   success?: boolean;
@@ -18,17 +18,12 @@ export async function updateProduct(
   id: string,
   formData: FormData
 ): Promise<ActionResult> {
-  // Convert FormData to object
   const rawData = Object.fromEntries(formData.entries());
 
-  // Handle boolean conversion (FormData sends strings)
   const data = {
     ...rawData,
     ce_marked: rawData.ce_marked === "true",
-    // Convert empty strings to null for nullable fields
     description: rawData.description || null,
-    price: rawData.price || null,
-    vendor_id: rawData.vendor_id || null,
     emdn_category_id: rawData.emdn_category_id || null,
     material_id: rawData.material_id || null,
     udi_di: rawData.udi_di || null,
@@ -37,7 +32,6 @@ export async function updateProduct(
     manufacturer_sku: rawData.manufacturer_sku || null,
   };
 
-  // Validate with Zod
   const validatedData = productSchema.safeParse(data);
 
   if (!validatedData.success) {
@@ -63,30 +57,19 @@ export async function updateProduct(
   }
 
   revalidatePath("/");
-  revalidateTag("categories", "default"); // Invalidate category counts cache
+  revalidateTag("categories", "default");
   return { success: true };
 }
 
-/**
- * Create a new product in the database.
- *
- * @param formData - FormData containing product fields
- * @returns ActionResult with success/productId or error
- */
 export async function createProduct(
   formData: FormData
 ): Promise<ActionResult> {
-  // Convert FormData to object
   const rawData = Object.fromEntries(formData.entries());
 
-  // Handle boolean conversion (FormData sends strings)
   const data = {
     ...rawData,
     ce_marked: rawData.ce_marked === "true",
-    // Convert empty strings to null for nullable fields
     description: rawData.description || null,
-    price: rawData.price || null,
-    vendor_id: rawData.vendor_id || null,
     emdn_category_id: rawData.emdn_category_id || null,
     material_id: rawData.material_id || null,
     udi_di: rawData.udi_di || null,
@@ -95,7 +78,6 @@ export async function createProduct(
     manufacturer_sku: rawData.manufacturer_sku || null,
   };
 
-  // Validate with Zod
   const validatedData = productSchema.safeParse(data);
 
   if (!validatedData.success) {
@@ -122,7 +104,7 @@ export async function createProduct(
   }
 
   revalidatePath("/");
-  revalidateTag("categories", "default"); // Invalidate category counts cache
+  revalidateTag("categories", "default");
   return { success: true, productId: created?.id };
 }
 
@@ -141,6 +123,77 @@ export async function deleteProduct(id: string): Promise<ActionResult> {
   }
 
   revalidatePath("/");
-  revalidateTag("categories", "default"); // Invalidate category counts cache
+  revalidateTag("categories", "default");
+  return { success: true };
+}
+
+// --- Offering CRUD ---
+
+interface OfferingResult {
+  success: boolean;
+  offeringId?: string;
+  error?: string;
+}
+
+export async function createOffering(
+  productId: string,
+  data: { vendor_id: string; vendor_sku?: string | null; vendor_price?: number | null; currency?: string; is_primary?: boolean }
+): Promise<OfferingResult> {
+  const validated = offeringSchema.safeParse(data);
+  if (!validated.success) {
+    return { success: false, error: validated.error.issues[0]?.message || "Invalid offering data" };
+  }
+
+  checkCircuit();
+  const supabase = await createClient();
+
+  const { data: created, error } = await supabase
+    .from("product_offerings")
+    .insert({ product_id: productId, ...validated.data })
+    .select("id")
+    .single();
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/");
+  return { success: true, offeringId: created?.id };
+}
+
+export async function updateOffering(
+  offeringId: string,
+  data: { vendor_sku?: string | null; vendor_price?: number | null; currency?: string; is_primary?: boolean }
+): Promise<OfferingResult> {
+  checkCircuit();
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("product_offerings")
+    .update(data)
+    .eq("id", offeringId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/");
+  return { success: true, offeringId };
+}
+
+export async function deleteOffering(offeringId: string): Promise<OfferingResult> {
+  checkCircuit();
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("product_offerings")
+    .delete()
+    .eq("id", offeringId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/");
   return { success: true };
 }

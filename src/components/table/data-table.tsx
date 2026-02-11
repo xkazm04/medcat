@@ -23,6 +23,7 @@ import {
   type ColumnVisibility,
 } from "./column-visibility-toggle";
 import { ExportMenu } from "./export-menu";
+import { ImportMenu } from "./import-menu";
 import { BulkActionsBar } from "./bulk-actions-bar";
 import { SearchInput } from "@/components/filters/search-input";
 import type { ProductWithRelations } from "@/lib/types";
@@ -253,7 +254,7 @@ export function DataTable<TData>({
       <div className="space-y-3">
         {/* Header with search and column toggle */}
         <div className="flex items-center gap-3">
-          <div className="w-64">
+          <div className="w-[32rem] max-w-full">
             <SearchInput />
           </div>
           <div className="flex items-center gap-2 ml-auto">
@@ -299,13 +300,14 @@ export function DataTable<TData>({
     <div className="space-y-3">
       {/* Header with search, total count, export, and column toggle */}
       <div className="flex items-center gap-3">
-        <div className="w-64">
+        <div className="w-[32rem] max-w-full">
           <SearchInput />
         </div>
         <div className="text-sm text-muted-foreground">
           {t("showingTotal", { count: data.length, total: totalCount.toLocaleString() })}
         </div>
         <div className="flex items-center gap-2 ml-auto">
+          <ImportMenu />
           <ExportMenu
             products={data as unknown as ProductWithRelations[]}
             selectedProducts={selectedProducts}

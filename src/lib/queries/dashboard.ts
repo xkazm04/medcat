@@ -3,14 +3,14 @@ import { checkCircuit } from "@/lib/supabase/circuit-breaker";
 
 export interface DashboardStats {
   totalProducts: number;
-  vendorCount: number;
+  distributorCount: number;
   referencePriceCount: number;
   priceCoverageCount: number;
 }
 
-export interface VendorBreakdown {
+export interface DistributorBreakdown {
   name: string;
-  count: number;
+  productCount: number;
 }
 
 export interface CategoryBreakdown {
@@ -52,7 +52,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   ]);
 
   const totalProducts = productsRes.count || 0;
-  const vendorCount = vendorsRes.count || 0;
+  const distributorCount = vendorsRes.count || 0;
   const referencePriceCount = refPricesRes.count || 0;
 
   // Count distinct product_ids from product_price_matches (can be >1000 rows, need pagination)
@@ -80,32 +80,39 @@ export async function getDashboardStats(): Promise<DashboardStats> {
 
   return {
     totalProducts,
-    vendorCount,
+    distributorCount,
     referencePriceCount,
     priceCoverageCount: productIds.size,
   };
 }
 
-export async function getVendorBreakdown(): Promise<VendorBreakdown[]> {
+export async function getDistributorBreakdown(): Promise<DistributorBreakdown[]> {
   checkCircuit();
   const supabase = await createClient();
 
+  // Count distinct products per vendor from product_offerings
   const { data } = await supabase
-    .from("products")
-    .select("vendor:vendors(name)");
+    .from("product_offerings")
+    .select("vendor_id, product_id, vendor:vendors(name)");
 
   if (!data) return [];
 
-  const counts = new Map<string, number>();
-  for (const p of data) {
-    const vendor = p.vendor as unknown as { name: string } | null;
+  // Count unique products per vendor
+  const vendorProducts = new Map<string, { name: string; products: Set<string> }>();
+  for (const offering of data) {
+    const vendor = offering.vendor as unknown as { name: string } | null;
     const name = vendor?.name || "Unknown";
-    counts.set(name, (counts.get(name) || 0) + 1);
+    const existing = vendorProducts.get(offering.vendor_id);
+    if (existing) {
+      existing.products.add(offering.product_id);
+    } else {
+      vendorProducts.set(offering.vendor_id, { name, products: new Set([offering.product_id]) });
+    }
   }
 
-  return [...counts.entries()]
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
+  return [...vendorProducts.values()]
+    .map(({ name, products }) => ({ name, productCount: products.size }))
+    .sort((a, b) => b.productCount - a.productCount)
     .slice(0, 15);
 }
 

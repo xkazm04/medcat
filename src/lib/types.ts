@@ -24,12 +24,27 @@ export interface Material {
   code: string | null;
 }
 
+export interface ProductOffering {
+  id: string;
+  product_id: string;
+  vendor_id: string;
+  vendor: Vendor | null;
+  vendor_sku: string | null;
+  vendor_price: number | null;
+  currency: string;
+  is_primary: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Product {
   id: string;
   name: string;
   sku: string;
   description: string | null;
+  /** @deprecated Use offerings[].vendor_price instead. Kept during transition. */
   price: number | null;
+  /** @deprecated Use offerings[] instead. Kept during transition. */
   vendor_id: string | null;
   emdn_category_id: string | null;
   material_id: string | null;
@@ -43,9 +58,11 @@ export interface Product {
 }
 
 export interface ProductWithRelations extends Product {
+  /** @deprecated Use offerings[] instead. Kept during transition. */
   vendor: Vendor | null;
   emdn_category: EMDNCategory | null;
   material: Material | null;
+  offerings: ProductOffering[];
 }
 
 export interface ReferencePrice {

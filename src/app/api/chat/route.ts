@@ -13,6 +13,8 @@ import {
   suggestCategories,
   searchExternalProducts,
   lookupReferencePrices,
+  browseCategories,
+  navigateToCategory,
 } from '@/lib/chat/tools';
 
 // Initialize Google provider with existing GEMINI_API_KEY
@@ -48,6 +50,8 @@ export async function POST(req: Request) {
         suggestCategories,
         searchExternalProducts,
         lookupReferencePrices,
+        browseCategories,
+        navigateToCategory,
       },
       stopWhen: stepCountIs(3), // Allow up to 3 steps for complex queries (search -> compare -> synthesize)
       abortSignal: req.signal, // CRITICAL: Pass abort signal for cleanup

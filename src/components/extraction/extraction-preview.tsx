@@ -1,16 +1,15 @@
 'use client'
 
-import { useState, useTransition, useEffect, useMemo } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslations } from 'next-intl'
 import { Check, Plus } from 'lucide-react'
 import { productSchema } from '@/lib/schemas/product'
-import { createProduct } from '@/lib/actions/products'
+import { createProduct, createOffering } from '@/lib/actions/products'
 import { createVendor } from '@/lib/actions/vendors'
 import { findSimilarProducts, type SimilarProduct } from '@/lib/actions/similarity'
-import { getExchangeRates, type ExchangeRates, type Currency } from '@/lib/actions/exchange-rates'
 import { SimilarProductsWarning } from './similar-products-warning'
 import { toTitleCase } from '@/lib/utils/format-category'
 import { useToast } from '@/components/ui/toast'
@@ -20,9 +19,6 @@ import type { ExtractedProduct } from '@/lib/schemas/extraction'
 type ProductFormInput = z.input<typeof productSchema>
 // Define output type after validation
 type ProductFormOutput = z.output<typeof productSchema>
-
-// Special value to indicate a new vendor should be created
-const NEW_VENDOR_PREFIX = '__new__:'
 
 interface ExtractionPreviewProps {
   extractedData: ExtractedProduct
@@ -51,121 +47,6 @@ function StatusBadge({ matched }: { matched: boolean }) {
   )
 }
 
-/** Convert a price from one currency to another using EUR-based rates */
-function convertPrice(
-  amount: number,
-  from: Currency,
-  to: Currency,
-  rates: ExchangeRates
-): number {
-  if (from === to) return amount
-  // Convert to EUR first
-  let eur: number
-  if (from === 'EUR') eur = amount
-  else if (from === 'CZK') eur = amount / rates.EUR_CZK
-  else eur = amount / rates.EUR_PLN
-  // Convert EUR to target
-  if (to === 'EUR') return eur
-  if (to === 'CZK') return eur * rates.EUR_CZK
-  return eur * rates.EUR_PLN
-}
-
-const CURRENCIES: Currency[] = ['EUR', 'CZK', 'PLN']
-const CURRENCY_SYMBOLS: Record<Currency, string> = { EUR: '€', CZK: 'Kč', PLN: 'zł' }
-
-/** Price trio: shows EUR/CZK/PLN — original is editable, others are auto-calculated */
-function PriceTrio({
-  originalCurrency,
-  watchedPrice,
-  rates,
-  priceField,
-  error,
-  inputClass,
-  labelClass,
-  errorClass,
-}: {
-  originalCurrency: Currency
-  watchedPrice: number | undefined
-  rates: ExchangeRates | null
-  priceField: React.InputHTMLAttributes<HTMLInputElement> & { ref: React.Ref<HTMLInputElement> }
-  error?: string
-  inputClass: string
-  labelClass: string
-  errorClass: string
-}) {
-  const t = useTranslations('extraction')
-
-  // Compute converted prices from the current form value
-  const converted = useMemo(() => {
-    const result: Record<Currency, string> = { EUR: '', CZK: '', PLN: '' }
-    const price = watchedPrice
-    if (price == null || isNaN(price) || !rates) return result
-
-    for (const cur of CURRENCIES) {
-      if (cur === originalCurrency) continue
-      const val = convertPrice(price, originalCurrency, cur, rates)
-      result[cur] = val.toFixed(2)
-    }
-    return result
-  }, [watchedPrice, originalCurrency, rates])
-
-  return (
-    <div>
-      <label className={labelClass}>{t('price')}</label>
-      <div className="grid grid-cols-3 gap-2 mt-1">
-        {CURRENCIES.map((cur) => {
-          const isOriginal = cur === originalCurrency
-          return (
-            <div key={cur} className="relative">
-              <div className="flex items-center gap-1 mb-1">
-                <span className="text-xs font-medium text-muted-foreground">{cur}</span>
-                {isOriginal && (
-                  <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                    {t('original')}
-                  </span>
-                )}
-              </div>
-              {isOriginal ? (
-                <div className="relative">
-                  <input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    {...priceField}
-                    className={`${inputClass} pr-8`}
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                    {CURRENCY_SYMBOLS[cur]}
-                  </span>
-                </div>
-              ) : (
-                <div className="relative">
-                  <input
-                    type="text"
-                    readOnly
-                    tabIndex={-1}
-                    value={converted[cur] || '—'}
-                    className={`${inputClass} bg-muted/50 text-muted-foreground cursor-default pr-8`}
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                    {CURRENCY_SYMBOLS[cur]}
-                  </span>
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
-      {error && <p className={errorClass}>{error}</p>}
-      {rates && (
-        <p className="text-[10px] text-muted-foreground mt-1">
-          {t('ratesDate', { date: rates.effectiveDate })}
-        </p>
-      )}
-    </div>
-  )
-}
-
 export function ExtractionPreview({
   extractedData,
   vendors,
@@ -183,24 +64,21 @@ export function ExtractionPreview({
   const [similarProducts, setSimilarProducts] = useState<SimilarProduct[]>([])
   const [similarityLoading, setSimilarityLoading] = useState(true)
 
-  // Match extracted names to database IDs (case-insensitive partial match)
+  // Match extracted vendor name to existing vendor
   const matchedVendor = vendors.find(
     (v) =>
       extractedData.vendor_name &&
       v.name.toLowerCase().includes(extractedData.vendor_name.toLowerCase())
   )
 
-  // Improvement 5: Better EMDN matching - try exact match first, then partial
+  // Better EMDN matching - try exact match first, then partial
   const matchedEmdn = emdnCategories.find(
     (c) => extractedData.suggested_emdn && c.code === extractedData.suggested_emdn
   ) || emdnCategories.find(
     (c) => extractedData.suggested_emdn && c.code.startsWith(extractedData.suggested_emdn)
   )
 
-  // Exchange rates for price trio
-  const [rates, setRates] = useState<ExchangeRates | null>(null)
-
-  // Check for similar products + fetch exchange rates on mount
+  // Check for similar products on mount
   useEffect(() => {
     async function checkSimilarity() {
       setSimilarityLoading(true)
@@ -216,22 +94,12 @@ export function ExtractionPreview({
     checkSimilarity()
   }, [extractedData.name, extractedData.sku])
 
-  useEffect(() => {
-    getExchangeRates().then(setRates)
-  }, [])
-
-  // Determine default vendor value: matched ID, or new vendor prefix if extracted but not matched
-  const defaultVendorId = matchedVendor?.id
-    ?? (extractedData.vendor_name ? `${NEW_VENDOR_PREFIX}${extractedData.vendor_name}` : undefined)
-
   const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: extractedData.name,
       sku: extractedData.sku,
       description: extractedData.description ?? undefined,
-      price: extractedData.price ?? undefined,
-      vendor_id: defaultVendorId,
       emdn_category_id: matchedEmdn?.id ?? undefined,
       udi_di: extractedData.udi_di ?? undefined,
       ce_marked: extractedData.ce_marked ?? false,
@@ -243,35 +111,42 @@ export function ExtractionPreview({
   const onSubmit: SubmitHandler<ProductFormOutput> = (data) => {
     setServerError(null)
     startTransition(async () => {
-      let vendorId = data.vendor_id || ''
-
-      // Check if we need to create a new vendor
-      if (vendorId.startsWith(NEW_VENDOR_PREFIX)) {
-        const newVendorName = vendorId.slice(NEW_VENDOR_PREFIX.length)
-        const vendorResult = await createVendor(newVendorName)
-        if (!vendorResult.success || !vendorResult.vendorId) {
-          setServerError(vendorResult.error || 'Failed to create vendor')
-          return
-        }
-        vendorId = vendorResult.vendorId
-      }
-
       const formData = new FormData()
       formData.append('name', data.name)
       formData.append('sku', data.sku)
       formData.append('description', data.description || '')
-      formData.append('price', data.price?.toString() || '')
-      formData.append('vendor_id', vendorId)
       formData.append('emdn_category_id', data.emdn_category_id || '')
       formData.append('material_id', data.material_id || '')
       formData.append('udi_di', data.udi_di || '')
       formData.append('ce_marked', data.ce_marked ? 'true' : 'false')
       formData.append('mdr_class', data.mdr_class || '')
       formData.append('manufacturer_name', data.manufacturer_name || '')
+      formData.append('manufacturer_sku', data.manufacturer_sku || '')
 
       const result = await createProduct(formData)
 
-      if (result.success) {
+      if (result.success && result.productId) {
+        // Create offering from extracted vendor/price data if available
+        const vendorName = extractedData.vendor_name
+        const extractedPrice = extractedData.price
+        if (vendorName) {
+          // Resolve vendor: use matched or create new
+          let vendorId = matchedVendor?.id
+          if (!vendorId) {
+            const vendorResult = await createVendor(vendorName)
+            if (vendorResult.success && vendorResult.vendorId) {
+              vendorId = vendorResult.vendorId
+            }
+          }
+          if (vendorId) {
+            await createOffering(result.productId, {
+              vendor_id: vendorId,
+              vendor_price: extractedPrice ?? undefined,
+              currency: extractedData.price_currency ?? 'EUR',
+              is_primary: true,
+            })
+          }
+        }
         showToast(t('productSaved'), 'success')
         onSuccess()
       } else if (result.error) {
@@ -362,59 +237,18 @@ export function ExtractionPreview({
               </p>
             )}
           </div>
-
-          {/* Price Trio */}
-          <PriceTrio
-            originalCurrency={extractedData.price_currency ?? 'EUR'}
-            watchedPrice={Number(form.watch('price')) || undefined}
-            rates={rates}
-            priceField={form.register('price')}
-            error={form.formState.errors.price?.message}
-            inputClass={inputClass}
-            labelClass={labelClass}
-            errorClass={errorClass}
-          />
         </div>
 
         {/* Right Column - Classification & Compliance */}
         <div className="flex flex-col space-y-5">
-          {/* Vendor & Manufacturer Section */}
+          {/* Manufacturer Section */}
           <div className="space-y-3">
-            <h3 className={sectionTitleClass}>{t('vendorManufacturer')}</h3>
-
-            {/* Vendor */}
-            <div>
-              <label htmlFor="vendor_id" className={labelClass}>
-                {tp('vendor')}
-                {extractedData.vendor_name && <StatusBadge matched={!!matchedVendor} />}
-              </label>
-              <select
-                id="vendor_id"
-                {...form.register('vendor_id')}
-                className={inputClass}
-              >
-                <option value="">{tp('selectVendor')}</option>
-                {/* Show extracted vendor as new option if not matched */}
-                {extractedData.vendor_name && !matchedVendor && (
-                  <option
-                    value={`${NEW_VENDOR_PREFIX}${extractedData.vendor_name}`}
-                    className="font-medium"
-                  >
-                    {extractedData.vendor_name}
-                  </option>
-                )}
-                {vendors.map((vendor) => (
-                  <option key={vendor.id} value={vendor.id}>
-                    {vendor.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <h3 className={sectionTitleClass}>{tp('manufacturer')}</h3>
 
             {/* Manufacturer Name */}
             <div>
               <label htmlFor="manufacturer_name" className={labelClass}>
-                {tp('manufacturer')}
+                {tp('manufacturer')} <span className="text-red-500 ml-1">*</span>
               </label>
               <input
                 id="manufacturer_name"
@@ -423,7 +257,45 @@ export function ExtractionPreview({
                 className={inputClass}
                 placeholder={tp('manufacturer')}
               />
+              {form.formState.errors.manufacturer_name && (
+                <p className={errorClass}>
+                  {form.formState.errors.manufacturer_name.message}
+                </p>
+              )}
             </div>
+
+            {/* Manufacturer SKU */}
+            <div>
+              <label htmlFor="manufacturer_sku" className={labelClass}>
+                {tp('manufacturerSku')}
+              </label>
+              <input
+                id="manufacturer_sku"
+                type="text"
+                {...form.register('manufacturer_sku')}
+                className={inputClass}
+              />
+            </div>
+
+            {/* Extracted distributor info (read-only) */}
+            {extractedData.vendor_name && (
+              <div className="bg-blue-50 border border-blue-200 rounded-md px-3 py-2">
+                <p className="text-xs font-medium text-blue-700 mb-1">{t('distributorInfo')}</p>
+                <p className="text-sm text-blue-900">
+                  {extractedData.vendor_name}
+                  {matchedVendor && <StatusBadge matched={true} />}
+                  {!matchedVendor && <StatusBadge matched={false} />}
+                </p>
+                {extractedData.price != null && (
+                  <p className="text-xs text-blue-700 mt-0.5">
+                    {t('price')}: {extractedData.price} {extractedData.price_currency ?? 'EUR'}
+                  </p>
+                )}
+                <p className="text-[10px] text-blue-600 mt-1 italic">
+                  {t('offeringCreatedAutomatically')}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* EMDN Classification Section */}

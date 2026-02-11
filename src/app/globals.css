@@ -212,6 +212,21 @@ body.col-resizing * {
   user-select: none !important;
 }
 
+/* Category tree — CSS-only expand/collapse via grid-template-rows */
+.tree-children {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 150ms ease-in-out;
+}
+
+.tree-children.expanded {
+  grid-template-rows: 1fr;
+}
+
+.tree-children > div {
+  overflow: hidden;
+}
+
 /* Sticky header depth shadow */
 .table-header-depth {
   box-shadow:

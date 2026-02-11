@@ -17,16 +17,15 @@ import { ReferencePricesPanel } from './reference-prices'
 import { PriceComparisonTable } from '@/components/comparison/price-comparison-table'
 import {
   getProductPriceComparison,
-  type ProductPriceComparison,
+  type OfferingComparison,
 } from '@/lib/actions/similarity'
 import { getReferencePricesForProduct } from '@/lib/actions/reference-prices'
-import type { ProductWithRelations, Vendor, EMDNCategory, ReferencePrice } from '@/lib/types'
+import type { ProductWithRelations, EMDNCategory, ReferencePrice } from '@/lib/types'
 
 interface ProductSheetProps {
   product: ProductWithRelations | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  vendors: Vendor[]
   emdnCategories: EMDNCategory[]
 }
 
@@ -34,7 +33,6 @@ export function ProductSheet({
   product,
   open,
   onOpenChange,
-  vendors,
   emdnCategories,
 }: ProductSheetProps) {
   const t = useTranslations('product')
@@ -44,7 +42,7 @@ export function ProductSheet({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   // Price comparison state
-  const [comparisonProducts, setComparisonProducts] = useState<ProductPriceComparison[]>([])
+  const [comparisonProducts, setComparisonProducts] = useState<OfferingComparison[]>([])
   const [comparisonLoading, setComparisonLoading] = useState(true)
   const [comparisonError, setComparisonError] = useState(false)
   const [isPriceComparisonOpen, setIsPriceComparisonOpen] = useState(false)
@@ -104,8 +102,8 @@ export function ProductSheet({
     fetchRefPrices()
   }, [product?.id, open])
 
-  // Count of comparable products (excluding current product)
-  const comparisonCount = comparisonProducts.filter(p => p.id !== product?.id).length
+  // Count of offerings (offerings are already for this product)
+  const comparisonCount = comparisonProducts.length
   const showComparisonButton = !comparisonLoading && !comparisonError && comparisonCount > 0
   const showRefPricesButton = !referencePricesLoading && referencePrices.length > 0
 
@@ -186,7 +184,7 @@ export function ProductSheet({
                       </p>
                       <ReferencePricesPanel
                         prices={referencePrices}
-                        vendorPriceCzk={product?.price}
+                        offerings={product?.offerings}
                         productEmdnCode={product?.emdn_category?.code}
                       />
                     </div>
@@ -243,7 +241,6 @@ export function ProductSheet({
                 ) : (
                   <ProductForm
                     product={product}
-                    vendors={vendors.map((v) => ({ id: v.id, name: v.name }))}
                     emdnCategories={emdnCategories.map((c) => ({
                       id: c.id,
                       code: c.code,

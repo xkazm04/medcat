@@ -26,17 +26,20 @@ async function fetchCategories(): Promise<CategoryNode[]> {
  */
 interface CategoryLookups {
   byId: Map<string, CategoryNode>
+  byCode: Map<string, CategoryNode>
   ancestorsById: Map<string, string[]>
 }
 
 function buildCategoryLookups(categories: CategoryNode[]): CategoryLookups {
   const byId = new Map<string, CategoryNode>()
+  const byCode = new Map<string, CategoryNode>()
   const ancestorsById = new Map<string, string[]>()
 
   // Recursive function to traverse tree and build maps
   function traverse(nodes: CategoryNode[], ancestors: string[]) {
     for (const node of nodes) {
       byId.set(node.id, node)
+      byCode.set(node.code, node)
       ancestorsById.set(node.id, [...ancestors])
 
       if (node.children && node.children.length > 0) {
@@ -46,7 +49,7 @@ function buildCategoryLookups(categories: CategoryNode[]): CategoryLookups {
   }
 
   traverse(categories, [])
-  return { byId, ancestorsById }
+  return { byId, byCode, ancestorsById }
 }
 
 /**
@@ -94,7 +97,7 @@ export function useCategoryLookups() {
 
   return useMemo(() => {
     if (!categories || categories.length === 0) {
-      return { byId: new Map(), ancestorsById: new Map() }
+      return { byId: new Map(), byCode: new Map(), ancestorsById: new Map() }
     }
     return buildCategoryLookups(categories)
   }, [categories])
@@ -109,6 +112,17 @@ export function useCategoryById(categoryId: string | null) {
 
   if (!categoryId) return null
   return byId.get(categoryId) || null
+}
+
+/**
+ * Hook: Get a specific category by EMDN code from the cached tree
+ * Uses O(1) lookup instead of tree traversal
+ */
+export function useCategoryByCode(code: string | null) {
+  const { byCode } = useCategoryLookups()
+
+  if (!code) return null
+  return byCode.get(code) || null
 }
 
 /**

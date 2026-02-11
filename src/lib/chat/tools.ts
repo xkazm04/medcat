@@ -14,6 +14,7 @@ const google = createGoogleGenerativeAI({
 /**
  * Search the product catalog for medical devices.
  * Wraps getProducts() with natural language parameter mapping.
+ * Enhanced: detects EMDN code patterns in query and resolves to category filter.
  */
 export const searchProducts = tool({
   description:
@@ -26,24 +27,45 @@ export const searchProducts = tool({
       .string()
       .optional()
       .describe('EMDN category ID to filter by'),
-    vendor: z.string().optional().describe('Vendor ID to filter by'),
+    manufacturer: z
+      .string()
+      .optional()
+      .describe('Manufacturer name to filter by (e.g., "Zimmer Biomet")'),
     material: z
       .string()
       .optional()
       .describe('Material ID to filter by (e.g., titanium, PEEK)'),
-    minPrice: z.number().optional().describe('Minimum price in EUR'),
-    maxPrice: z.number().optional().describe('Maximum price in EUR'),
+    minPrice: z.number().optional().describe('Minimum offering price in EUR'),
+    maxPrice: z.number().optional().describe('Maximum offering price in EUR'),
     limit: z
       .number()
       .default(5)
       .describe('Number of results to return (default 5)'),
   }),
-  execute: async ({ query, category, vendor, material, minPrice, maxPrice, limit }) => {
+  execute: async ({ query, category, manufacturer, material, minPrice, maxPrice, limit }) => {
+    let resolvedCategory = category;
+    let searchQuery = query;
+
+    // Detect EMDN code pattern in query and resolve to category filter
+    if (!category) {
+      const codeMatch = query.match(/\b(P\d{4,})\b/i);
+      if (codeMatch) {
+        const allCategories = await getEMDNCategoriesFlat();
+        const matched = allCategories.find(c => c.code.toUpperCase() === codeMatch[1].toUpperCase());
+        if (matched) {
+          resolvedCategory = matched.id;
+          // Strip EMDN code from search text
+          searchQuery = query.replace(codeMatch[0], '').trim();
+          if (!searchQuery) searchQuery = '';
+        }
+      }
+    }
+
     // First try AND mode (all words must match) for precision
     const result = await getProducts({
-      search: query,
-      category,
-      vendor,
+      search: searchQuery || undefined,
+      category: resolvedCategory,
+      manufacturer,
       material,
       minPrice,
       maxPrice,
@@ -51,12 +73,12 @@ export const searchProducts = tool({
     });
 
     // If AND returns 0 results and query has multiple words, retry with OR (any word)
-    if (result.count === 0 && query.trim().split(/\s+/).length > 1) {
+    if (result.count === 0 && searchQuery && searchQuery.trim().split(/\s+/).length > 1) {
       const orResult = await getProducts({
-        search: query,
+        search: searchQuery,
         searchMode: 'or',
-        category,
-        vendor,
+        category: resolvedCategory,
+        manufacturer,
         material,
         minPrice,
         maxPrice,
@@ -78,22 +100,22 @@ export const searchProducts = tool({
 });
 
 /**
- * Compare prices for a product across different vendors.
- * Wraps getProductPriceComparison() for similarity-based price lookup.
+ * Compare prices for a product across different distributors.
+ * Wraps getProductPriceComparison() to return all vendor offerings.
  */
 export const comparePrices = tool({
   description:
-    'Compare prices for a product across different vendors. Use when user asks to compare prices or see vendor pricing.',
+    'Compare prices for a product across different distributors. Use when user asks to compare prices or see distributor pricing.',
   inputSchema: z.object({
     productId: z.string().describe('UUID of the product to compare'),
   }),
   execute: async ({ productId }) => {
     const result = await getProductPriceComparison(productId);
     if (!result.success) {
-      return { error: result.error, products: [] };
+      return { error: result.error, offerings: [] };
     }
     return {
-      products: result.data || [],
+      offerings: result.data || [],
       count: result.data?.length || 0,
     };
   },
@@ -200,12 +222,12 @@ export const searchExternalProducts = tool({
       .string()
       .optional()
       .describe('EMDN category or product type for context'),
-    vendorName: z
+    manufacturerName: z
       .string()
       .optional()
-      .describe('Current vendor for exclusion context'),
+      .describe('Current manufacturer for exclusion context'),
   }),
-  execute: async ({ productName, productCategory, vendorName }) => {
+  execute: async ({ productName, productCategory, manufacturerName }) => {
     try {
       // Build search context - MUST include 'EU market' and 'CE marked'
       const contextParts = [
@@ -215,7 +237,7 @@ export const searchExternalProducts = tool({
         'EU market',
         'CE marked',
         'alternatives',
-        vendorName ? `alternative to ${vendorName}` : '',
+        manufacturerName ? `alternative to ${manufacturerName}` : '',
       ].filter(Boolean);
       const searchContext = contextParts.join(' ');
 
@@ -395,5 +417,146 @@ export const lookupReferencePrices = tool({
     }
 
     return { error: 'Provide either productId or emdnCategoryId', prices: [], summary: null };
+  },
+});
+
+/**
+ * Browse the EMDN category tree.
+ * Returns children of a category, search results, or root nodes.
+ */
+export const browseCategories = tool({
+  description:
+    'Browse the EMDN category tree. Use when user asks "what categories exist under...", "show EMDN tree for...", or wants to explore categories.',
+  inputSchema: z.object({
+    parentCode: z
+      .string()
+      .optional()
+      .describe('EMDN code of parent category to list children of (e.g., "P09")'),
+    search: z
+      .string()
+      .optional()
+      .describe('Search term to find categories by name or code'),
+    depth: z
+      .number()
+      .default(1)
+      .describe('How many levels deep to return (default 1, max 3)'),
+  }),
+  execute: async ({ parentCode, search, depth }) => {
+    const allCategories = await getEMDNCategoriesFlat();
+    const maxDepth = Math.min(depth, 3);
+
+    if (parentCode) {
+      // Find parent and return children
+      const parent = allCategories.find(c => c.code.toUpperCase() === parentCode.toUpperCase());
+      if (!parent) {
+        return { error: `Category code "${parentCode}" not found`, categories: [] };
+      }
+
+      // Find direct children (codes that start with parent code and are one level deeper)
+      const parentLen = parent.code.length;
+      const children = allCategories.filter(c => {
+        if (!c.code.startsWith(parent.code) || c.code === parent.code) return false;
+        // For depth control: count digits after parent code
+        const suffix = c.code.slice(parentLen);
+        const suffixDepth = suffix.replace(/[^0-9]/g, '').length;
+        return suffixDepth <= maxDepth * 2; // Approximate depth by digit count
+      });
+
+      return {
+        parent: { code: parent.code, name: parent.name, id: parent.id },
+        categories: children.slice(0, 20).map(c => ({
+          id: c.id,
+          code: c.code,
+          name: c.name,
+        })),
+        totalChildren: children.length,
+      };
+    }
+
+    if (search) {
+      const lower = search.toLowerCase();
+      const matched = allCategories.filter(c =>
+        c.name.toLowerCase().includes(lower) ||
+        c.code.toLowerCase().includes(lower)
+      );
+      return {
+        categories: matched.slice(0, 10).map(c => ({
+          id: c.id,
+          code: c.code,
+          name: c.name,
+        })),
+        totalMatches: matched.length,
+      };
+    }
+
+    // Return root categories (2-character codes like P01, P02, etc.)
+    const roots = allCategories.filter(c => c.code.length === 3);
+    return {
+      categories: roots.map(c => ({
+        id: c.id,
+        code: c.code,
+        name: c.name,
+      })),
+      totalCategories: allCategories.length,
+    };
+  },
+});
+
+/**
+ * Navigate to a specific EMDN category in the catalog.
+ * Resolves code/name to UUID and returns navigation info.
+ */
+export const navigateToCategory = tool({
+  description:
+    'Navigate to a specific EMDN category in the catalog. Use when user says "show me P0908 products", "filter by knee prostheses", or wants to navigate to a category.',
+  inputSchema: z.object({
+    emdnCode: z
+      .string()
+      .optional()
+      .describe('EMDN code to navigate to (e.g., "P0908")'),
+    categoryName: z
+      .string()
+      .optional()
+      .describe('Category name to search for (e.g., "hip femoral stems")'),
+  }),
+  execute: async ({ emdnCode, categoryName }) => {
+    const allCategories = await getEMDNCategoriesFlat();
+
+    let target = null;
+
+    if (emdnCode) {
+      target = allCategories.find(c => c.code.toUpperCase() === emdnCode.toUpperCase());
+    }
+
+    if (!target && categoryName) {
+      const lower = categoryName.toLowerCase();
+      // Try exact-ish match first, then partial
+      target = allCategories.find(c => c.name.toLowerCase() === lower) ||
+               allCategories.find(c => c.name.toLowerCase().includes(lower));
+    }
+
+    if (!target) {
+      return { error: `Category not found for ${emdnCode || categoryName}`, action: 'none' };
+    }
+
+    // Build path breadcrumb by walking up the code
+    const path: Array<{ code: string; name: string }> = [];
+    let currentCode = target.code;
+    while (currentCode.length > 1) {
+      const cat = allCategories.find(c => c.code === currentCode);
+      if (cat) path.unshift({ code: cat.code, name: cat.name });
+      // Walk up: P090801 → P0908 → P09 → P
+      currentCode = currentCode.length > 3
+        ? currentCode.slice(0, -2)
+        : currentCode.slice(0, -1);
+    }
+
+    return {
+      categoryId: target.id,
+      code: target.code,
+      name: target.name,
+      path,
+      action: 'navigate',
+    };
   },
 });

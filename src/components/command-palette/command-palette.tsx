@@ -3,40 +3,21 @@
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Moon, Sun, Languages, FilterX, MessageSquare, Clock, X, ArrowRight } from 'lucide-react';
+import { Search, Moon, Sun, Languages, FilterX, MessageSquare, Clock, X, ArrowRight, FolderTree } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useDebounceValue } from 'usehooks-ts';
 import { useChatContextOptional } from '@/lib/hooks/use-chat-context';
+import { useCategoryLookups } from '@/lib/query/hooks';
+import { getRecentSearches, addRecentSearch } from '@/lib/utils/recent-searches';
+import { matchCategories, type CategoryMatch } from '@/components/filters/search-suggestions';
 
 interface CommandItem {
   id: string;
   label: string;
   description?: string;
   icon: React.ReactNode;
-  category: 'action' | 'recent';
+  category: 'action' | 'recent' | 'emdn';
   onSelect: () => void;
-}
-
-const RECENT_STORAGE_KEY = 'medcatalog-recent-searches';
-const MAX_RECENT = 10;
-
-function getRecentSearches(): string[] {
-  try {
-    const stored = localStorage.getItem(RECENT_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function addRecentSearch(query: string) {
-  try {
-    const recent = getRecentSearches().filter(s => s !== query);
-    recent.unshift(query);
-    localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
-  } catch {
-    // localStorage unavailable
-  }
 }
 
 export function CommandPalette() {
@@ -141,6 +122,26 @@ export function CommandPalette() {
       },
     }));
 
+  // Category matches from EMDN tree
+  const { byCode, byId } = useCategoryLookups();
+  const categoryItems: CommandItem[] = debouncedQuery
+    ? matchCategories(debouncedQuery, byCode, byId, 5).map(cat => ({
+        id: `cat-${cat.id}`,
+        label: `${cat.code} - ${cat.name}`,
+        description: cat.productCount > 0 ? `${cat.productCount} products` : undefined,
+        icon: <FolderTree className="h-4 w-4" />,
+        category: 'emdn' as const,
+        onSelect: () => {
+          const params = new URLSearchParams(searchParams.toString());
+          params.set('category', cat.id);
+          params.delete('search');
+          params.set('page', '1');
+          startTransition(() => { router.push(`?${params.toString()}`); });
+          close();
+        },
+      }))
+    : [];
+
   // Filter actions by query
   const filteredActions = debouncedQuery
     ? actions.filter(a => a.label.toLowerCase().includes(debouncedQuery.toLowerCase()))
@@ -148,6 +149,7 @@ export function CommandPalette() {
 
   const allItems = [
     ...filteredActions,
+    ...categoryItems,
     ...recentItems,
   ];
 
@@ -251,6 +253,30 @@ export function CommandPalette() {
                     </>
                   )}
 
+                  {/* Categories */}
+                  {categoryItems.length > 0 && (
+                    <>
+                      <div className="px-4 py-1 mt-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Categories
+                      </div>
+                      {categoryItems.map((item, idx) => (
+                        <button
+                          key={item.id}
+                          onClick={item.onSelect}
+                          className={`flex items-center gap-3 w-full px-4 py-2 text-sm text-left transition-colors ${
+                            selectedIndex === filteredActions.length + idx ? 'bg-accent/10 text-accent' : 'hover:bg-muted'
+                          }`}
+                        >
+                          <span className="text-muted-foreground">{item.icon}</span>
+                          <span className="truncate">{item.label}</span>
+                          {item.description && (
+                            <span className="ml-auto text-xs text-muted-foreground shrink-0">{item.description}</span>
+                          )}
+                        </button>
+                      ))}
+                    </>
+                  )}
+
                   {/* Recent */}
                   {recentItems.length > 0 && (
                     <>
@@ -262,7 +288,7 @@ export function CommandPalette() {
                           key={item.id}
                           onClick={item.onSelect}
                           className={`flex items-center gap-3 w-full px-4 py-2 text-sm text-left transition-colors ${
-                            selectedIndex === filteredActions.length + idx ? 'bg-accent/10 text-accent' : 'hover:bg-muted'
+                            selectedIndex === filteredActions.length + categoryItems.length + idx ? 'bg-accent/10 text-accent' : 'hover:bg-muted'
                           }`}
                         >
                           <span className="text-muted-foreground">{item.icon}</span>

@@ -11,26 +11,27 @@ export interface SimilarProduct {
   id: string;
   name: string;
   sku: string;
-  price: number | null;
-  vendor_id: string | null;
-  vendor_name: string | null;
+  manufacturer_name: string | null;
+  manufacturer_sku: string | null;
+  emdn_category_id: string | null;
   name_similarity: number;
   sku_similarity: number;
+  offering_count: number;
+  min_price: number | null;
+  max_price: number | null;
 }
 
 /**
- * Represents a product in a price comparison group.
- * Used to show all vendor prices for similar products.
+ * Represents a vendor offering for a product (from price comparison RPC).
  */
-export interface ProductPriceComparison {
-  id: string;
-  name: string;
-  sku: string;
-  price: number | null;
-  vendor_id: string | null;
+export interface OfferingComparison {
+  offering_id: string;
+  vendor_id: string;
   vendor_name: string | null;
-  emdn_code: string | null;
-  similarity: number;
+  vendor_sku: string | null;
+  vendor_price: number | null;
+  currency: string | null;
+  is_primary: boolean;
 }
 
 interface SimilarityResult {
@@ -41,7 +42,7 @@ interface SimilarityResult {
 
 interface PriceComparisonResult {
   success: boolean;
-  data?: ProductPriceComparison[];
+  data?: OfferingComparison[];
   error?: string;
 }
 
@@ -77,23 +78,20 @@ export async function findSimilarProducts(
 }
 
 /**
- * Get all products similar to a given product for price comparison.
- * Returns products ordered by price ascending for easy comparison.
+ * Get all vendor offerings for a given product for price comparison.
+ * Returns offerings ordered by price ascending for easy comparison.
  *
  * @param productId - UUID of the product to compare
- * @param threshold - Minimum similarity threshold (default 0.5 for grouping)
- * @returns PriceComparisonResult with similar products or error
+ * @returns PriceComparisonResult with vendor offerings or error
  */
 export async function getProductPriceComparison(
-  productId: string,
-  threshold: number = 0.5
+  productId: string
 ): Promise<PriceComparisonResult> {
   checkCircuit();
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc("get_product_price_comparison", {
-    product_id: productId,
-    similarity_threshold: threshold,
+    p_product_id: productId,
   });
 
   if (error) {

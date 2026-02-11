@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useMemo, useTransition, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
 import { ChevronRight, FolderTree, Check, Loader2, Search, X } from "lucide-react";
 import { useDebounceValue } from "usehooks-ts";
-import { useCategories, useCategoryAncestors } from "@/lib/query/hooks";
+import { useCategories, useCategoryAncestors, useCategoryLookups } from "@/lib/query/hooks";
 import type { CategoryNode } from "@/lib/queries";
 import { simplifyChildName } from "@/lib/utils/format-category";
 import { useLocalizedCategoryName } from "@/lib/utils/use-localized-category";
@@ -53,7 +52,7 @@ function CategoryItem({
 
   // Get localized name based on current locale
   const localizedName = useLocalizedCategoryName(category);
-  const localizedParentName = parentName; // Parent name should also be localized by parent component
+  const localizedParentName = parentName;
 
   // Format the display name - remove redundant parent context
   const displayName = useMemo(() => {
@@ -73,6 +72,10 @@ function CategoryItem({
     onToggleExpand(category.id);
   };
 
+  // Cap indent at depth 4: max 64px. For depth > 4, use border accent.
+  const indent = Math.min(depth, 4) * 14 + 8;
+  const isDeep = depth > 4;
+
   return (
     <div className="select-none">
       <div
@@ -84,11 +87,13 @@ function CategoryItem({
             ? "bg-accent text-accent-foreground shadow-sm hover:shadow-md"
             : "hover:bg-green-light/30 text-foreground hover:shadow-sm active:scale-[0.99]"
           }
+          ${isDeep && !isSelected ? "border-l-2 border-accent/20" : ""}
         `}
-        style={{ paddingLeft: `${depth * 16 + 8}px` }}
+        style={{ paddingLeft: `${indent}px` }}
         onClick={handleClick}
+        title={`${category.code} - ${localizedName}`}
       >
-        {/* Expand/collapse button */}
+        {/* Expand/collapse button — CSS transition instead of Framer Motion */}
         {hasChildren ? (
           <button
             onClick={handleExpandClick}
@@ -98,12 +103,9 @@ function CategoryItem({
               ${isSelected ? "hover:bg-accent-foreground/20 active:scale-90" : "hover:bg-muted-foreground/20 active:scale-90"}
             `}
           >
-            <motion.div
-              animate={{ rotate: isExpanded ? 90 : 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <ChevronRight className="h-3.5 w-3.5 opacity-60" />
-            </motion.div>
+            <ChevronRight
+              className={`h-3.5 w-3.5 opacity-60 transition-transform duration-150 ${isExpanded ? "rotate-90" : ""}`}
+            />
           </button>
         ) : (
           <span className="w-[18px]" />
@@ -127,16 +129,12 @@ function CategoryItem({
         )}
       </div>
 
-      {/* Children */}
-      <AnimatePresence>
-        {isExpanded && hasChildren && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.15, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
+      {/* Children — always mounted, CSS grid expand/collapse */}
+      {hasChildren && (
+        <div
+          className={`tree-children ${isExpanded ? "expanded" : ""}`}
+        >
+          <div>
             {category.children.map((child) => (
               <CategoryItem
                 key={child.id}
@@ -149,9 +147,9 @@ function CategoryItem({
                 onToggleExpand={onToggleExpand}
               />
             ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -198,6 +196,50 @@ function filterCategories(
   return { filtered, matchAncestorIds: ancestorIds };
 }
 
+/** Breadcrumb for selected deep category */
+function CategoryBreadcrumb({
+  selectedId,
+  onSelect,
+}: {
+  selectedId: string;
+  onSelect: (id: string | null) => void;
+}) {
+  const { byId, ancestorsById } = useCategoryLookups();
+  const ancestors = ancestorsById.get(selectedId) || [];
+  const selected = byId.get(selectedId);
+
+  if (ancestors.length < 2 || !selected) return null;
+
+  // Build path: ancestors + selected node
+  const pathNodes = [...ancestors.map((id: string) => byId.get(id)).filter(Boolean), selected];
+  // Show last 4 segments max for compact display
+  const visible = pathNodes.slice(-4);
+  const truncated = pathNodes.length > 4;
+
+  return (
+    <div className="flex items-center gap-0.5 px-1 py-1 text-[11px] text-muted-foreground overflow-x-auto scrollbar-thin">
+      {truncated && <span className="shrink-0">...</span>}
+      {visible.map((node, i) => (
+        <span key={node!.id} className="flex items-center gap-0.5 shrink-0">
+          {(i > 0 || truncated) && <ChevronRight className="h-2.5 w-2.5 opacity-40" />}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(node!.id === selectedId ? null : node!.id);
+            }}
+            className={`hover:text-accent transition-colors truncate max-w-[80px] ${
+              node!.id === selectedId ? "font-medium text-accent" : "hover:underline"
+            }`}
+            title={`${node!.code} - ${node!.name}`}
+          >
+            {node!.code}
+          </button>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function CategoryTree({ initialCategories }: CategoryTreeProps) {
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -240,14 +282,13 @@ export function CategoryTree({ initialCategories }: CategoryTreeProps) {
     }
   }, [searchExpandIds]);
 
-  const handleSelect = (id: string | null) => {
-    // Use startTransition to keep UI responsive during navigation
+  const handleSelect = useCallback((id: string | null) => {
     startTransition(() => {
       setCategory(id);
     });
-  };
+  }, [startTransition, setCategory]);
 
-  const handleToggleExpand = (id: string) => {
+  const handleToggleExpand = useCallback((id: string) => {
     setExpandedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -257,7 +298,7 @@ export function CategoryTree({ initialCategories }: CategoryTreeProps) {
       }
       return next;
     });
-  };
+  }, []);
 
   // Expand all / collapse all
   const allCategoryIds = useMemo(() => {
@@ -344,6 +385,11 @@ export function CategoryTree({ initialCategories }: CategoryTreeProps) {
             </button>
           )}
         </div>
+      )}
+
+      {/* Breadcrumb for deep selected category */}
+      {selectedId && (
+        <CategoryBreadcrumb selectedId={selectedId} onSelect={handleSelect} />
       )}
 
       {/* Expand/collapse toggle */}

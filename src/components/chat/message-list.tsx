@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, ChevronRight, ExternalLink, FolderTree } from 'lucide-react';
 import { MessageBubble } from './message-bubble';
 import { ProductCard } from './product-card';
 import { ExternalProductCard } from './external-product-card';
@@ -15,18 +15,19 @@ import { QuickActions } from './quick-actions';
 import { MessageActions } from './message-actions';
 import type { UIMessage } from 'ai';
 import type { ProductWithRelations, ReferencePrice } from '@/lib/types';
-import type { ProductPriceComparison } from '@/lib/actions/similarity';
+import type { OfferingComparison } from '@/lib/actions/similarity';
 
 interface MessageListProps {
   messages: UIMessage[];
   isStreaming: boolean;
   onComparePrice: (productId: string) => void;
   onCategorySelect: (categoryId: string, categoryName: string) => void;
+  onNavigateToCategory: (categoryId: string) => void;
   onViewInCatalog: (product: ProductWithRelations) => void;
   onSendMessage: (text: string) => void;
   onCompareResults: () => void;
   onShowMore: () => void;
-  onFilterVendor: () => void;
+  onFilterManufacturer: () => void;
   onRegenerate?: () => void;
   activeSearch?: string;
   activeCategory?: string;
@@ -46,7 +47,7 @@ interface SearchProductsOutput {
 }
 
 interface ComparePricesOutput {
-  products: ProductPriceComparison[];
+  offerings: OfferingComparison[];
   count: number;
   error?: string;
 }
@@ -92,16 +93,35 @@ interface LookupReferencePricesOutput {
   error?: string;
 }
 
+interface BrowseCategoriesOutput {
+  parent?: { code: string; name: string; id: string };
+  categories: Array<{ id: string; code: string; name: string }>;
+  totalChildren?: number;
+  totalMatches?: number;
+  totalCategories?: number;
+  error?: string;
+}
+
+interface NavigateToCategoryOutput {
+  categoryId: string;
+  code: string;
+  name: string;
+  path: Array<{ code: string; name: string }>;
+  action: string;
+  error?: string;
+}
+
 export function MessageList({
   messages,
   isStreaming,
   onComparePrice,
   onCategorySelect,
+  onNavigateToCategory,
   onViewInCatalog,
   onSendMessage,
   onCompareResults,
   onShowMore,
-  onFilterVendor,
+  onFilterManufacturer,
   onRegenerate,
   activeSearch,
   activeCategory,
@@ -211,7 +231,7 @@ export function MessageList({
                   productCount={toolPart.output.products.length}
                   onCompare={onCompareResults}
                   onShowMore={onShowMore}
-                  onFilterVendor={onFilterVendor}
+                  onFilterManufacturer={onFilterManufacturer}
                 />
               )}
             </div>
@@ -228,7 +248,7 @@ export function MessageList({
         if (!isToolPart(part)) return null;
         const toolPart = part as ToolPartBase & { output?: ComparePricesOutput };
         if (toolPart.state === 'output-available' && toolPart.output) {
-          return <ComparisonTable key={toolPart.toolCallId} products={toolPart.output.products} />;
+          return <ComparisonTable key={toolPart.toolCallId} offerings={toolPart.output.offerings} />;
         }
         if (hasCompletedToolOfType(allParts, 'tool-comparePrices')) {
           return null;
@@ -336,6 +356,79 @@ export function MessageList({
           return null;
         }
         return <LoadingSpinner key={toolPart.toolCallId} text="Looking up reference prices..." />;
+      }
+
+      case 'tool-browseCategories': {
+        if (!isToolPart(part)) return null;
+        const toolPart = part as ToolPartBase & { output?: BrowseCategoriesOutput };
+        if (toolPart.state === 'output-available' && toolPart.output) {
+          if (toolPart.output.error) {
+            return <p key={toolPart.toolCallId} className="text-sm text-muted-foreground">{toolPart.output.error}</p>;
+          }
+          return (
+            <div key={toolPart.toolCallId} className="space-y-1.5">
+              {toolPart.output.parent && (
+                <p className="text-xs text-muted-foreground">
+                  Children of <span className="font-mono font-medium">{toolPart.output.parent.code}</span> {toolPart.output.parent.name}
+                </p>
+              )}
+              <div className="flex flex-wrap gap-1.5">
+                {toolPart.output.categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => onCategorySelect(cat.id, cat.name)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-muted hover:bg-accent/10 hover:text-accent border border-border/60 rounded-md transition-colors"
+                  >
+                    <span className="font-mono text-muted-foreground">{cat.code}</span>
+                    <span className="truncate max-w-[150px]">{cat.name}</span>
+                  </button>
+                ))}
+              </div>
+              {(toolPart.output.totalChildren || 0) > toolPart.output.categories.length && (
+                <p className="text-xs text-muted-foreground">
+                  Showing {toolPart.output.categories.length} of {toolPart.output.totalChildren} subcategories
+                </p>
+              )}
+            </div>
+          );
+        }
+        if (hasCompletedToolOfType(allParts, 'tool-browseCategories')) return null;
+        return <LoadingSpinner key={toolPart.toolCallId} text="Browsing categories..." />;
+      }
+
+      case 'tool-navigateToCategory': {
+        if (!isToolPart(part)) return null;
+        const toolPart = part as ToolPartBase & { output?: NavigateToCategoryOutput };
+        if (toolPart.state === 'output-available' && toolPart.output) {
+          if (toolPart.output.error) {
+            return <p key={toolPart.toolCallId} className="text-sm text-muted-foreground">{toolPart.output.error}</p>;
+          }
+          return (
+            <div key={toolPart.toolCallId} className="border border-border rounded-lg p-3 mb-2">
+              {/* EMDN breadcrumb path */}
+              <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2 flex-wrap">
+                {toolPart.output.path.map((segment, i) => (
+                  <span key={segment.code} className="flex items-center gap-1">
+                    {i > 0 && <ChevronRight className="h-3 w-3 opacity-40" />}
+                    <span className={`${i === toolPart.output!.path.length - 1 ? 'font-medium text-foreground' : ''}`}>
+                      <span className="font-mono">{segment.code}</span> {segment.name}
+                    </span>
+                  </span>
+                ))}
+              </div>
+              <button
+                onClick={() => onNavigateToCategory(toolPart.output!.categoryId)}
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 font-medium text-accent bg-green-light hover:bg-green-light/80 rounded-md transition-colors"
+              >
+                <FolderTree className="w-3 h-3" />
+                Open in catalog
+                <ExternalLink className="w-3 h-3" />
+              </button>
+            </div>
+          );
+        }
+        if (hasCompletedToolOfType(allParts, 'tool-navigateToCategory')) return null;
+        return <LoadingSpinner key={toolPart.toolCallId} text="Finding category..." />;
       }
 
       default:

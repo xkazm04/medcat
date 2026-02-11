@@ -37,15 +37,22 @@ export function ProductCard({ product, onCompare, onViewInCatalog }: ProductCard
           <div className="min-w-0 flex-1">
             <h4 className="font-semibold text-sm leading-tight truncate">{product.name}</h4>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">
-              {product.vendor?.name || 'Unknown vendor'}
+              {product.manufacturer_name || 'Unknown manufacturer'}
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {product.price !== null && (
-              <span className="text-sm font-semibold tabular-nums text-foreground">
-                {formatPrice(product.price, locale)}
-              </span>
-            )}
+            {(() => {
+              const prices = product.offerings?.map(o => o.vendor_price).filter((p): p is number => p !== null) ?? [];
+              if (prices.length > 0) {
+                const minPrice = Math.min(...prices);
+                return (
+                  <span className="text-sm font-semibold tabular-nums text-foreground">
+                    {prices.length > 1 ? 'from ' : ''}{formatPrice(minPrice, locale)}
+                  </span>
+                );
+              }
+              return null;
+            })()}
             <button
               onClick={() => setExpanded(!expanded)}
               className="p-1 hover:bg-muted rounded transition-colors"
@@ -99,7 +106,17 @@ export function ProductCard({ product, onCompare, onViewInCatalog }: ProductCard
                   {product.emdn_category && (
                     <div className="flex gap-2">
                       <dt className="font-medium text-foreground/70 shrink-0">EMDN:</dt>
-                      <dd className="truncate">{product.emdn_category.code} - {product.emdn_category.name}</dd>
+                      <dd className="truncate">
+                        {product.emdn_category.path
+                          ? product.emdn_category.path.split('.').map((seg: string, i: number, arr: string[]) => (
+                              <span key={i}>
+                                {i > 0 && <span className="mx-0.5 opacity-40">&rsaquo;</span>}
+                                <span className={i === arr.length - 1 ? 'font-medium' : ''}>{seg}</span>
+                              </span>
+                            ))
+                          : `${product.emdn_category.code} - ${product.emdn_category.name}`
+                        }
+                      </dd>
                     </div>
                   )}
                 </dl>

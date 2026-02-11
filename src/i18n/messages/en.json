@@ -312,16 +312,20 @@
     "deleteBatch": "Delete batch",
     "price": "Price",
     "original": "original",
-    "ratesDate": "ECB rates as of {date}"
+    "ratesDate": "ECB rates as of {date}",
+    "distributorInfo": "Distributor offering",
+    "offeringCreatedAutomatically": "An offering will be created automatically for this distributor"
   },
   "comparison": {
     "title": "Price Comparison",
-    "subtitle": "Same or similar products from other vendors",
+    "subtitle": "Distributor offerings for this product",
     "product": "Product",
     "vendor": "Vendor",
+    "distributor": "Distributor",
     "price": "Price",
     "match": "Match",
-    "noComparison": "No price comparison available",
+    "diff": "Diff",
+    "noComparison": "No distributor offerings available",
     "current": "current",
     "unknown": "Unknown",
     "notAvailable": "N/A"
@@ -468,6 +472,29 @@
     "exportSelectedDesc": "{count} selected products",
     "exporting": "Exporting..."
   },
+  "xlsxImport": {
+    "import": "Import",
+    "importData": "Import XLSX",
+    "selectFile": "Select .xlsx file",
+    "importing": "Importing...",
+    "importComplete": "Import Complete",
+    "importedCount": "{count} products imported",
+    "updatedCount": "{count} products updated",
+    "skippedDuplicates": "{count} skipped as duplicates",
+    "errorCount": "{count} errors",
+    "formatError": "File format not recognized. Please use the same format as catalog export.",
+    "noFile": "No file selected",
+    "confirm": "Import {count} products",
+    "cancel": "Cancel",
+    "close": "Close",
+    "viewDetails": "View details",
+    "hideDetails": "Hide details",
+    "rowNumber": "Row {row}",
+    "previewTitle": "Import Preview",
+    "previewDesc": "{count} products found in file",
+    "duplicatesFound": "Duplicates",
+    "errorsFound": "Errors"
+  },
   "darkMode": {
     "light": "Light",
     "dark": "Dark",
@@ -497,6 +524,13 @@
     "noViews": "No saved views yet",
     "noViewsDesc": "Apply filters and save them for quick access",
     "maxViews": "Maximum of 20 views reached"
+  },
+  "searchSuggestions": {
+    "categories": "Categories",
+    "recentSearches": "Recent Searches",
+    "searchCatalog": "Search catalog for \"{query}\"",
+    "askAI": "Ask AI about \"{query}\"",
+    "categoryProducts": "{count} products"
   },
   "bulkActions": {
     "selected": "{count} selected",
@@ -530,7 +564,7 @@
   "columnVisibility": {
     "product": "Product",
     "sku": "SKU (under product)",
-    "vendor": "Vendor (under product)",
+    "vendor": "Distributors",
     "manufacturer": "Manufacturer",
     "price": "Price",
     "regulatory": "Regulatory",
@@ -547,7 +581,7 @@
       "fromCountries": "from {count} {count, plural, =1 {country} other {countries}}",
       "priceCoverage": "Price Coverage",
       "ofProducts": "of products",
-      "vendors": "Vendors",
+      "distributors": "Distributors",
       "registered": "registered",
       "unprocessedSets": "Unprocessed Sets",
       "setsToDecompose": "sets to decompose"
@@ -557,7 +591,7 @@
       "setDecompositionProgress": "Set Decomposition Progress",
       "ofSets": "of {total} sets",
       "sourceCountries": "Source Countries",
-      "topVendorsByProducts": "Top Vendors by Products",
+      "topDistributorsByProducts": "Top Distributors by Products",
       "topManufacturers": "Top Manufacturers (Ref. Prices)",
       "productsByCategory": "Products by EMDN Category",
       "products": "Products:"

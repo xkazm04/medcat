@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { getProducts, getVendors, getEMDNCategories, getManufacturers, getRefPricePaths } from "@/lib/queries";
+// getVendors still needed for extraction sheet and active-filters backward compat
 import { flattenCategories } from "@/lib/utils/format-category";
 
 // ISR: Revalidate page every 60 seconds for fresh data without blocking
@@ -8,7 +9,7 @@ export const revalidate = 60;
 import { FilterSidebar, FilterSection } from "@/components/filters/filter-sidebar";
 import { MobileFilterTrigger } from "@/components/filters/mobile-filter-trigger";
 import { CategoryTree } from "@/components/filters/category-tree";
-import { VendorFilter } from "@/components/filters/vendor-filter";
+// VendorFilter removed — vendor is now per-offering, not per-product
 import { CatalogClient } from "@/components/catalog-client";
 import { CatalogSkeleton } from "@/components/catalog-skeleton";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -74,8 +75,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const { data: products, count } = productsResult;
   const pageCount = Math.ceil(count / pageSize);
 
-  // Count selected filters for badges
-  const selectedVendorCount = params.vendor?.split(",").filter(Boolean).length || 0;
+  // Vendor filter removed from sidebar — vendor is now per-offering
 
   return (
     <main className="min-h-screen bg-background">
@@ -119,10 +119,6 @@ export default async function Home({ searchParams }: HomeProps) {
                 <FilterSection title={t("filters.category")} badge={params.category ? 1 : 0}>
                   <CategoryTree initialCategories={categories} />
                 </FilterSection>
-
-                <FilterSection title={t("filters.vendor")} badge={selectedVendorCount}>
-                  <VendorFilter vendors={vendors} />
-                </FilterSection>
               </FilterSidebar>
             </Suspense>
           </div>
@@ -133,9 +129,6 @@ export default async function Home({ searchParams }: HomeProps) {
               <div className="space-y-4">
                 <FilterSection title={t("filters.category")} badge={params.category ? 1 : 0}>
                   <CategoryTree initialCategories={categories} />
-                </FilterSection>
-                <FilterSection title={t("filters.vendor")} badge={selectedVendorCount}>
-                  <VendorFilter vendors={vendors} />
                 </FilterSection>
               </div>
             </MobileFilterTrigger>
@@ -155,6 +148,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 currentPage={page}
                 pageSize={pageSize}
               />
+              {/* vendors still passed for ExtractionSheet and ActiveFilters backward compat */}
             </Suspense>
           </div>
         </div>

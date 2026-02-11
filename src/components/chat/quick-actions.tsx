@@ -4,14 +4,14 @@ interface QuickActionsProps {
   productCount: number;
   onCompare: () => void;
   onShowMore: () => void;
-  onFilterVendor: () => void;
+  onFilterManufacturer: () => void;
 }
 
 export function QuickActions({
   productCount,
   onCompare,
   onShowMore,
-  onFilterVendor,
+  onFilterManufacturer,
 }: QuickActionsProps) {
   if (productCount === 0) return null;
 
@@ -34,10 +34,10 @@ export function QuickActions({
         </button>
       )}
       <button
-        onClick={onFilterVendor}
+        onClick={onFilterManufacturer}
         className="px-3 py-1.5 text-xs border border-border rounded-md hover:bg-muted transition-colors"
       >
-        Filter by vendor
+        Filter by manufacturer
       </button>
     </div>
   );

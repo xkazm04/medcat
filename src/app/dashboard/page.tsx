@@ -3,7 +3,7 @@ import { ArrowLeft, BarChart3 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import {
   getDashboardStats,
-  getVendorBreakdown,
+  getDistributorBreakdown,
   getCategoryBreakdown,
   getPriceScopeBreakdown,
   getSourceCountryBreakdown,
@@ -18,7 +18,7 @@ export default async function DashboardPage() {
   const t = await getTranslations();
   const [
     stats,
-    vendorBreakdown,
+    distributorBreakdown,
     categoryBreakdown,
     priceScopeBreakdown,
     sourceCountryBreakdown,
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
     decompositionProgress,
   ] = await Promise.all([
     getDashboardStats(),
-    getVendorBreakdown(),
+    getDistributorBreakdown(),
     getCategoryBreakdown(),
     getPriceScopeBreakdown(),
     getSourceCountryBreakdown(),
@@ -55,7 +55,7 @@ export default async function DashboardPage() {
       <div className="max-w-7xl mx-auto p-6">
         <DashboardCharts
           stats={stats}
-          vendorBreakdown={vendorBreakdown}
+          distributorBreakdown={distributorBreakdown}
           categoryBreakdown={categoryBreakdown}
           priceScopeBreakdown={priceScopeBreakdown}
           sourceCountryBreakdown={sourceCountryBreakdown}

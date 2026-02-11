@@ -316,16 +316,20 @@
     "deleteBatch": "Smazat import",
     "price": "Cena",
     "original": "originál",
-    "ratesDate": "Kurzy ECB ke dni {date}"
+    "ratesDate": "Kurzy ECB ke dni {date}",
+    "distributorInfo": "Nabídka distributora",
+    "offeringCreatedAutomatically": "Nabídka bude vytvořena automaticky pro tohoto distributora"
   },
   "comparison": {
     "title": "Srovnání cen",
-    "subtitle": "Stejné nebo podobné produkty od jiných dodavatelů",
+    "subtitle": "Nabídky distributorů pro tento produkt",
     "product": "Produkt",
     "vendor": "Dodavatel",
+    "distributor": "Distributor",
     "price": "Cena",
     "match": "Shoda",
-    "noComparison": "Není k dispozici žádné srovnání cen",
+    "diff": "Rozdíl",
+    "noComparison": "Žádné nabídky distributorů nejsou k dispozici",
     "current": "aktuální",
     "unknown": "Neznámý",
     "notAvailable": "N/D"
@@ -472,6 +476,29 @@
     "exportSelectedDesc": "{count} vybraných produktů",
     "exporting": "Exportování..."
   },
+  "xlsxImport": {
+    "import": "Import",
+    "importData": "Import XLSX",
+    "selectFile": "Vyberte .xlsx soubor",
+    "importing": "Importování...",
+    "importComplete": "Import dokončen",
+    "importedCount": "{count} produktů importováno",
+    "updatedCount": "{count} produktů aktualizováno",
+    "skippedDuplicates": "{count} přeskočeno jako duplicity",
+    "errorCount": "{count} chyb",
+    "formatError": "Formát souboru nerozpoznán. Použijte stejný formát jako export katalogu.",
+    "noFile": "Žádný soubor nevybrán",
+    "confirm": "Importovat {count} produktů",
+    "cancel": "Zrušit",
+    "close": "Zavřít",
+    "viewDetails": "Zobrazit detaily",
+    "hideDetails": "Skrýt detaily",
+    "rowNumber": "Řádek {row}",
+    "previewTitle": "Náhled importu",
+    "previewDesc": "{count} produktů nalezeno v souboru",
+    "duplicatesFound": "Duplicity",
+    "errorsFound": "Chyby"
+  },
   "darkMode": {
     "light": "Světlý",
     "dark": "Tmavý",
@@ -501,6 +528,13 @@
     "noViews": "Zatím žádné uložené pohledy",
     "noViewsDesc": "Použijte filtry a uložte je pro rychlý přístup",
     "maxViews": "Dosažen maximální počet 20 pohledů"
+  },
+  "searchSuggestions": {
+    "categories": "Kategorie",
+    "recentSearches": "Nedávná hledání",
+    "searchCatalog": "Hledat v katalogu \"{query}\"",
+    "askAI": "Zeptat se AI na \"{query}\"",
+    "categoryProducts": "{count} produktů"
   },
   "bulkActions": {
     "selected": "{count} vybráno",
@@ -534,7 +568,7 @@
   "columnVisibility": {
     "product": "Produkt",
     "sku": "SKU (pod produktem)",
-    "vendor": "Dodavatel (pod produktem)",
+    "vendor": "Distributoři",
     "manufacturer": "Výrobce",
     "price": "Cena",
     "regulatory": "Regulace",
@@ -551,7 +585,7 @@
       "fromCountries": "z {count} {count, plural, =1 {země} =2 {zemí} =3 {zemí} =4 {zemí} other {zemí}}",
       "priceCoverage": "Cenové pokrytí",
       "ofProducts": "produktů",
-      "vendors": "Dodavatelé",
+      "distributors": "Distributoři",
       "registered": "registrováno",
       "unprocessedSets": "Nezpracované sety",
       "setsToDecompose": "setů k dekompozici"
@@ -561,7 +595,7 @@
       "setDecompositionProgress": "Průběh dekompozice setů",
       "ofSets": "z {total} setů",
       "sourceCountries": "Zdrojové země",
-      "topVendorsByProducts": "Top dodavatelé podle produktů",
+      "topDistributorsByProducts": "Top distributoři podle produktů",
       "topManufacturers": "Top výrobci (ref. ceny)",
       "productsByCategory": "Produkty podle EMDN kategorie",
       "products": "Produkty:"

@@ -3,15 +3,14 @@
 import { useMemo, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Building2, Search, Shield, Factory } from "lucide-react";
+import { X, Search, Shield, Factory } from "lucide-react";
 import { toTitleCase } from "@/lib/utils/format-category";
-import type { Vendor, EMDNCategory } from "@/lib/types";
+import type { EMDNCategory } from "@/lib/types";
 import type { CategoryNode } from "@/lib/queries";
 import { useTranslations, useLocale } from "next-intl";
 import { getLocalizedCategoryName } from "@/lib/utils/use-localized-category";
 
 interface ActiveFiltersProps {
-  vendors: Vendor[];
   categories: CategoryNode[];
 }
 
@@ -77,7 +76,7 @@ function FilterChip({ label, value, icon, onRemove, variant = "default" }: Filte
   );
 }
 
-export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
+export function ActiveFilters({ categories }: ActiveFiltersProps) {
   const t = useTranslations("activeFilters");
   const locale = useLocale();
   const router = useRouter();
@@ -87,27 +86,17 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
   // Memoize filter extraction to avoid recalculating on every render
   const {
     search,
-    vendorIds,
     categoryId,
     ceMarkedValues,
     mdrClassValues,
     manufacturerValues,
   } = useMemo(() => ({
     search: searchParams.get("search"),
-    vendorIds: searchParams.get("vendor")?.split(",").filter(Boolean) || [],
     categoryId: searchParams.get("category"),
     ceMarkedValues: searchParams.get("ceMarked")?.split(",").filter(Boolean) || [],
     mdrClassValues: searchParams.get("mdrClass")?.split(",").filter(Boolean) || [],
     manufacturerValues: searchParams.get("manufacturer")?.split(",").filter(Boolean).map(decodeURIComponent) || [],
   }), [searchParams]);
-
-  // Memoize vendor lookup
-  const selectedVendors = useMemo(() =>
-    vendorIds
-      .map((id) => vendors.find((v) => v.id === id))
-      .filter(Boolean) as Vendor[],
-    [vendorIds, vendors]
-  );
 
   // Memoize category path calculation (expensive tree traversal)
   const categoryPath = useMemo(() =>
@@ -115,7 +104,7 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
     [categoryId, categories]
   );
 
-  const hasFilters = search || vendorIds.length > 0 || categoryId || ceMarkedValues.length > 0 || mdrClassValues.length > 0 || manufacturerValues.length > 0;
+  const hasFilters = search || categoryId || ceMarkedValues.length > 0 || mdrClassValues.length > 0 || manufacturerValues.length > 0;
 
   if (!hasFilters) {
     return null;
@@ -124,14 +113,7 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
   const removeFilter = (key: string, value?: string) => {
     const params = new URLSearchParams(searchParams.toString());
 
-    if (key === "vendor" && value) {
-      const newVendors = vendorIds.filter((id) => id !== value);
-      if (newVendors.length > 0) {
-        params.set("vendor", newVendors.join(","));
-      } else {
-        params.delete("vendor");
-      }
-    } else if (key === "ceMarked" && value) {
+    if (key === "ceMarked" && value) {
       const newValues = ceMarkedValues.filter((v) => v !== value);
       if (newValues.length > 0) {
         params.set("ceMarked", newValues.join(","));
@@ -231,17 +213,6 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
             />
           )}
 
-          {/* Vendors */}
-          {selectedVendors.map((vendor) => (
-            <FilterChip
-              key={`vendor-${vendor.id}`}
-              label={t("vendor")}
-              value={vendor.name}
-              icon={<Building2 className="h-3 w-3" />}
-              onRemove={() => removeFilter("vendor", vendor.id)}
-            />
-          ))}
-
           {/* CE Marked */}
           {ceMarkedValues.map((value) => (
             <FilterChip
@@ -277,7 +248,7 @@ export function ActiveFilters({ vendors, categories }: ActiveFiltersProps) {
         </AnimatePresence>
 
         {/* Clear all button */}
-        {(search || selectedVendors.length > 0 || ceMarkedValues.length > 0 || mdrClassValues.length > 0 || manufacturerValues.length > 0) && (
+        {(search || ceMarkedValues.length > 0 || mdrClassValues.length > 0 || manufacturerValues.length > 0) && (
           <button
             onClick={clearAll}
             className="ml-auto text-xs font-medium text-muted-foreground hover:text-foreground transition-colors duration-150 px-2 py-1 rounded hover:bg-muted/50"
