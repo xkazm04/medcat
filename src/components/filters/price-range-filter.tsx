@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useDebounceValue } from "usehooks-ts";
+import { useUrlFilterBatch } from "@/lib/hooks/use-url-filter";
+
+const PRICE_KEYS = ["minPrice", "maxPrice"] as const;
 
 export function PriceRangeFilter() {
   const t = useTranslations("filters");
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { values: urlValues, setParams } = useUrlFilterBatch([...PRICE_KEYS]);
 
-  const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
-  const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
+  const [minPrice, setMinPrice] = useState(urlValues.minPrice);
+  const [maxPrice, setMaxPrice] = useState(urlValues.maxPrice);
 
   const [debouncedMin] = useDebounceValue(minPrice, 500);
   const [debouncedMax] = useDebounceValue(maxPrice, 500);
@@ -23,29 +24,15 @@ export function PriceRangeFilter() {
       return;
     }
 
-    const params = new URLSearchParams(searchParams.toString());
-    const currentMin = params.get("minPrice") || "";
-    const currentMax = params.get("maxPrice") || "";
-
-    if (currentMin === debouncedMin && currentMax === debouncedMax) {
+    if (urlValues.minPrice === debouncedMin && urlValues.maxPrice === debouncedMax) {
       return;
     }
 
-    if (debouncedMin) {
-      params.set("minPrice", debouncedMin);
-    } else {
-      params.delete("minPrice");
-    }
-
-    if (debouncedMax) {
-      params.set("maxPrice", debouncedMax);
-    } else {
-      params.delete("maxPrice");
-    }
-
-    params.set("page", "1");
-    router.push(`?${params.toString()}`);
-  }, [debouncedMin, debouncedMax, router, searchParams]);
+    setParams({
+      minPrice: debouncedMin || null,
+      maxPrice: debouncedMax || null,
+    });
+  }, [debouncedMin, debouncedMax, urlValues.minPrice, urlValues.maxPrice, setParams]);
 
   const hasValues = minPrice || maxPrice;
 
@@ -70,6 +57,7 @@ export function PriceRangeFilter() {
               onChange={(e) => setMinPrice(e.target.value)}
               placeholder={t("min")}
               min="0"
+              data-testid="min-price-input"
               className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-md bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>
@@ -90,6 +78,7 @@ export function PriceRangeFilter() {
               onChange={(e) => setMaxPrice(e.target.value)}
               placeholder={t("max")}
               min="0"
+              data-testid="max-price-input"
               className="w-full pl-9 pr-3 py-2 text-sm border border-border rounded-md bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent/50 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
           </div>

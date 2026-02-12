@@ -59,6 +59,7 @@ export function FilterSidebar({ children }: FilterSidebarProps) {
               <button
                 onClick={clearAllFilters}
                 disabled={isPending}
+                data-testid="sidebar-clear-all"
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-md hover:bg-muted transition-colors duration-150 disabled:opacity-50"
               >
                 {isPending ? (

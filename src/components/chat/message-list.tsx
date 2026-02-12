@@ -447,7 +447,7 @@ export function MessageList({
         />
       ) : (
         messages.map((message, messageIndex) => (
-          <div key={message.id}>
+          <div key={`${message.id}-${messageIndex}`}>
             {message.parts.map((part, partIndex) =>
               renderPart(part, partIndex, message.role, message.parts, messageIndex)
             )}

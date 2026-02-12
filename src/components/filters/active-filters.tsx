@@ -163,6 +163,7 @@ export function ActiveFilters({ categories }: ActiveFiltersProps) {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       className="mb-4 p-3 bg-green-light/30 border border-green-border/50 rounded-lg shadow-sm"
+      data-testid="active-filters"
     >
       {/* Category hierarchy - indented bullet list */}
       {categoryPath.length > 0 && (
@@ -251,6 +252,7 @@ export function ActiveFilters({ categories }: ActiveFiltersProps) {
         {(search || ceMarkedValues.length > 0 || mdrClassValues.length > 0 || manufacturerValues.length > 0) && (
           <button
             onClick={clearAll}
+            data-testid="clear-all-filters"
             className="ml-auto text-xs font-medium text-muted-foreground hover:text-foreground transition-colors duration-150 px-2 py-1 rounded hover:bg-muted/50"
           >
             {t("clearAll")}

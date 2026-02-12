@@ -41,6 +41,8 @@
     "noVendors": "No vendors available",
     "noMaterials": "No materials available",
     "noManufacturers": "No manufacturers available",
+    "noVendorsMatch": "No vendors match \"{query}\"",
+    "noMaterialsMatch": "No materials match \"{query}\"",
     "priceRange": "Price Range",
     "currencySymbol": "CZK",
     "min": "Min",
@@ -48,8 +50,11 @@
     "clearPriceRange": "Clear price range",
     "clearManufacturer": "Clear manufacturer filters",
     "selected": "{count} selected",
+    "clearSearch": "Clear search",
     "loadingCategories": "Loading categories...",
     "failedCategories": "Failed to load categories",
+    "noCategorized": "No categorized products",
+    "noCategorizedDesc": "Products must have EMDN categories assigned for filtering",
     "collapseAll": "Collapse all",
     "expandAll": "Expand all",
     "resultsFound": "{count, plural, =0 {No categories found} =1 {1 category found} other {# categories found}}",
@@ -125,10 +130,36 @@
     "yes": "Yes",
     "no": "No",
     "noProductSelected": "No product selected",
-    "priceComparison": "Price Comparison",
-    "comparisonDesc": "Same or similar products from other vendors",
+    "priceComparison": "Distributor Offerings",
+    "comparisonDesc": "Prices from distributors offering this product",
     "openComparison": "Open price comparison",
-    "closeComparison": "Close price comparison"
+    "closeComparison": "Close price comparison",
+    "pricingOverview": "Pricing Overview",
+    "openPricing": "Open pricing overview",
+    "closePricing": "Close pricing overview",
+    "noPricingData": "No pricing data available for this product",
+    "verdictAbove": "Above reference range",
+    "verdictBelow": "Below reference range",
+    "verdictWithin": "Within reference range",
+    "verdictDetail": "Offers: {offerRange} vs. Reference: {refRange}",
+    "verdictMixedScope": "mixed scope comparison",
+    "distributorCount": "{count, plural, =1 {# distributor} other {# distributors}}",
+    "validation": {
+      "nameRequired": "Name is required",
+      "nameTooLong": "Name too long",
+      "skuRequired": "SKU is required",
+      "skuTooLong": "SKU too long",
+      "descriptionTooLong": "Description too long",
+      "invalidCategoryId": "Invalid category ID",
+      "invalidMaterialId": "Invalid material ID",
+      "udiDiMaxLength": "UDI-DI max 14 characters",
+      "manufacturerRequired": "Manufacturer is required",
+      "manufacturerNameTooLong": "Manufacturer name too long",
+      "manufacturerSkuTooLong": "Manufacturer SKU too long",
+      "invalidVendorId": "Invalid vendor ID",
+      "vendorSkuTooLong": "SKU too long",
+      "priceMustBePositive": "Price must be positive"
+    }
   },
   "regulatory": {
     "title": "Regulatory",
@@ -326,9 +357,12 @@
     "match": "Match",
     "diff": "Diff",
     "noComparison": "No distributor offerings available",
+    "offering": "offer",
+    "offerings": "offers",
     "current": "current",
     "unknown": "Unknown",
-    "notAvailable": "N/A"
+    "notAvailable": "N/A",
+    "loadError": "Could not load price comparison"
   },
   "research": {
     "title": "Research EU Pricing",
@@ -410,7 +444,8 @@
     "rangeLabel": "Reference range",
     "bestMatchRange": "Best match",
     "categoryRange": "Category range",
-    "vendorPrice": "Vendor price (approx.)",
+    "vendorPrice": "Your price (approx.)",
+    "refLabel": "ref.",
     "productLevel": "product",
     "categoryLevel": "category",
     "matchProduct": "Matched",
@@ -640,5 +675,11 @@
       "pending": "Pending"
     },
     "matchedProducts": "Matched catalog products ({count})"
+  },
+  "batch": {
+    "processing": "Processing {current}/{total}...",
+    "completed": "Batch complete ({total} items)",
+    "viewResults": "View results",
+    "resuming": "Resuming batch..."
   }
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { getAIClient, EXTRACTION_MODEL } from "@/lib/gemini/client";
+import { getAIClient, EXTRACTION_MODEL, withRetry } from "@/lib/gemini/client";
 import { lookupEmdnViaEudamed } from "@/lib/gemini/eudamed-lookup";
 import {
   extractedProductSchema,
@@ -80,6 +80,59 @@ async function extractFromPdf(file: File): Promise<ExtractionResult> {
 }
 
 /**
+ * Run AI extraction with retry, validation, and EUDAMED enrichment.
+ * Shared by extractFromContent and extractFromUrl.
+ */
+async function executeAIExtraction(
+  prompt: string,
+  fallbackError: string
+): Promise<ExtractionResult> {
+  try {
+    const ai = getAIClient();
+    const response = await withRetry(() =>
+      ai.models.generateContent({
+        model: EXTRACTION_MODEL,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseJsonSchema: extractedProductJsonSchema,
+        },
+      })
+    );
+
+    if (!response.text) {
+      return { success: false, error: "No response from AI model" };
+    }
+
+    const parsed = JSON.parse(response.text);
+    const validated = extractedProductSchema.parse(parsed);
+
+    // Enrich with EUDAMED lookup (overwrites step 1 EMDN if found)
+    try {
+      const eudamed = await lookupEmdnViaEudamed(
+        validated.name,
+        validated.manufacturer_name,
+        validated.sku
+      );
+      if (eudamed.code) {
+        validated.suggested_emdn = eudamed.code;
+        validated.emdn_source = eudamed.source;
+        validated.emdn_rationale = eudamed.rationale;
+      }
+    } catch {
+      /* keep step 1 result */
+    }
+
+    return { success: true, data: validated };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : fallbackError,
+    };
+  }
+}
+
+/**
  * Extract structured product data from a URL.
  * Uses Gemini's ability to fetch and analyze web content.
  */
@@ -91,47 +144,10 @@ export async function extractFromUrl(url: string): Promise<ExtractionResult> {
     return { success: false, error: "Invalid URL format" };
   }
 
-  try {
-    const ai = getAIClient();
-    const response = await ai.models.generateContent({
-      model: EXTRACTION_MODEL,
-      contents: buildUrlExtractionPrompt(url),
-      config: {
-        responseMimeType: "application/json",
-        responseJsonSchema: extractedProductJsonSchema,
-      },
-    });
-
-    if (!response.text) {
-      return { success: false, error: "No response from AI model" };
-    }
-
-    const parsed = JSON.parse(response.text);
-    const validated = extractedProductSchema.parse(parsed);
-
-    // Enrich with EUDAMED lookup (overwrites step 1 EMDN if found)
-    try {
-      const eudamed = await lookupEmdnViaEudamed(
-        validated.name,
-        validated.manufacturer_name,
-        validated.sku
-      );
-      if (eudamed.code) {
-        validated.suggested_emdn = eudamed.code;
-        validated.emdn_source = eudamed.source;
-        validated.emdn_rationale = eudamed.rationale;
-      }
-    } catch {
-      /* keep step 1 result */
-    }
-
-    return { success: true, data: validated };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to extract from URL",
-    };
-  }
+  return executeAIExtraction(
+    buildUrlExtractionPrompt(url),
+    "Failed to extract from URL"
+  );
 }
 
 /**
@@ -140,47 +156,19 @@ export async function extractFromUrl(url: string): Promise<ExtractionResult> {
 export async function extractFromContent(
   content: string
 ): Promise<ExtractionResult> {
-  try {
-    const ai = getAIClient();
-    const response = await ai.models.generateContent({
-      model: EXTRACTION_MODEL,
-      contents: buildExtractionPrompt(content),
-      config: {
-        responseMimeType: "application/json",
-        responseJsonSchema: extractedProductJsonSchema,
-      },
-    });
-
-    if (!response.text) {
-      return { success: false, error: "No response from AI model" };
-    }
-    const parsed = JSON.parse(response.text);
-    const validated = extractedProductSchema.parse(parsed);
-
-    // Enrich with EUDAMED lookup (overwrites step 1 EMDN if found)
-    try {
-      const eudamed = await lookupEmdnViaEudamed(
-        validated.name,
-        validated.manufacturer_name,
-        validated.sku
-      );
-      if (eudamed.code) {
-        validated.suggested_emdn = eudamed.code;
-        validated.emdn_source = eudamed.source;
-        validated.emdn_rationale = eudamed.rationale;
-      }
-    } catch {
-      /* keep step 1 result */
-    }
-
-    return { success: true, data: validated };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Extraction failed unexpectedly",
-    };
+  if (!content || content.trim().length === 0) {
+    return { success: false, error: "No content provided" };
   }
+
+  const MAX_CONTENT_LENGTH = 100_000; // 100KB
+  if (content.length > MAX_CONTENT_LENGTH) {
+    return { success: false, error: `Content too large (${Math.round(content.length / 1000)}KB). Maximum is 100KB.` };
+  }
+
+  return executeAIExtraction(
+    buildExtractionPrompt(content),
+    "Extraction failed unexpectedly"
+  );
 }
 
 /**

@@ -1,7 +1,8 @@
 import { tool, generateText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { z } from 'zod/v4';
-import { getProducts, getEMDNCategoriesFlat } from '@/lib/queries';
+import { getProducts, getEMDNCategories } from '@/lib/queries';
+import { flattenCategories } from '@/lib/utils/format-category';
 import { getProductPriceComparison } from '@/lib/actions/similarity';
 import { getReferencePricesForProduct, getReferencePricesByCategory } from '@/lib/actions/reference-prices';
 import { estimateComponentPrice, formatFractionRange } from '@/lib/utils/component-fractions';
@@ -50,7 +51,7 @@ export const searchProducts = tool({
     if (!category) {
       const codeMatch = query.match(/\b(P\d{4,})\b/i);
       if (codeMatch) {
-        const allCategories = await getEMDNCategoriesFlat();
+        const allCategories = flattenCategories(await getEMDNCategories());
         const matched = allCategories.find(c => c.code.toUpperCase() === codeMatch[1].toUpperCase());
         if (matched) {
           resolvedCategory = matched.id;
@@ -172,7 +173,7 @@ export const suggestCategories = tool({
 
     // If product search yielded no categories, search category names directly
     if (categoryMap.size === 0) {
-      const allCategories = await getEMDNCategoriesFlat();
+      const allCategories = flattenCategories(await getEMDNCategories());
       const words = query.toLowerCase().split(/\s+/).filter(w => w.length > 1);
       const matched = allCategories.filter((cat) => {
         const name = cat.name.toLowerCase();
@@ -442,7 +443,7 @@ export const browseCategories = tool({
       .describe('How many levels deep to return (default 1, max 3)'),
   }),
   execute: async ({ parentCode, search, depth }) => {
-    const allCategories = await getEMDNCategoriesFlat();
+    const allCategories = flattenCategories(await getEMDNCategories());
     const maxDepth = Math.min(depth, 3);
 
     if (parentCode) {
@@ -520,7 +521,7 @@ export const navigateToCategory = tool({
       .describe('Category name to search for (e.g., "hip femoral stems")'),
   }),
   execute: async ({ emdnCode, categoryName }) => {
-    const allCategories = await getEMDNCategoriesFlat();
+    const allCategories = flattenCategories(await getEMDNCategories());
 
     let target = null;
 

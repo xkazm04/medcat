@@ -75,24 +75,6 @@ export function checkCircuit(config = DEFAULT_CONFIG): void {
 }
 
 /**
- * Reset the circuit breaker state.
- * Useful for testing or manual recovery.
- */
-export function resetCircuit(): void {
-  circuitState.requestCount = 0;
-  circuitState.windowStart = Date.now();
-  circuitState.isOpen = false;
-  circuitState.openedAt = 0;
-}
-
-/**
- * Get current circuit state for debugging.
- */
-export function getCircuitState(): Readonly<CircuitState> {
-  return { ...circuitState };
-}
-
-/**
  * Check circuit breaker and log any errors before rethrowing.
  * Combines circuit check and error handling in a single helper.
  * @param context - Context label for logging (e.g., "Supabase Client", "Supabase Server")

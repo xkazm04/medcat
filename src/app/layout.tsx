@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { LocaleProvider } from "@/components/providers/locale-provider";
+import { BatchProcessorProvider } from "@/components/providers/batch-processor-provider";
 import { ToastProvider } from "@/components/ui/toast";
 import { type Locale } from "@/i18n/config";
 import "./globals.css";
@@ -40,7 +41,9 @@ export default async function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <LocaleProvider locale={locale} messages={messages}>
           <ToastProvider>
-            <QueryProvider>{children}</QueryProvider>
+            <QueryProvider>
+              <BatchProcessorProvider>{children}</BatchProcessorProvider>
+            </QueryProvider>
           </ToastProvider>
         </LocaleProvider>
       </body>

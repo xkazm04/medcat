@@ -16,23 +16,9 @@ interface ActionResult {
 
 export async function updateProduct(
   id: string,
-  formData: FormData
+  input: Record<string, unknown>
 ): Promise<ActionResult> {
-  const rawData = Object.fromEntries(formData.entries());
-
-  const data = {
-    ...rawData,
-    ce_marked: rawData.ce_marked === "true",
-    description: rawData.description || null,
-    emdn_category_id: rawData.emdn_category_id || null,
-    material_id: rawData.material_id || null,
-    udi_di: rawData.udi_di || null,
-    mdr_class: rawData.mdr_class || null,
-    manufacturer_name: rawData.manufacturer_name || null,
-    manufacturer_sku: rawData.manufacturer_sku || null,
-  };
-
-  const validatedData = productSchema.safeParse(data);
+  const validatedData = productSchema.safeParse(input);
 
   if (!validatedData.success) {
     return {
@@ -62,23 +48,9 @@ export async function updateProduct(
 }
 
 export async function createProduct(
-  formData: FormData
+  input: Record<string, unknown>
 ): Promise<ActionResult> {
-  const rawData = Object.fromEntries(formData.entries());
-
-  const data = {
-    ...rawData,
-    ce_marked: rawData.ce_marked === "true",
-    description: rawData.description || null,
-    emdn_category_id: rawData.emdn_category_id || null,
-    material_id: rawData.material_id || null,
-    udi_di: rawData.udi_di || null,
-    mdr_class: rawData.mdr_class || null,
-    manufacturer_name: rawData.manufacturer_name || null,
-    manufacturer_sku: rawData.manufacturer_sku || null,
-  };
-
-  const validatedData = productSchema.safeParse(data);
+  const validatedData = productSchema.safeParse(input);
 
   if (!validatedData.success) {
     return {

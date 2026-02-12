@@ -69,7 +69,7 @@ export function buildResearchPrompt(
           .slice(0, 30)
           .map(
             (mp) =>
-              `| ${mp.product_name} | ${mp.product_manufacturer || '—'} | ${mp.sku || '—'} | ${mp.product_price != null ? `${mp.product_price} CZK (≈€${Math.round(mp.product_price / 25.2)})` : '—'} | ${Math.round(mp.match_score * 100)}% |`
+              `| ${mp.product_name} | ${mp.product_manufacturer || '—'} | ${mp.sku || '—'} | ${mp.product_min_price != null ? `€${Math.round(mp.product_min_price)}${mp.product_offering_count > 1 ? ` (${mp.product_offering_count} offers)` : ''}` : '—'} | ${Math.round(mp.match_score * 100)}% |`
           )
           .join('\n')
       : '(No matched products)'

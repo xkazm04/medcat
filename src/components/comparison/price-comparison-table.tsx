@@ -72,11 +72,12 @@ export function PriceComparisonTable({
     )
   }
 
-  // Sort by price ascending
+  // Sort by price ascending, null prices go last
   const withPrices = offerings.filter(o => o.vendor_price !== null)
   const withoutPrices = offerings.filter(o => o.vendor_price === null)
-  const sorted = [...withPrices].sort((a, b) => (a.vendor_price ?? 0) - (b.vendor_price ?? 0))
-  const lowestPrice = sorted[0]?.vendor_price ?? 0
+  const sortedWithPrices = [...withPrices].sort((a, b) => (a.vendor_price ?? 0) - (b.vendor_price ?? 0))
+  const allSorted = [...sortedWithPrices, ...withoutPrices]
+  const lowestPrice = sortedWithPrices[0]?.vendor_price ?? 0
 
   return (
     <div className="border border-border rounded-lg overflow-hidden">
@@ -90,11 +91,13 @@ export function PriceComparisonTable({
           </tr>
         </thead>
         <tbody>
-          {sorted.map((o, idx) => {
-            const isBest = idx === 0
-            const diff = lowestPrice > 0 && o.vendor_price !== null
-              ? Math.round(((o.vendor_price - lowestPrice) / lowestPrice) * 100)
-              : null
+          {allSorted.map((o, idx) => {
+            const isBest = idx === 0 && o.vendor_price !== null
+            const hasPrice = o.vendor_price !== null
+            const diff = isBest ? null
+              : lowestPrice > 0 && hasPrice
+                ? Math.round(((o.vendor_price! - lowestPrice) / lowestPrice) * 100)
+                : null
 
             return (
               <tr
@@ -119,7 +122,11 @@ export function PriceComparisonTable({
                     )}
                   </div>
                 </td>
-                <td className={`px-4 py-2 text-right tabular-nums text-sm ${isBest ? 'font-semibold text-accent' : 'font-medium'}`}>
+                <td className={`px-4 py-2 text-right tabular-nums text-sm ${
+                  isBest ? 'font-semibold text-accent'
+                    : hasPrice ? 'font-medium'
+                    : 'text-muted-foreground'
+                }`}>
                   {formatPrice(o.vendor_price)}
                 </td>
                 <td className="px-4 py-2 text-sm font-mono text-muted-foreground">
@@ -133,11 +140,6 @@ export function PriceComparisonTable({
           })}
         </tbody>
       </table>
-      {withoutPrices.length > 0 && (
-        <div className="px-4 py-1.5 bg-muted/30 border-t border-border/40 text-[10px] text-muted-foreground">
-          +{withoutPrices.length} more distributor{withoutPrices.length !== 1 ? 's' : ''} without catalog prices
-        </div>
-      )}
     </div>
   )
 }

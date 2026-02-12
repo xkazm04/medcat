@@ -29,18 +29,40 @@ interface SavedBatchRow {
 
 export async function createBatchImport(
   fileName: string,
-  rows: { rawData: Record<string, string>; rowIndex: number }[]
+  rows: { rawData: Record<string, string>; rowIndex: number }[],
+  headers?: string[]
 ): Promise<{ success: boolean; batchId?: string; error?: string }> {
   const supabase = await createClient()
 
-  const { data: batch, error: batchError } = await supabase
+  // Try with headers column first; fall back without if column doesn't exist yet
+  let batch: { id: string } | null = null
+  const insertData: Record<string, unknown> = {
+    file_name: fileName,
+    total_rows: rows.length,
+    status: 'processing',
+  }
+  if (headers) insertData.headers = headers
+
+  const { data: d1, error: e1 } = await supabase
     .from('batch_imports')
-    .insert({ file_name: fileName, total_rows: rows.length, status: 'processing' })
+    .insert(insertData)
     .select('id')
     .single()
 
-  if (batchError || !batch) {
-    return { success: false, error: batchError?.message || 'Failed to create batch' }
+  if (e1 && headers && e1.message?.includes('headers')) {
+    // headers column not migrated yet — retry without it
+    const { file_name, total_rows, status } = insertData as { file_name: string; total_rows: number; status: string }
+    const { data: d2, error: e2 } = await supabase
+      .from('batch_imports')
+      .insert({ file_name, total_rows, status })
+      .select('id')
+      .single()
+    if (e2 || !d2) return { success: false, error: e2?.message || 'Failed to create batch' }
+    batch = d2
+  } else if (e1 || !d1) {
+    return { success: false, error: e1?.message || 'Failed to create batch' }
+  } else {
+    batch = d1
   }
 
   const rowInserts = rows.map((r) => ({
@@ -97,6 +119,40 @@ export async function updateBatchStatus(
 ): Promise<void> {
   const supabase = await createClient()
   await supabase.from('batch_imports').update({ status }).eq('id', batchId)
+}
+
+// ── Get the currently processing batch (for resume on refresh) ────────
+
+export async function getActiveBatch(): Promise<{
+  id: string
+  file_name: string
+  total_rows: number
+  processed: number
+} | null> {
+  const supabase = await createClient()
+  const { data: batch } = await supabase
+    .from('batch_imports')
+    .select('id, file_name, total_rows')
+    .eq('status', 'processing')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (!batch) return null
+
+  // Count non-pending rows to get progress
+  const { count } = await supabase
+    .from('batch_import_rows')
+    .select('id', { count: 'exact', head: true })
+    .eq('batch_import_id', batch.id)
+    .neq('status', 'pending')
+
+  return {
+    id: batch.id,
+    file_name: batch.file_name,
+    total_rows: batch.total_rows,
+    processed: count ?? 0,
+  }
 }
 
 // ── Load open batches ──────────────────────────────────────────────────

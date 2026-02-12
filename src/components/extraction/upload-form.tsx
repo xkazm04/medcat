@@ -12,10 +12,12 @@ interface UploadFormProps {
   onExtracted: (data: ExtractedProduct) => void
 }
 
+type ActionType = 'file' | 'url' | 'test' | null
+
 export function UploadForm({ onExtracted }: UploadFormProps) {
   const t = useTranslations('extraction')
   const [isPending, startTransition] = useTransition()
-  const [isTestPending, startTestTransition] = useTransition()
+  const [activeAction, setActiveAction] = useState<ActionType>(null)
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [testInfo, setTestInfo] = useState<string | null>(null)
@@ -32,6 +34,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
   function handleFileSubmit(formData: FormData) {
     setError(null)
     setTestInfo(null)
+    setActiveAction('file')
     startTransition(async () => {
       const result = await extractFromProductSheet(formData)
       if (result.success && result.data) {
@@ -50,6 +53,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
     }
     setError(null)
     setTestInfo(null)
+    setActiveAction('url')
     startTransition(async () => {
       const result = await extractFromUrl(url.trim())
       if (result.success && result.data) {
@@ -63,7 +67,8 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
   function handleTestExtraction() {
     setError(null)
     setTestInfo(null)
-    startTestTransition(async () => {
+    setActiveAction('test')
+    startTransition(async () => {
       const result = await runTestExtraction()
       if (result.success && result.data) {
         if (result.deletedExisting) {
@@ -76,7 +81,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
     })
   }
 
-  const isLoading = isPending || isTestPending
+  const isLoading = isPending
 
   return (
     <div className="space-y-5">
@@ -111,7 +116,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
           disabled={isLoading || !fileName}
           className="w-full bg-button text-button-foreground py-2.5 px-4 rounded-md font-medium disabled:opacity-50 hover:bg-button-hover transition-colors"
         >
-          {isPending && fileName ? (
+          {isPending && activeAction === 'file' ? (
             <>
               <Loader2 className="inline mr-2 h-4 w-4 animate-spin" />
               {t('extracting')}
@@ -165,7 +170,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
             disabled={isLoading || !url.trim()}
             className="w-full bg-button text-button-foreground py-2.5 px-4 rounded-md font-medium disabled:opacity-50 hover:bg-button-hover transition-colors"
           >
-            {isPending && url.trim() ? (
+            {isPending && activeAction === 'url' ? (
               <>
                 <Loader2 className="inline mr-2 h-4 w-4 animate-spin" />
                 {t('fetchingExtracting')}
@@ -198,7 +203,7 @@ export function UploadForm({ onExtracted }: UploadFormProps) {
           disabled={isLoading}
           className="w-full border border-border text-foreground py-2 px-4 rounded-md font-medium disabled:opacity-50 hover:bg-muted transition-colors"
         >
-          {isTestPending ? (
+          {isPending && activeAction === 'test' ? (
             <>
               <Loader2 className="inline mr-2 h-4 w-4 animate-spin" />
               {t('runningTest')}

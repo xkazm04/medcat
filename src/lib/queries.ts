@@ -221,22 +221,6 @@ export async function getMaterials(): Promise<Material[]> {
   return data || [];
 }
 
-export async function getEMDNCategoriesFlat(): Promise<EMDNCategory[]> {
-  checkCircuit();
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from("emdn_categories")
-    .select("*")
-    .order("code");
-
-  if (error) {
-    console.error("Error fetching EMDN categories:", error.message);
-    throw new Error(`Failed to fetch EMDN categories: ${error.message}`);
-  }
-
-  return data || [];
-}
 
 export interface CategoryNode extends EMDNCategory {
   children: CategoryNode[];

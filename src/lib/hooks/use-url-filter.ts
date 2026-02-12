@@ -1,5 +1,5 @@
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 /**
  * Custom hook for managing URL search parameters with automatic page reset.
@@ -159,4 +159,66 @@ export function useUrlFilterMulti(
     setValues,
     clearValues,
   };
+}
+
+/**
+ * Custom hook for managing multiple URL params atomically in a single navigation.
+ * Useful for coupled filters like price range (minPrice + maxPrice).
+ *
+ * @param paramKeys - Array of URL parameter keys to manage
+ * @returns Object with current values record, setParams, and clearParams
+ *
+ * @example
+ * const { values, setParams, clearParams } = useUrlFilterBatch(["minPrice", "maxPrice"]);
+ * setParams({ minPrice: "1000", maxPrice: "5000" });
+ * clearParams(); // clears both
+ */
+export function useUrlFilterBatch(paramKeys: string[]) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Current values as a record
+  const values = useMemo(() => {
+    const result: Record<string, string> = {};
+    for (const key of paramKeys) {
+      result[key] = searchParams.get(key) || "";
+    }
+    return result;
+  }, [paramKeys, searchParams]);
+
+  /**
+   * Set multiple params at once in a single navigation.
+   * Empty/null values delete the param.
+   */
+  const setParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      }
+
+      params.set("page", "1");
+      router.push(`?${params.toString()}`);
+    },
+    [router, searchParams]
+  );
+
+  /**
+   * Clear all managed params in a single navigation.
+   */
+  const clearParams = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const key of paramKeys) {
+      params.delete(key);
+    }
+    params.set("page", "1");
+    router.push(`?${params.toString()}`);
+  }, [paramKeys, router, searchParams]);
+
+  return { values, setParams, clearParams };
 }

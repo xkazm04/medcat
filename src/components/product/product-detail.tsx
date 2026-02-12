@@ -5,7 +5,7 @@ import { ProductWithRelations } from '@/lib/types'
 import { EMDNBreadcrumb } from './emdn-breadcrumb'
 import { RegulatoryInfo } from './regulatory-info'
 import { ResearchPrompt } from './research-prompt'
-import { formatPrice } from '@/lib/utils/format-price'
+import { formatPriceWithCurrency } from '@/lib/utils/format-price'
 
 interface ProductDetailProps {
   product: ProductWithRelations
@@ -22,17 +22,20 @@ export function ProductDetail({ product }: ProductDetailProps) {
   if (product.manufacturer_name) infoItems.push(product.manufacturer_name)
   const offeringCount = product.offerings?.length ?? 0
   if (offeringCount > 0) {
-    const prices = product.offerings.map(o => o.vendor_price).filter((p): p is number => p !== null)
-    if (prices.length > 0) {
+    const pricedOfferings = product.offerings.filter((o): o is typeof o & { vendor_price: number } => o.vendor_price !== null)
+    if (pricedOfferings.length > 0) {
+      const prices = pricedOfferings.map(o => o.vendor_price)
       const minPrice = Math.min(...prices)
       const maxPrice = Math.max(...prices)
+      // Use the currency from the first priced offering (typically consistent within a product)
+      const currency = pricedOfferings[0].currency || 'EUR'
       if (minPrice === maxPrice) {
-        infoItems.push(formatPrice(minPrice, locale))
+        infoItems.push(formatPriceWithCurrency(minPrice, currency, locale))
       } else {
-        infoItems.push(`${formatPrice(minPrice, locale)} – ${formatPrice(maxPrice, locale)}`)
+        infoItems.push(`${formatPriceWithCurrency(minPrice, currency, locale)} – ${formatPriceWithCurrency(maxPrice, currency, locale)}`)
       }
     }
-    infoItems.push(`${offeringCount} distributor${offeringCount !== 1 ? 's' : ''}`)
+    infoItems.push(t('distributorCount', { count: offeringCount }))
   }
 
   return (

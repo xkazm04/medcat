@@ -164,11 +164,12 @@ export function ReferencePricesPanel({ prices, vendorPriceCzk, offerings, produc
   const allMax = Math.max(...allEurPrices)
 
   const EUR_TO_CZK = 25.2
-  // Compute vendor price: prefer offerings min EUR price, fall back to legacy vendorPriceCzk
+  // Compute offering price range from offerings array, fall back to legacy vendorPriceCzk
   const offeringPricesEur = (offerings ?? []).map(o => o.vendor_price).filter((p): p is number => p !== null)
-  const vendorPriceEur = offeringPricesEur.length > 0
-    ? Math.min(...offeringPricesEur)
-    : vendorPriceCzk ? vendorPriceCzk / EUR_TO_CZK : null
+  const offeringPriceRange = offeringPricesEur.length > 0
+    ? { min: Math.min(...offeringPricesEur), max: Math.max(...offeringPricesEur) }
+    : vendorPriceCzk ? { min: vendorPriceCzk / EUR_TO_CZK, max: vendorPriceCzk / EUR_TO_CZK } : null
+  const vendorPriceEur = offeringPriceRange ? offeringPriceRange.min : null
 
   const hasSetPricesOnly = scopeCounts.set > 0 && scopeCounts.component === 0
   const componentEstimate = hasSetPricesOnly && productEmdnCode
@@ -203,19 +204,22 @@ export function ReferencePricesPanel({ prices, vendorPriceCzk, offerings, produc
               : `${formatPriceWithCurrency(bestMin, 'EUR', locale)} – ${formatPriceWithCurrency(bestMax, 'EUR', locale)}`}
           </span>
         </div>
-        {vendorPriceEur && (
+        {offeringPriceRange && (
           <div className="flex items-baseline justify-between mt-0.5">
             <span className="text-xs text-muted-foreground">{t('vendorPrice')}</span>
             <span className="text-xs tabular-nums text-muted-foreground">
-              ~{formatPriceWithCurrency(Math.round(vendorPriceEur), 'EUR', locale)}
-              {vendorPriceEur > bestMax && (
+              {offeringPriceRange.min === offeringPriceRange.max
+                ? `~${formatPriceWithCurrency(Math.round(offeringPriceRange.min), 'EUR', locale)}`
+                : `${formatPriceWithCurrency(Math.round(offeringPriceRange.min), 'EUR', locale)} – ${formatPriceWithCurrency(Math.round(offeringPriceRange.max), 'EUR', locale)}`
+              }
+              {offeringPriceRange.min > bestMax && (
                 <span className="ml-1 text-red-500">
-                  (+{Math.round(((vendorPriceEur - bestMax) / bestMax) * 100)}%)
+                  (+{Math.round(((offeringPriceRange.min - bestMax) / bestMax) * 100)}%)
                 </span>
               )}
-              {vendorPriceEur < bestMin && (
+              {offeringPriceRange.max < bestMin && (
                 <span className="ml-1 text-green-600">
-                  ({Math.round(((vendorPriceEur - bestMin) / bestMin) * 100)}%)
+                  ({Math.round(((offeringPriceRange.max - bestMin) / bestMin) * 100)}%)
                 </span>
               )}
             </span>
@@ -229,7 +233,7 @@ export function ReferencePricesPanel({ prices, vendorPriceCzk, offerings, produc
           productMatchRange={hasProductMatches ? { min: bestMin, max: bestMax } : null}
           categoryRange={{ min: allMin, max: allMax }}
           componentEstimate={componentEstimate ? { min: componentEstimate.min, max: componentEstimate.max } : null}
-          vendorPriceEur={vendorPriceEur}
+          offeringPriceRange={offeringPriceRange}
           pricePoints={prices}
         />
       )}

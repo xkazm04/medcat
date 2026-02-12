@@ -18,6 +18,7 @@ import { ChatWidget } from "@/components/chat/chat-widget";
 import { ChatContextWrapper } from "@/components/chat-context-wrapper";
 import { CommandPalette } from "@/components/command-palette/command-palette";
 import { KeyboardShortcuts } from "@/components/keyboard-shortcuts";
+import { BatchStatusBadge } from "@/components/batch-status-badge";
 import { Package, BarChart3 } from "lucide-react";
 import Link from "next/link";
 
@@ -91,6 +92,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <BatchStatusBadge />
           {isDev && (
             <Link
               href="/dashboard"

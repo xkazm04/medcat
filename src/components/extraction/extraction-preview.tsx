@@ -6,19 +6,19 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslations } from 'next-intl'
 import { Check, Plus } from 'lucide-react'
-import { productSchema } from '@/lib/schemas/product'
+import { createProductSchema } from '@/lib/schemas/product'
 import { createProduct, createOffering } from '@/lib/actions/products'
 import { createVendor } from '@/lib/actions/vendors'
+import { formatServerError } from '@/lib/utils/format-server-error'
 import { findSimilarProducts, type SimilarProduct } from '@/lib/actions/similarity'
 import { SimilarProductsWarning } from './similar-products-warning'
 import { toTitleCase } from '@/lib/utils/format-category'
 import { useToast } from '@/components/ui/toast'
 import type { ExtractedProduct } from '@/lib/schemas/extraction'
 
-// Define input type for the form (before Zod transforms)
-type ProductFormInput = z.input<typeof productSchema>
-// Define output type after validation
-type ProductFormOutput = z.output<typeof productSchema>
+// Define input/output types from the schema factory (shape is always the same)
+type ProductFormInput = z.input<ReturnType<typeof createProductSchema>>
+type ProductFormOutput = z.output<ReturnType<typeof createProductSchema>>
 
 interface ExtractionPreviewProps {
   extractedData: ExtractedProduct
@@ -62,7 +62,7 @@ export function ExtractionPreview({
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
   const [similarProducts, setSimilarProducts] = useState<SimilarProduct[]>([])
-  const [similarityLoading, setSimilarityLoading] = useState(true)
+  const [similarityLoading, setSimilarityLoading] = useState(false)
 
   // Match extracted vendor name to existing vendor
   const matchedVendor = vendors.find(
@@ -78,24 +78,50 @@ export function ExtractionPreview({
     (c) => extractedData.suggested_emdn && c.code.startsWith(extractedData.suggested_emdn)
   )
 
-  // Check for similar products on mount
+  // Check for similar products when extracted data changes
   useEffect(() => {
+    // Skip if no meaningful data to search with
+    if (!extractedData.name?.trim() && !extractedData.sku?.trim()) {
+      setSimilarProducts([])
+      setSimilarityLoading(false)
+      return
+    }
+
+    let cancelled = false
     async function checkSimilarity() {
       setSimilarityLoading(true)
       const result = await findSimilarProducts(
         extractedData.name,
         extractedData.sku
       )
-      if (result.success && result.data) {
-        setSimilarProducts(result.data)
+      if (!cancelled) {
+        if (result.success && result.data) {
+          setSimilarProducts(result.data)
+        }
+        setSimilarityLoading(false)
       }
-      setSimilarityLoading(false)
     }
     checkSimilarity()
+    return () => { cancelled = true }
   }, [extractedData.name, extractedData.sku])
 
+  const tValidation = useTranslations('product.validation')
+  const schema = createProductSchema({
+    nameRequired: tValidation('nameRequired'),
+    nameTooLong: tValidation('nameTooLong'),
+    skuRequired: tValidation('skuRequired'),
+    skuTooLong: tValidation('skuTooLong'),
+    descriptionTooLong: tValidation('descriptionTooLong'),
+    invalidCategoryId: tValidation('invalidCategoryId'),
+    invalidMaterialId: tValidation('invalidMaterialId'),
+    udiDiMaxLength: tValidation('udiDiMaxLength'),
+    manufacturerRequired: tValidation('manufacturerRequired'),
+    manufacturerNameTooLong: tValidation('manufacturerNameTooLong'),
+    manufacturerSkuTooLong: tValidation('manufacturerSkuTooLong'),
+  })
+
   const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       name: extractedData.name,
       sku: extractedData.sku,
@@ -111,19 +137,7 @@ export function ExtractionPreview({
   const onSubmit: SubmitHandler<ProductFormOutput> = (data) => {
     setServerError(null)
     startTransition(async () => {
-      const formData = new FormData()
-      formData.append('name', data.name)
-      formData.append('sku', data.sku)
-      formData.append('description', data.description || '')
-      formData.append('emdn_category_id', data.emdn_category_id || '')
-      formData.append('material_id', data.material_id || '')
-      formData.append('udi_di', data.udi_di || '')
-      formData.append('ce_marked', data.ce_marked ? 'true' : 'false')
-      formData.append('mdr_class', data.mdr_class || '')
-      formData.append('manufacturer_name', data.manufacturer_name || '')
-      formData.append('manufacturer_sku', data.manufacturer_sku || '')
-
-      const result = await createProduct(formData)
+      const result = await createProduct(data)
 
       if (result.success && result.productId) {
         // Create offering from extracted vendor/price data if available
@@ -150,13 +164,7 @@ export function ExtractionPreview({
         showToast(t('productSaved'), 'success')
         onSuccess()
       } else if (result.error) {
-        const errorMessage =
-          result.error.formErrors?.[0] ||
-          Object.values(result.error.fieldErrors || {})
-            .flat()
-            .join(', ') ||
-          'An error occurred'
-        setServerError(errorMessage)
+        setServerError(formatServerError(result.error))
       }
     })
   }

@@ -4,6 +4,14 @@ import { useTranslations } from 'next-intl'
 import { ChevronRight } from 'lucide-react'
 import { toTitleCase } from '@/lib/utils/format-category'
 
+const levelKeys = ['level0', 'level1', 'level2', 'level3', 'level4', 'level5', 'level6'] as const;
+
+/** Get the translated level label for a given EMDN depth (0-based segment count) */
+function getLevelLabel(t: ReturnType<typeof useTranslations<'emdn'>>, segmentCount: number): string {
+  const index = segmentCount - 1;
+  return index >= 0 && index < levelKeys.length ? t(levelKeys[index]) : t('classification');
+}
+
 interface EMDNBreadcrumbProps {
   path: string | null  // e.g., "P/P09/P0901/P090101"
   categoryName: string
@@ -20,8 +28,7 @@ export function EMDNBreadcrumb({ path, categoryName, compact = false }: EMDNBrea
   // Parse path into segments
   const segments = path.split('/').filter(Boolean)
   const formattedName = toTitleCase(categoryName)
-  const levelKey = `level${segments.length - 1}` as any;
-  const level = t.has(levelKey) ? t(levelKey) : t('classification');
+  const level = getLevelLabel(t, segments.length);
 
   if (compact) {
     // Compact view: show only code and name

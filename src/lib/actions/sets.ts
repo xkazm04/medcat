@@ -110,7 +110,7 @@ export async function getSetGroups(): Promise<SetGroupsResult> {
           name,
           manufacturer_name,
           sku,
-          price
+          offerings:product_offerings (vendor_price, currency)
         )
       `)
       .in('reference_price_id', batch)
@@ -123,15 +123,17 @@ export async function getSetGroups(): Promise<SetGroupsResult> {
           name: string
           manufacturer_name: string | null
           sku: string | null
-          price: number | null
+          offerings: Array<{ vendor_price: number | null; currency: string }>
         }
+        const priced = p.offerings.filter((o): o is typeof o & { vendor_price: number } => o.vendor_price !== null)
         matchedProducts.push({
           reference_price_id: m.reference_price_id,
           product_id: p.id,
           product_name: p.name,
           product_manufacturer: p.manufacturer_name,
           sku: p.sku,
-          product_price: p.price,
+          product_min_price: priced.length > 0 ? Math.min(...priced.map(o => o.vendor_price)) : null,
+          product_offering_count: p.offerings.length,
           match_score: m.match_score,
           match_reason: m.match_reason,
         })

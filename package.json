@@ -20,7 +20,9 @@
     "db:migrate:dry": "tsx scripts/run-migration.ts --dry-run",
     "db:test": "tsx scripts/test-db-connection.ts",
     "import:gb-nhs": "tsx scripts/import-gb-nhs-tariff.ts",
-    "import:cz-szpcr": "tsx scripts/import-cz-szpcr.ts"
+    "import:cz-szpcr": "tsx scripts/import-cz-szpcr.ts",
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.21",
@@ -55,6 +57,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.16.0",

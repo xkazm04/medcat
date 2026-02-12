@@ -157,21 +157,3 @@ export function useInvalidateCategories() {
     },
   })
 }
-
-/**
- * Hook: Prefetch categories
- *
- * Call this to warm the cache before it's needed
- * (e.g., on hover or route prefetch)
- */
-export function usePrefetchCategories() {
-  const queryClient = useQueryClient()
-
-  return () => {
-    queryClient.prefetchQuery({
-      queryKey: queryKeys.categories.tree(),
-      queryFn: fetchCategories,
-      staleTime: 5 * 60 * 1000,
-    })
-  }
-}

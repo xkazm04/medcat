@@ -120,7 +120,8 @@ export interface SetMatchedProduct {
   product_name: string
   product_manufacturer: string | null
   sku: string | null
-  product_price: number | null
+  product_min_price: number | null
+  product_offering_count: number
   match_score: number
   match_reason: string | null
 }

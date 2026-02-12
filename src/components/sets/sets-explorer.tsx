@@ -601,9 +601,14 @@ function ExpandedDetail({ group, locale, t }: { group: SetGroup; locale: string;
                 <span className="font-medium truncate max-w-[260px]">{mp.product_name}</span>
                 {mp.product_manufacturer && <span className="text-muted-foreground text-[11px]">{mp.product_manufacturer}</span>}
                 {mp.sku && <span className="font-mono text-[10px] text-muted-foreground bg-muted/40 px-1 py-0.5 rounded">{mp.sku}</span>}
-                {mp.product_price != null && (
+                {mp.product_min_price != null && (
                   <span className="tabular-nums text-muted-foreground">
-                    {formatPriceWithCurrency(mp.product_price, 'CZK', locale)}
+                    {formatPriceWithCurrency(mp.product_min_price, 'EUR', locale)}
+                  </span>
+                )}
+                {mp.product_offering_count > 0 && (
+                  <span className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
+                    {mp.product_offering_count} {mp.product_offering_count === 1 ? 'offer' : 'offers'}
                   </span>
                 )}
                 <span className="inline-flex items-center justify-center w-8 h-4 rounded text-[10px] font-semibold text-green-700 bg-green-100 ml-auto">

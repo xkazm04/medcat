@@ -5,14 +5,14 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { useTranslations } from 'next-intl'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { productSchema } from '@/lib/schemas/product'
+import { createProductSchema } from '@/lib/schemas/product'
 import { updateProduct } from '@/lib/actions/products'
+import { formatServerError } from '@/lib/utils/format-server-error'
 import { ProductWithRelations } from '@/lib/types'
 
-// Define input type for the form (before Zod transforms)
-type ProductFormInput = z.input<typeof productSchema>
-// Define output type after validation
-type ProductFormOutput = z.output<typeof productSchema>
+// Define input/output types from the schema factory (shape is always the same)
+type ProductFormInput = z.input<ReturnType<typeof createProductSchema>>
+type ProductFormOutput = z.output<ReturnType<typeof createProductSchema>>
 
 interface ProductFormProps {
   product: ProductWithRelations
@@ -31,8 +31,23 @@ export function ProductForm({
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
 
+  const tValidation = useTranslations('product.validation')
+  const schema = createProductSchema({
+    nameRequired: tValidation('nameRequired'),
+    nameTooLong: tValidation('nameTooLong'),
+    skuRequired: tValidation('skuRequired'),
+    skuTooLong: tValidation('skuTooLong'),
+    descriptionTooLong: tValidation('descriptionTooLong'),
+    invalidCategoryId: tValidation('invalidCategoryId'),
+    invalidMaterialId: tValidation('invalidMaterialId'),
+    udiDiMaxLength: tValidation('udiDiMaxLength'),
+    manufacturerRequired: tValidation('manufacturerRequired'),
+    manufacturerNameTooLong: tValidation('manufacturerNameTooLong'),
+    manufacturerSkuTooLong: tValidation('manufacturerSkuTooLong'),
+  })
+
   const form = useForm<ProductFormInput, unknown, ProductFormOutput>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
       name: product.name,
       sku: product.sku,
@@ -50,30 +65,12 @@ export function ProductForm({
   const onSubmit: SubmitHandler<ProductFormOutput> = (data) => {
     setServerError(null)
     startTransition(async () => {
-      const formData = new FormData()
-      formData.append('name', data.name)
-      formData.append('sku', data.sku)
-      formData.append('description', data.description || '')
-      formData.append('emdn_category_id', data.emdn_category_id || '')
-      formData.append('material_id', data.material_id || '')
-      formData.append('udi_di', data.udi_di || '')
-      formData.append('ce_marked', data.ce_marked ? 'true' : 'false')
-      formData.append('mdr_class', data.mdr_class || '')
-      formData.append('manufacturer_name', data.manufacturer_name || '')
-      formData.append('manufacturer_sku', data.manufacturer_sku || '')
-
-      const result = await updateProduct(product.id, formData)
+      const result = await updateProduct(product.id, data)
 
       if (result.success) {
         onSuccess?.()
       } else if (result.error) {
-        const errorMessage =
-          result.error.formErrors?.[0] ||
-          Object.values(result.error.fieldErrors || {})
-            .flat()
-            .join(', ') ||
-          tCommon('error')
-        setServerError(errorMessage)
+        setServerError(formatServerError(result.error, tCommon('error')))
       }
     })
   }

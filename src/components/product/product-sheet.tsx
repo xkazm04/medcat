@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useTranslations } from 'next-intl'
+import { useState, useEffect, useMemo } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { motion, AnimatePresence } from 'motion/react'
-import { Pencil, Trash2, Eye, DollarSign, Globe, X } from 'lucide-react'
+import { Pencil, Trash2, Eye, DollarSign, Globe, X, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
@@ -20,6 +20,7 @@ import {
   type OfferingComparison,
 } from '@/lib/actions/similarity'
 import { getReferencePricesForProduct } from '@/lib/actions/reference-prices'
+import { formatPriceWithCurrency } from '@/lib/utils/format-price'
 import type { ProductWithRelations, EMDNCategory, ReferencePrice } from '@/lib/types'
 
 interface ProductSheetProps {
@@ -37,7 +38,9 @@ export function ProductSheet({
 }: ProductSheetProps) {
   const t = useTranslations('product')
   const tRef = useTranslations('referencePricing')
+  const tComp = useTranslations('comparison')
   const tActions = useTranslations('actions')
+  const locale = useLocale()
   const [mode, setMode] = useState<'view' | 'edit'>('view')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
@@ -45,19 +48,19 @@ export function ProductSheet({
   const [comparisonProducts, setComparisonProducts] = useState<OfferingComparison[]>([])
   const [comparisonLoading, setComparisonLoading] = useState(true)
   const [comparisonError, setComparisonError] = useState(false)
-  const [isPriceComparisonOpen, setIsPriceComparisonOpen] = useState(false)
 
   // Reference prices state
   const [referencePrices, setReferencePrices] = useState<ReferencePrice[]>([])
   const [referencePricesLoading, setReferencePricesLoading] = useState(true)
-  const [isReferencePricesOpen, setIsReferencePricesOpen] = useState(false)
 
-  // Reset mode and panels when sheet opens
+  // Unified pricing panel state
+  const [isPricingOpen, setIsPricingOpen] = useState(false)
+
+  // Reset mode and panel when sheet opens
   useEffect(() => {
     if (open) {
       setMode('view')
-      setIsPriceComparisonOpen(false)
-      setIsReferencePricesOpen(false)
+      setIsPricingOpen(false)
     }
   }, [open])
 
@@ -102,21 +105,61 @@ export function ProductSheet({
     fetchRefPrices()
   }, [product?.id, open])
 
-  // Count of offerings (offerings are already for this product)
+  // Derived counts
   const comparisonCount = comparisonProducts.length
-  const showComparisonButton = !comparisonLoading && !comparisonError && comparisonCount > 0
-  const showRefPricesButton = !referencePricesLoading && referencePrices.length > 0
+  const hasOfferings = !comparisonLoading && !comparisonError && comparisonCount > 0
+  const hasRefPrices = !referencePricesLoading && referencePrices.length > 0
+  const totalPricingCount = comparisonCount + referencePrices.length
+  const showPricingButton = hasOfferings || hasRefPrices || comparisonError
+
+  // Pricing verdict computation
+  const verdict = useMemo(() => {
+    if (!hasOfferings || !hasRefPrices) return null
+
+    // Get offering prices
+    const offeringPrices = comparisonProducts
+      .map(o => o.vendor_price)
+      .filter((p): p is number => p !== null)
+    if (offeringPrices.length === 0) return null
+
+    // Get component-scope reference prices (most comparable)
+    const componentRefPrices = referencePrices
+      .filter(p => p.price_scope === 'component')
+      .map(p => p.price_eur)
+
+    // Fall back to all reference prices if no component-scope
+    const refPricesToUse = componentRefPrices.length > 0
+      ? componentRefPrices
+      : referencePrices.map(p => p.price_eur)
+
+    if (refPricesToUse.length === 0) return null
+
+    const offeringMin = Math.min(...offeringPrices)
+    const offeringMax = Math.max(...offeringPrices)
+    const refMin = Math.min(...refPricesToUse)
+    const refMax = Math.max(...refPricesToUse)
+
+    if (offeringMin > refMax) {
+      const pct = Math.round(((offeringMin - refMax) / refMax) * 100)
+      return { type: 'above' as const, pct, offeringMin, offeringMax, refMin, refMax, isComponentScope: componentRefPrices.length > 0 }
+    }
+    if (offeringMax < refMin) {
+      const pct = Math.round(((refMin - offeringMax) / refMin) * 100)
+      return { type: 'below' as const, pct, offeringMin, offeringMax, refMin, refMax, isComponentScope: componentRefPrices.length > 0 }
+    }
+    return { type: 'within' as const, pct: 0, offeringMin, offeringMax, refMin, refMax, isComponentScope: componentRefPrices.length > 0 }
+  }, [hasOfferings, hasRefPrices, comparisonProducts, referencePrices])
 
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent side="right" className="!w-auto !max-w-none p-0">
           <div className="flex h-full">
-            {/* Price Comparison Panel (slides in from left) */}
+            {/* Unified Pricing Overview Panel */}
             <AnimatePresence>
-              {isPriceComparisonOpen && (
+              {isPricingOpen && (
                 <motion.div
-                  key="price-comparison-panel"
+                  key="pricing-panel"
                   initial={{ width: 0, opacity: 0 }}
                   animate={{ width: 800, opacity: 1 }}
                   exit={{ width: 0, opacity: 0 }}
@@ -124,69 +167,122 @@ export function ProductSheet({
                   className="h-full border-r border-border bg-background overflow-hidden"
                 >
                   <div className="w-[800px] h-full flex flex-col">
-                    <div className="px-4 py-4 border-b border-border flex items-center justify-between">
+                    {/* Panel header */}
+                    <div className="px-4 py-4 border-b-2 border-green-border flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <DollarSign className="h-4 w-4 text-green-600" />
-                        <h3 className="font-semibold text-sm">{t('priceComparison')}</h3>
+                        <h3 className="font-semibold text-sm">{t('pricingOverview')}</h3>
+                        {hasOfferings && (
+                          <span className="text-[10px] font-medium bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">
+                            {comparisonCount} {comparisonCount === 1 ? tComp('offering') : tComp('offerings')}
+                          </span>
+                        )}
+                        {hasRefPrices && (
+                          <span className="text-[10px] font-medium bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">
+                            {referencePrices.length} {tRef('refLabel')}
+                          </span>
+                        )}
                       </div>
                       <button
-                        onClick={() => setIsPriceComparisonOpen(false)}
+                        onClick={() => setIsPricingOpen(false)}
                         className="p-1 rounded hover:bg-muted transition-colors"
                       >
                         <X className="h-4 w-4" />
                       </button>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-4">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {t('comparisonDesc')}
-                      </p>
-                      <PriceComparisonTable
-                        products={comparisonProducts}
-                        currentProductId={product?.id || ''}
-                        isLoading={false}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
-            {/* EU Reference Prices Panel (slides in from left) */}
-            <AnimatePresence>
-              {isReferencePricesOpen && (
-                <motion.div
-                  key="reference-prices-panel"
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: 800, opacity: 1 }}
-                  exit={{ width: 0, opacity: 0 }}
-                  transition={{ duration: 0.2, ease: 'easeInOut' }}
-                  className="h-full border-r border-border bg-background overflow-hidden"
-                >
-                  <div className="w-[800px] h-full flex flex-col">
-                    <div className="px-4 py-4 border-b-2 border-purple-300 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-purple-600" />
-                        <h3 className="font-semibold text-sm">{tRef('title')}</h3>
-                        <span className="text-xs text-muted-foreground">
-                          {referencePrices.length} {referencePrices.length === 1 ? tRef('price') : tRef('prices')}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => setIsReferencePricesOpen(false)}
-                        className="p-1 rounded hover:bg-muted transition-colors"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-4">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {tRef('description')}
-                      </p>
-                      <ReferencePricesPanel
-                        prices={referencePrices}
-                        offerings={product?.offerings}
-                        productEmdnCode={product?.emdn_category?.code}
-                      />
+                    {/* Scrollable content */}
+                    <div className="flex-1 overflow-y-auto">
+                      {/* Section 1: Distributor Offerings */}
+                      {(hasOfferings || comparisonError) && (
+                        <div className="p-4 border-b border-border">
+                          <div className="flex items-center gap-2 mb-3">
+                            <DollarSign className="h-3.5 w-3.5 text-green-600" />
+                            <h4 className="font-semibold text-xs uppercase tracking-wide text-green-700">{t('priceComparison')}</h4>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {t('comparisonDesc')}
+                          </p>
+                          {comparisonError ? (
+                            <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                              <AlertTriangle className="h-4 w-4 shrink-0" />
+                              {tComp('loadError')}
+                            </div>
+                          ) : (
+                            <PriceComparisonTable
+                              products={comparisonProducts}
+                              currentProductId={product?.id || ''}
+                              isLoading={false}
+                            />
+                          )}
+                        </div>
+                      )}
+
+                      {/* Section 2: Pricing Verdict */}
+                      {verdict && (
+                        <div className={`px-4 py-3 border-b border-border ${
+                          verdict.type === 'above' ? 'bg-red-50' :
+                          verdict.type === 'below' ? 'bg-green-50' :
+                          'bg-blue-50'
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            {verdict.type === 'above' && <TrendingUp className="h-4 w-4 text-red-600" />}
+                            {verdict.type === 'below' && <TrendingDown className="h-4 w-4 text-green-600" />}
+                            {verdict.type === 'within' && <Minus className="h-4 w-4 text-blue-600" />}
+                            <span className={`text-sm font-semibold ${
+                              verdict.type === 'above' ? 'text-red-700' :
+                              verdict.type === 'below' ? 'text-green-700' :
+                              'text-blue-700'
+                            }`}>
+                              {verdict.type === 'above' && `${t('verdictAbove')} (+${verdict.pct}%)`}
+                              {verdict.type === 'below' && `${t('verdictBelow')} (-${verdict.pct}%)`}
+                              {verdict.type === 'within' && t('verdictWithin')}
+                            </span>
+                          </div>
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            {t('verdictDetail', {
+                              offerRange: verdict.offeringMin === verdict.offeringMax
+                                ? formatPriceWithCurrency(verdict.offeringMin, 'EUR', locale)
+                                : `${formatPriceWithCurrency(verdict.offeringMin, 'EUR', locale)} – ${formatPriceWithCurrency(verdict.offeringMax, 'EUR', locale)}`,
+                              refRange: verdict.refMin === verdict.refMax
+                                ? formatPriceWithCurrency(verdict.refMin, 'EUR', locale)
+                                : `${formatPriceWithCurrency(verdict.refMin, 'EUR', locale)} – ${formatPriceWithCurrency(verdict.refMax, 'EUR', locale)}`,
+                            })}
+                            {!verdict.isComponentScope && (
+                              <span className="ml-1 italic">({t('verdictMixedScope')})</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Section 3: EU Reference Prices */}
+                      {hasRefPrices && (
+                        <div className="p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Globe className="h-3.5 w-3.5 text-purple-600" />
+                            <h4 className="font-semibold text-xs uppercase tracking-wide text-purple-700">{tRef('title')}</h4>
+                            <span className="text-xs text-muted-foreground">
+                              {referencePrices.length} {referencePrices.length === 1 ? tRef('price') : tRef('prices')}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {tRef('description')}
+                          </p>
+                          <ReferencePricesPanel
+                            prices={referencePrices}
+                            offerings={product?.offerings}
+                            productEmdnCode={product?.emdn_category?.code}
+                          />
+                        </div>
+                      )}
+
+                      {/* Empty state if nothing to show */}
+                      {!hasOfferings && !comparisonError && !hasRefPrices && (
+                        <div className="p-8 text-center text-muted-foreground">
+                          <DollarSign className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                          <p className="text-sm">{t('noPricingData')}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -253,58 +349,27 @@ export function ProductSheet({
                 )}
               </div>
 
-              {/* Floating Toggle Buttons (left edge) */}
-              {mode === 'view' && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full flex flex-col gap-2">
-                  {/* Price Comparison Toggle */}
-                  {showComparisonButton && (
-                    <button
-                      onClick={() => {
-                        setIsPriceComparisonOpen(!isPriceComparisonOpen)
-                        if (!isPriceComparisonOpen) setIsReferencePricesOpen(false)
-                      }}
-                      className={`
-                        flex items-center gap-1 px-2 py-3 rounded-l-lg
-                        border border-r-0 border-border
-                        transition-colors
-                        ${isPriceComparisonOpen
-                          ? 'bg-green-600 text-white border-green-600'
-                          : 'bg-background hover:bg-muted'
-                        }
-                      `}
-                      title={isPriceComparisonOpen ? t('closeComparison') : t('openComparison')}
-                    >
-                      <DollarSign className={`h-4 w-4 ${isPriceComparisonOpen ? 'text-white' : 'text-green-600'}`} />
-                      <span className={`text-sm font-medium ${isPriceComparisonOpen ? 'text-white' : 'text-green-600'}`}>
-                        {comparisonCount}
-                      </span>
-                    </button>
-                  )}
-
-                  {/* EU Reference Prices Toggle */}
-                  {showRefPricesButton && (
-                    <button
-                      onClick={() => {
-                        setIsReferencePricesOpen(!isReferencePricesOpen)
-                        if (!isReferencePricesOpen) setIsPriceComparisonOpen(false)
-                      }}
-                      className={`
-                        flex items-center gap-1 px-2 py-3 rounded-l-lg
-                        border border-r-0 border-border
-                        transition-colors
-                        ${isReferencePricesOpen
-                          ? 'bg-purple-600 text-white border-purple-600'
-                          : 'bg-background hover:bg-muted'
-                        }
-                      `}
-                      title={isReferencePricesOpen ? tRef('title') : tRef('title')}
-                    >
-                      <Globe className={`h-4 w-4 ${isReferencePricesOpen ? 'text-white' : 'text-purple-600'}`} />
-                      <span className={`text-sm font-medium ${isReferencePricesOpen ? 'text-white' : 'text-purple-600'}`}>
-                        {referencePrices.length}
-                      </span>
-                    </button>
-                  )}
+              {/* Floating Pricing Toggle Button (left edge) */}
+              {mode === 'view' && showPricingButton && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full">
+                  <button
+                    onClick={() => setIsPricingOpen(!isPricingOpen)}
+                    className={`
+                      flex items-center gap-1 px-2 py-3 rounded-l-lg
+                      border border-r-0 border-border
+                      transition-colors
+                      ${isPricingOpen
+                        ? 'bg-green-600 text-white border-green-600'
+                        : 'bg-background hover:bg-muted'
+                      }
+                    `}
+                    title={isPricingOpen ? t('closePricing') : t('openPricing')}
+                  >
+                    <DollarSign className={`h-4 w-4 ${isPricingOpen ? 'text-white' : 'text-green-600'}`} />
+                    <span className={`text-sm font-medium ${isPricingOpen ? 'text-white' : 'text-green-600'}`}>
+                      {totalPricingCount}
+                    </span>
+                  </button>
                 </div>
               )}
             </div>

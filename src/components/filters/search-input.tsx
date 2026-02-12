@@ -176,6 +176,7 @@ export function SearchInput() {
         onBlur={handleBlur}
         onKeyDown={handleInputKeyDown}
         placeholder={t('search')}
+        data-testid="search-input"
         className="w-full pl-9 pr-20 py-1.5 text-sm border border-border rounded-md bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all"
       />
 

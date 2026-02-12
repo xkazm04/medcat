@@ -90,7 +90,7 @@ export function CatalogClient({
       <div className="mb-4 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold text-foreground">{t('catalog.products')}</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground" data-testid="product-count">
             {t('catalog.productsFound', { count: totalCount })}
           </p>
         </div>
@@ -109,7 +109,7 @@ export function CatalogClient({
       />
 
       {/* Data table with shimmer loading overlay */}
-      <div className={`relative ${isTransitioning ? 'table-shimmer' : ''}`} data-table-container>
+      <div className={`relative ${isTransitioning ? 'table-shimmer' : ''}`} data-table-container data-testid="product-table">
         <div
           className="transition-opacity duration-200"
           style={{ opacity: isTransitioning ? 0.7 : 1 }}

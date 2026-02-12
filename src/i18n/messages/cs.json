@@ -57,7 +57,9 @@
     "noCategorized": "Žádné kategorizované produkty",
     "noCategorizedDesc": "Produkty musí mít přiřazeny EMDN kategorie pro filtrování",
     "collapseAll": "Sbalit vše",
-    "expandAll": "Rozbalit vše"
+    "expandAll": "Rozbalit vše",
+    "resultsFound": "{count, plural, =0 {Žádné kategorie nenalezeny} =1 {1 kategorie nalezena} =2 {# kategorie nalezeny} =3 {# kategorie nalezeny} =4 {# kategorie nalezeny} other {# kategorií nalezeno}}",
+    "allCategories": "Všechny kategorie"
   },
   "activeFilters": {
     "category": "Kategorie:",
@@ -129,10 +131,36 @@
     "yes": "Ano",
     "no": "Ne",
     "noProductSelected": "Není vybrán žádný produkt",
-    "priceComparison": "Srovnání cen",
-    "comparisonDesc": "Stejné nebo podobné produkty od jiných dodavatelů",
+    "priceComparison": "Nabídky distributorů",
+    "comparisonDesc": "Ceny od distributorů nabízejících tento produkt",
     "openComparison": "Otevřít srovnání cen",
-    "closeComparison": "Zavřít srovnání cen"
+    "closeComparison": "Zavřít srovnání cen",
+    "pricingOverview": "Přehled cen",
+    "openPricing": "Otevřít přehled cen",
+    "closePricing": "Zavřít přehled cen",
+    "noPricingData": "Pro tento produkt nejsou k dispozici cenové údaje",
+    "verdictAbove": "Nad referenčním rozmezím",
+    "verdictBelow": "Pod referenčním rozmezím",
+    "verdictWithin": "V referenčním rozmezí",
+    "verdictDetail": "Nabídky: {offerRange} vs. Reference: {refRange}",
+    "verdictMixedScope": "srovnání smíšeného rozsahu",
+    "distributorCount": "{count, plural, =1 {# distributor} other {# distributoři}}",
+    "validation": {
+      "nameRequired": "Název je povinný",
+      "nameTooLong": "Název je příliš dlouhý",
+      "skuRequired": "SKU je povinné",
+      "skuTooLong": "SKU je příliš dlouhé",
+      "descriptionTooLong": "Popis je příliš dlouhý",
+      "invalidCategoryId": "Neplatné ID kategorie",
+      "invalidMaterialId": "Neplatné ID materiálu",
+      "udiDiMaxLength": "UDI-DI max 14 znaků",
+      "manufacturerRequired": "Výrobce je povinný",
+      "manufacturerNameTooLong": "Název výrobce je příliš dlouhý",
+      "manufacturerSkuTooLong": "SKU výrobce je příliš dlouhé",
+      "invalidVendorId": "Neplatné ID dodavatele",
+      "vendorSkuTooLong": "SKU je příliš dlouhé",
+      "priceMustBePositive": "Cena musí být kladná"
+    }
   },
   "regulatory": {
     "title": "Regulace",
@@ -330,9 +358,12 @@
     "match": "Shoda",
     "diff": "Rozdíl",
     "noComparison": "Žádné nabídky distributorů nejsou k dispozici",
+    "offering": "nabídka",
+    "offerings": "nabídky",
     "current": "aktuální",
     "unknown": "Neznámý",
-    "notAvailable": "N/D"
+    "notAvailable": "N/D",
+    "loadError": "Nepodařilo se načíst srovnání cen"
   },
   "research": {
     "title": "Průzkum cen v EU",
@@ -414,7 +445,8 @@
     "rangeLabel": "Referenční rozsah",
     "bestMatchRange": "Nejlepší shoda",
     "categoryRange": "Rozsah kategorie",
-    "vendorPrice": "Cena dodavatele (přibl.)",
+    "vendorPrice": "Vaše cena (přibl.)",
+    "refLabel": "ref.",
     "productLevel": "produkt",
     "categoryLevel": "kategorie",
     "matchProduct": "Shoda",
@@ -644,5 +676,11 @@
       "pending": "Čeká"
     },
     "matchedProducts": "Spárované katalogové produkty ({count})"
+  },
+  "batch": {
+    "processing": "Zpracování {current}/{total}...",
+    "completed": "Dávka dokončena ({total} položek)",
+    "viewResults": "Zobrazit výsledky",
+    "resuming": "Obnovování dávky..."
   }
 }

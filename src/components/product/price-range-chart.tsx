@@ -16,8 +16,8 @@ interface PriceRangeChartProps {
   categoryRange: PriceRange
   /** Estimated component cost from set price */
   componentEstimate?: PriceRange | null
-  /** Vendor price converted to EUR */
-  vendorPriceEur?: number | null
+  /** Offering price range in EUR (min/max from distributor offerings) */
+  offeringPriceRange?: { min: number; max: number } | null
   /** Individual price data points to render as dots */
   pricePoints?: ReferencePrice[]
 }
@@ -31,7 +31,7 @@ export function PriceRangeChart({
   productMatchRange,
   categoryRange,
   componentEstimate,
-  vendorPriceEur,
+  offeringPriceRange,
   pricePoints,
 }: PriceRangeChartProps) {
   const locale = useLocale()
@@ -44,8 +44,8 @@ export function PriceRangeChart({
   if (componentEstimate) {
     allValues.push(componentEstimate.min, componentEstimate.max)
   }
-  if (vendorPriceEur) {
-    allValues.push(vendorPriceEur)
+  if (offeringPriceRange) {
+    allValues.push(offeringPriceRange.min, offeringPriceRange.max)
   }
 
   const scaleMin = Math.min(...allValues)
@@ -218,20 +218,51 @@ export function PriceRangeChart({
           )
         })}
 
-        {/* Vendor price marker line */}
-        {vendorPriceEur && (
-          <div
-            className="absolute top-0 border-l-2 border-red-400 z-10"
-            style={{
-              left: `${toPercent(vendorPriceEur)}%`,
-              height: rows.length * 24,
-            }}
-          >
-            <div className="absolute -top-3.5 -translate-x-1/2 bg-red-50 border border-red-300 rounded px-1 text-[8px] text-red-600 font-medium tabular-nums whitespace-nowrap">
-              {formatPriceWithCurrency(Math.round(vendorPriceEur), 'EUR', locale)}
+        {/* Offering price marker(s) */}
+        {offeringPriceRange && (
+          offeringPriceRange.min === offeringPriceRange.max ? (
+            // Single price — render as marker line
+            <div
+              className="absolute top-0 border-l-2 border-red-400 z-10"
+              style={{
+                left: `${toPercent(offeringPriceRange.min)}%`,
+                height: rows.length * 24,
+              }}
+            >
+              <div className="absolute -top-3.5 -translate-x-1/2 bg-red-50 border border-red-300 rounded px-1 text-[8px] text-red-600 font-medium tabular-nums whitespace-nowrap">
+                {formatPriceWithCurrency(Math.round(offeringPriceRange.min), 'EUR', locale)}
+              </div>
+              <div className="absolute -left-[3px] -top-0.5 w-1.5 h-1.5 rounded-full bg-red-400" />
             </div>
-            <div className="absolute -left-[3px] -top-0.5 w-1.5 h-1.5 rounded-full bg-red-400" />
-          </div>
+          ) : (
+            // Price range — render as shaded band with min/max labels
+            <>
+              <div
+                className="absolute top-0 bg-red-200/40 border-l-2 border-r-2 border-red-300 z-10"
+                style={{
+                  left: `${toPercent(offeringPriceRange.min)}%`,
+                  width: `${Math.max(toPercent(offeringPriceRange.max) - toPercent(offeringPriceRange.min), 0.5)}%`,
+                  height: rows.length * 24,
+                }}
+              />
+              <div
+                className="absolute z-10"
+                style={{ left: `${toPercent(offeringPriceRange.min)}%`, top: -14 }}
+              >
+                <span className="absolute -translate-x-1/2 bg-red-50 border border-red-300 rounded px-1 text-[8px] text-red-600 font-medium tabular-nums whitespace-nowrap">
+                  {formatPriceWithCurrency(Math.round(offeringPriceRange.min), 'EUR', locale)}
+                </span>
+              </div>
+              <div
+                className="absolute z-10"
+                style={{ left: `${toPercent(offeringPriceRange.max)}%`, top: -14 }}
+              >
+                <span className="absolute -translate-x-1/2 bg-red-50 border border-red-300 rounded px-1 text-[8px] text-red-600 font-medium tabular-nums whitespace-nowrap">
+                  {formatPriceWithCurrency(Math.round(offeringPriceRange.max), 'EUR', locale)}
+                </span>
+              </div>
+            </>
+          )
         )}
 
         {/* Legend — inside chart, bottom-right */}
@@ -250,10 +281,10 @@ export function PriceRangeChart({
               </span>
             </div>
           ))}
-          {vendorPriceEur && (
+          {offeringPriceRange && (
             <div className="flex items-center gap-1.5">
               <div className="w-2 h-0.5 bg-red-400 shrink-0" />
-              <span className="text-[9px] text-red-500 whitespace-nowrap">Vendor</span>
+              <span className="text-[9px] text-red-500 whitespace-nowrap">Your prices</span>
             </div>
           )}
         </div>

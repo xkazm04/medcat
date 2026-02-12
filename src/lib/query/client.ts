@@ -47,15 +47,4 @@ export const queryKeys = {
     byId: (id: string) => [...queryKeys.categories.all, 'detail', id] as const,
     descendants: (id: string) => [...queryKeys.categories.all, 'descendants', id] as const,
   },
-  products: {
-    all: ['products'] as const,
-    list: (filters: Record<string, unknown>) => [...queryKeys.products.all, 'list', filters] as const,
-    detail: (id: string) => [...queryKeys.products.all, 'detail', id] as const,
-  },
-  vendors: {
-    all: ['vendors'] as const,
-  },
-  materials: {
-    all: ['materials'] as const,
-  },
 } as const

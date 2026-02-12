@@ -6,16 +6,15 @@ import { Loader2, FolderOpen } from 'lucide-react'
 import { BatchFileUpload } from './batch-file-upload'
 import { BatchProcessing } from './batch-processing'
 import { BatchResultsTable } from './batch-results-table'
-import { extractFromSpreadsheetRow } from '@/lib/actions/batch-extraction'
 import {
   createBatchImport,
   updateBatchRow,
-  updateBatchStatus,
   getOpenBatchImports,
   getBatchImportWithRows,
   deleteBatchImport,
   type SavedBatchImport,
 } from '@/lib/actions/batch-imports'
+import { useBatchProcessor } from '@/components/providers/batch-processor-provider'
 import type { BatchRow, ParsedSpreadsheet } from '@/lib/types/batch-import'
 
 type Step = 'loading' | 'upload' | 'processing' | 'results'
@@ -31,17 +30,34 @@ interface BatchImportFlowProps {
 export const BatchImportFlow = forwardRef<BatchImportFlowHandle, BatchImportFlowProps>(
   function BatchImportFlow({ onReviewRow }, ref) {
     const t = useTranslations('extraction')
+    const { activeBatch, startBatch, cancelBatch } = useBatchProcessor()
     const [step, setStep] = useState<Step>('loading')
     const [rows, setRows] = useState<BatchRow[]>([])
-    const [progress, setProgress] = useState({ current: 0, total: 0 })
     const [openBatches, setOpenBatches] = useState<SavedBatchImport[]>([])
-    const cancelRef = useRef(false)
     const batchIdRef = useRef<string | null>(null)
 
-    // Load open batches on mount
+    // Load open batches on mount; if there's an active processing batch, show it
     useEffect(() => {
       let mounted = true
       async function load() {
+        // If context has an active batch, show its state
+        if (activeBatch) {
+          batchIdRef.current = activeBatch.id
+          if (activeBatch.status === 'processing') {
+            setStep('processing')
+            if (mounted) return
+          }
+          // If completed, load results
+          if (activeBatch.status === 'completed') {
+            const result = await getBatchImportWithRows(activeBatch.id)
+            if (result && mounted) {
+              setRows(result.rows)
+              setStep('results')
+              return
+            }
+          }
+        }
+
         const batches = await getOpenBatchImports()
         if (mounted) {
           setOpenBatches(batches)
@@ -50,7 +66,21 @@ export const BatchImportFlow = forwardRef<BatchImportFlowHandle, BatchImportFlow
       }
       load()
       return () => { mounted = false }
-    }, [])
+    }, [activeBatch])
+
+    // When context batch completes, load results from DB
+    useEffect(() => {
+      if (activeBatch?.status === 'completed' && batchIdRef.current === activeBatch.id && step === 'processing') {
+        async function loadResults() {
+          const result = await getBatchImportWithRows(activeBatch!.id)
+          if (result) {
+            setRows(result.rows)
+            setStep('results')
+          }
+        }
+        loadResults()
+      }
+    }, [activeBatch?.status, activeBatch?.id, step])
 
     // Keep a ref to rows for imperative handle (avoid stale closure)
     const rowsRef = useRef(rows)
@@ -76,16 +106,22 @@ export const BatchImportFlow = forwardRef<BatchImportFlowHandle, BatchImportFlow
       if (result) {
         batchIdRef.current = batchId
         setRows(result.rows)
-        setStep('results')
+
+        // Check if there are pending rows — if so, resume processing via context
+        const hasPending = result.rows.some(r => r.status === 'pending' || r.status === 'processing')
+        if (hasPending && result.batch.status === 'processing') {
+          startBatch(batchId, result.batch.file_name, result.batch.total_rows)
+          setStep('processing')
+        } else {
+          setStep('results')
+        }
       } else {
         setStep('upload')
       }
-    }, [])
+    }, [startBatch])
 
     // Start new batch processing
     const handleReady = useCallback(async (spreadsheet: ParsedSpreadsheet) => {
-      cancelRef.current = false
-
       const initialRows: BatchRow[] = spreadsheet.rows.map((raw, i) => ({
         id: `row-${i}`,
         rowIndex: i,
@@ -95,71 +131,26 @@ export const BatchImportFlow = forwardRef<BatchImportFlowHandle, BatchImportFlow
       }))
 
       setRows(initialRows)
-      setProgress({ current: 0, total: initialRows.length })
       setStep('processing')
 
-      // Create batch in DB
+      // Create batch in DB (with headers for server-side processing)
       const { batchId } = await createBatchImport(
         spreadsheet.fileName,
-        initialRows.map((r) => ({ rawData: r.rawData, rowIndex: r.rowIndex }))
+        initialRows.map((r) => ({ rawData: r.rawData, rowIndex: r.rowIndex })),
+        spreadsheet.headers
       )
       batchIdRef.current = batchId ?? null
 
-      // Process rows sequentially
-      for (let i = 0; i < initialRows.length; i++) {
-        if (cancelRef.current) break
-
-        setRows((prev) => prev.map((r, idx) =>
-          idx === i ? { ...r, status: 'processing' } : r
-        ))
-
-        try {
-          const result = await extractFromSpreadsheetRow(
-            spreadsheet.headers,
-            initialRows[i].rawData
-          )
-
-          const newStatus = result.success ? 'extracted' as const : 'error' as const
-          const extracted = result.success ? result.data ?? null : null
-          const error = result.success ? undefined : result.error
-
-          setRows((prev) => prev.map((r, idx) =>
-            idx === i ? { ...r, extracted, status: newStatus, error } : r
-          ))
-
-          // Persist to DB
-          if (batchIdRef.current) {
-            updateBatchRow(batchIdRef.current, i, {
-              status: newStatus,
-              extracted_data: extracted,
-              error: error ?? null,
-            })
-          }
-        } catch (err) {
-          const errorMsg = err instanceof Error ? err.message : t('extractionError')
-          setRows((prev) => prev.map((r, idx) =>
-            idx === i ? { ...r, status: 'error', error: errorMsg } : r
-          ))
-          if (batchIdRef.current) {
-            updateBatchRow(batchIdRef.current, i, { status: 'error', error: errorMsg })
-          }
-        }
-
-        setProgress({ current: i + 1, total: initialRows.length })
+      // Start processing via global context (survives dialog close)
+      if (batchId) {
+        startBatch(batchId, spreadsheet.fileName, initialRows.length)
       }
-
-      // Mark batch completed
-      if (batchIdRef.current) {
-        updateBatchStatus(batchIdRef.current, cancelRef.current ? 'cancelled' : 'completed')
-      }
-
-      setStep('results')
-    }, [t])
+    }, [startBatch])
 
     const handleCancel = useCallback(() => {
-      cancelRef.current = true
+      cancelBatch()
       setStep('results')
-    }, [])
+    }, [cancelBatch])
 
     const handleDeleteBatch = useCallback(async () => {
       if (batchIdRef.current) {
@@ -167,7 +158,6 @@ export const BatchImportFlow = forwardRef<BatchImportFlowHandle, BatchImportFlow
         batchIdRef.current = null
       }
       setRows([])
-      setOpenBatches((prev) => prev.filter((b) => b.id !== batchIdRef.current))
       setStep('upload')
       // Reload open batches
       const batches = await getOpenBatchImports()
@@ -223,6 +213,7 @@ export const BatchImportFlow = forwardRef<BatchImportFlowHandle, BatchImportFlow
     }
 
     if (step === 'processing') {
+      const progress = activeBatch?.progress ?? { current: 0, total: 0 }
       return (
         <BatchProcessing
           current={progress.current}

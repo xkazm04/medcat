@@ -5,5 +5,4 @@ export {
   useCategoryByCode,
   useCategoryAncestors,
   useInvalidateCategories,
-  usePrefetchCategories,
 } from './use-categories'

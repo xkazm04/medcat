@@ -91,15 +91,6 @@ export function getCategoryDisplayName(
 }
 
 /**
- * Format category path for breadcrumb display.
- * Takes path codes and returns formatted segments.
- */
-export function formatCategoryPath(path: string): string[] {
-  if (!path) return [];
-  return path.split('/').filter(Boolean);
-}
-
-/**
  * Flatten a hierarchical category tree into a flat list.
  * Performs a depth-first traversal in O(n) time.
  *
