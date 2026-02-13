@@ -143,7 +143,7 @@ export const BatchImportFlow = forwardRef<BatchImportFlowHandle, BatchImportFlow
 
       // Start processing via global context (survives dialog close)
       if (batchId) {
-        startBatch(batchId, spreadsheet.fileName, initialRows.length)
+        startBatch(batchId, spreadsheet.fileName, initialRows.length, spreadsheet.webSearch ?? true)
       }
     }, [startBatch])
 

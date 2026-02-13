@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { extractFromSpreadsheetRow } from '@/lib/actions/batch-extraction'
 
-export const maxDuration = 60 // Allow up to 60s for LLM + EUDAMED lookup
+export const maxDuration = 120 // Allow up to 120s for LLM extraction + retries
 
 export async function POST(request: NextRequest) {
-  const { batchId } = await request.json()
+  const { batchId, webSearch } = await request.json()
 
   if (!batchId || typeof batchId !== 'string') {
     return NextResponse.json({ error: 'batchId is required' }, { status: 400 })
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
   let errorMsg: string | null = null
 
   try {
-    const result = await extractFromSpreadsheetRow(headers, pendingRow.raw_data)
+    const result = await extractFromSpreadsheetRow(headers, pendingRow.raw_data, { webSearch: webSearch !== false })
     if (result.success && result.data) {
       extractedData = result.data
       status = 'extracted'

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useDeferredValue, useMemo } from 'react'
+import { useState, useCallback, useDeferredValue, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Plus } from 'lucide-react'
@@ -10,6 +10,7 @@ import { useColumns } from './table/columns'
 import { ProductSheet } from './product/product-sheet'
 import { ExtractionSheet } from './extraction/extraction-sheet'
 import { ActiveFilters } from './filters/active-filters'
+import { useBatchProcessor } from './providers/batch-processor-provider'
 import type { ProductWithRelations, Vendor, EMDNCategory } from '@/lib/types'
 import type { CategoryNode } from '@/lib/queries'
 
@@ -42,7 +43,18 @@ export function CatalogClient({
   const [selectedProduct, setSelectedProduct] = useState<ProductWithRelations | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [extractionSheetOpen, setExtractionSheetOpen] = useState(false)
+  const [extractionInitialMode, setExtractionInitialMode] = useState<'single' | 'batch'>('single')
+  const { openBatchSheetRequested, clearOpenBatchSheetRequest } = useBatchProcessor()
   const searchParams = useSearchParams()
+
+  // Open extraction sheet in batch mode when badge is clicked
+  useEffect(() => {
+    if (openBatchSheetRequested) {
+      setExtractionInitialMode('batch')
+      setExtractionSheetOpen(true)
+      clearOpenBatchSheetRequest()
+    }
+  }, [openBatchSheetRequested, clearOpenBatchSheetRequest])
 
   // Column visibility state with localStorage persistence
   const { visibility: columnVisibility, setVisibility: setColumnVisibility } = useColumnVisibility()
@@ -137,7 +149,11 @@ export function CatalogClient({
       />
       <ExtractionSheet
         open={extractionSheetOpen}
-        onOpenChange={setExtractionSheetOpen}
+        onOpenChange={(open) => {
+          setExtractionSheetOpen(open)
+          if (!open) setExtractionInitialMode('single')
+        }}
+        initialMode={extractionInitialMode}
         vendors={vendors}
         emdnCategories={emdnCategories}
       />

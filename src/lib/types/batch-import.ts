@@ -17,4 +17,6 @@ export interface ParsedSpreadsheet {
   rows: Record<string, string>[]
   fileName: string
   totalRows: number
+  /** Whether to use EUDAMED web search for EMDN classification (default true) */
+  webSearch?: boolean
 }

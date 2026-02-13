@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import { Upload, FileSpreadsheet, Loader2, FlaskConical } from 'lucide-react'
+import { Upload, FileSpreadsheet, Loader2, FlaskConical, Globe } from 'lucide-react'
 import { parseSpreadsheet } from '@/lib/utils/spreadsheet-parser'
 import { TEST_BATCH_PRODUCTS } from '@/lib/constants/test-batch-products'
 import type { ParsedSpreadsheet } from '@/lib/types/batch-import'
@@ -18,6 +18,7 @@ export function BatchFileUpload({ onReady }: BatchFileUploadProps) {
   const [parsing, setParsing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
+  const [webSearch, setWebSearch] = useState(true)
 
   const handleFile = useCallback(async (file: File) => {
     setError(null)
@@ -53,7 +54,7 @@ export function BatchFileUpload({ onReady }: BatchFileUploadProps) {
 
   function handleSubmit() {
     if (!parsed) return
-    onReady(parsed)
+    onReady({ ...parsed, webSearch })
   }
 
   function handleTestBatch() {
@@ -108,6 +109,25 @@ export function BatchFileUpload({ onReady }: BatchFileUploadProps) {
           {parsed.totalRows} {parsed.totalRows === 1 ? 'row' : 'rows'} &middot; {parsed.headers.length} columns
         </div>
       )}
+
+      {/* Web Search toggle */}
+      <label className="flex items-start gap-3 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={webSearch}
+          onChange={(e) => setWebSearch(e.target.checked)}
+          className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent"
+        />
+        <div>
+          <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+            {t('webSearchLabel')}
+          </span>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {t('webSearchDesc')}
+          </p>
+        </div>
+      </label>
 
       {/* Error */}
       {error && (

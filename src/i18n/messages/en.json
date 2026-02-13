@@ -345,7 +345,9 @@
     "original": "original",
     "ratesDate": "ECB rates as of {date}",
     "distributorInfo": "Distributor offering",
-    "offeringCreatedAutomatically": "An offering will be created automatically for this distributor"
+    "offeringCreatedAutomatically": "An offering will be created automatically for this distributor",
+    "webSearchLabel": "Web search (EUDAMED)",
+    "webSearchDesc": "Search EUDAMED database for verified EMDN classification codes. Slower but more accurate."
   },
   "comparison": {
     "title": "Price Comparison",

@@ -12,9 +12,13 @@ export interface ActiveBatch {
 
 interface BatchProcessorContextValue {
   activeBatch: ActiveBatch | null
-  startBatch: (batchId: string, fileName: string, totalRows: number) => void
+  startBatch: (batchId: string, fileName: string, totalRows: number, webSearch?: boolean) => void
   cancelBatch: () => void
   dismissBatch: () => void
+  /** Signal that the batch sheet should be opened (e.g. badge click in header) */
+  openBatchSheetRequested: boolean
+  requestOpenBatchSheet: () => void
+  clearOpenBatchSheetRequest: () => void
 }
 
 const BatchProcessorContext = createContext<BatchProcessorContextValue>({
@@ -22,6 +26,9 @@ const BatchProcessorContext = createContext<BatchProcessorContextValue>({
   startBatch: () => {},
   cancelBatch: () => {},
   dismissBatch: () => {},
+  openBatchSheetRequested: false,
+  requestOpenBatchSheet: () => {},
+  clearOpenBatchSheetRequest: () => {},
 })
 
 export function useBatchProcessor() {
@@ -30,8 +37,11 @@ export function useBatchProcessor() {
 
 export function BatchProcessorProvider({ children }: { children: ReactNode }) {
   const [activeBatch, setActiveBatch] = useState<ActiveBatch | null>(null)
+  const [openBatchSheetRequested, setOpenBatchSheetRequested] = useState(false)
   const cancelledRef = useRef(false)
   const processingRef = useRef(false)
+
+  const webSearchRef = useRef(true)
 
   // Process rows one at a time via API route
   const processLoop = useCallback(async (batchId: string, fileName: string, totalRows: number, startFrom: number) => {
@@ -53,7 +63,7 @@ export function BatchProcessorProvider({ children }: { children: ReactNode }) {
         const res = await fetch('/api/batch/process-next', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ batchId }),
+          body: JSON.stringify({ batchId, webSearch: webSearchRef.current }),
         })
 
         if (!res.ok) {
@@ -80,8 +90,8 @@ export function BatchProcessorProvider({ children }: { children: ReactNode }) {
           break
         }
 
-        // Small delay between rows to avoid hammering the server
-        await new Promise(r => setTimeout(r, 300))
+        // Brief gap between rows (Gemini Flash handles sustained requests well)
+        await new Promise(r => setTimeout(r, 100))
       } catch {
         // Network error — wait longer and retry
         await new Promise(r => setTimeout(r, 3000))
@@ -104,7 +114,8 @@ export function BatchProcessorProvider({ children }: { children: ReactNode }) {
     return () => { mounted = false }
   }, [processLoop])
 
-  const startBatch = useCallback((batchId: string, fileName: string, totalRows: number) => {
+  const startBatch = useCallback((batchId: string, fileName: string, totalRows: number, webSearch = true) => {
+    webSearchRef.current = webSearch
     processLoop(batchId, fileName, totalRows, 0)
   }, [processLoop])
 
@@ -120,8 +131,16 @@ export function BatchProcessorProvider({ children }: { children: ReactNode }) {
     setActiveBatch(null)
   }, [])
 
+  const requestOpenBatchSheet = useCallback(() => {
+    setOpenBatchSheetRequested(true)
+  }, [])
+
+  const clearOpenBatchSheetRequest = useCallback(() => {
+    setOpenBatchSheetRequested(false)
+  }, [])
+
   return (
-    <BatchProcessorContext.Provider value={{ activeBatch, startBatch, cancelBatch, dismissBatch }}>
+    <BatchProcessorContext.Provider value={{ activeBatch, startBatch, cancelBatch, dismissBatch, openBatchSheetRequested, requestOpenBatchSheet, clearOpenBatchSheetRequest }}>
       {children}
     </BatchProcessorContext.Provider>
   )

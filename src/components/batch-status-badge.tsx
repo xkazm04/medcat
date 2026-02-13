@@ -5,13 +5,9 @@ import { useTranslations } from 'next-intl'
 import { Loader2, CheckCircle2, X } from 'lucide-react'
 import { useBatchProcessor } from './providers/batch-processor-provider'
 
-interface BatchStatusBadgeProps {
-  onOpenBatch?: () => void
-}
-
-export function BatchStatusBadge({ onOpenBatch }: BatchStatusBadgeProps) {
+export function BatchStatusBadge() {
   const t = useTranslations('batch')
-  const { activeBatch, dismissBatch } = useBatchProcessor()
+  const { activeBatch, dismissBatch, requestOpenBatchSheet } = useBatchProcessor()
   const [autoDismiss, setAutoDismiss] = useState(false)
 
   // Auto-dismiss completed batches after 15s
@@ -31,7 +27,7 @@ export function BatchStatusBadge({ onOpenBatch }: BatchStatusBadgeProps) {
   if (status === 'processing') {
     return (
       <button
-        onClick={onOpenBatch}
+        onClick={requestOpenBatchSheet}
         className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
         title={fileName}
       >
@@ -46,7 +42,7 @@ export function BatchStatusBadge({ onOpenBatch }: BatchStatusBadgeProps) {
     return (
       <div className="flex items-center gap-1">
         <button
-          onClick={onOpenBatch}
+          onClick={requestOpenBatchSheet}
           className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 transition-colors"
           title={fileName}
         >

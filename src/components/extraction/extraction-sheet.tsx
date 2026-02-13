@@ -22,6 +22,7 @@ type Mode = 'single' | 'batch'
 interface ExtractionSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  initialMode?: Mode
   vendors: Vendor[]
   emdnCategories: EMDNCategory[]
 }
@@ -29,11 +30,12 @@ interface ExtractionSheetProps {
 export function ExtractionSheet({
   open,
   onOpenChange,
+  initialMode = 'single',
   vendors,
   emdnCategories,
 }: ExtractionSheetProps) {
   const t = useTranslations('extraction')
-  const [mode, setMode] = useState<Mode>('single')
+  const [mode, setMode] = useState<Mode>(initialMode)
 
   // Single product state
   const [step, setStep] = useState<'upload' | 'preview'>('upload')
@@ -46,11 +48,12 @@ export function ExtractionSheet({
   // Reset state when sheet opens
   useEffect(() => {
     if (open) {
+      setMode(initialMode)
       setStep('upload')
       setExtractedData(null)
       setBatchReviewRow(null)
     }
-  }, [open])
+  }, [open, initialMode])
 
   // Single product handlers
   function handleExtracted(data: ExtractedProduct) {

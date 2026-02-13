@@ -346,7 +346,9 @@
     "original": "originál",
     "ratesDate": "Kurzy ECB ke dni {date}",
     "distributorInfo": "Nabídka distributora",
-    "offeringCreatedAutomatically": "Nabídka bude vytvořena automaticky pro tohoto distributora"
+    "offeringCreatedAutomatically": "Nabídka bude vytvořena automaticky pro tohoto distributora",
+    "webSearchLabel": "Webové vyhledávání (EUDAMED)",
+    "webSearchDesc": "Prohledá databázi EUDAMED pro ověřené EMDN klasifikační kódy. Pomalejší, ale přesnější."
   },
   "comparison": {
     "title": "Srovnání cen",
